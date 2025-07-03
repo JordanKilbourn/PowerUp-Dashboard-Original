@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>View Power Hours | PowerUp Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(180deg, #0f172a, #111827);
+      color: #f1f5f9;
+      font-size: 15px;
+    }
+
+    .sidebar {
+      position: fixed; top: 0; left: 0; height: 100%; width: 60px;
+      background: #0b0e2c; overflow-x: hidden;
+      transition: width 0.3s; box-shadow: 2px 0 8px rgba(0,0,0,0.4);
+      z-index: 1000; white-space: nowrap;
+    }
+    .sidebar.open { width: 220px; }
+    .sidebar a {
+      display: flex; align-items: center; padding: 16px;
+      color: #e2e8f0; text-decoration: none;
+      font-size: 15px; transition: all 0.3s;
+    }
+    .sidebar a:hover { background: #1a1f46; transform: translateX(5px); }
+    .sidebar a.active {
+      background: #1e293b; font-weight: bold; color: #fcd34d;
+    }
+    .sidebar i { min-width: 24px; margin-right: 12px; }
+    .link-text { display: none; }
+    .sidebar.open .link-text { display: inline; }
+
+    .sidebar .sidebar-section {
+      color: #94a3b8; text-transform: uppercase;
+      font-size: 12px; padding: 12px 16px 4px;
+      font-weight: 600; letter-spacing: 0.5px;
+      display: none;
+    }
+    .sidebar.open .sidebar-section { display: block; }
+
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      background: linear-gradient(to right, #1a1a40, #000);
+      padding: 20px 30px;
+      color: #fff; margin-left: 60px; position: relative;
+    }
+    header h1 {
+      font-size: 28px; font-weight: 700; color: #ffb400;
+      text-shadow: 0 0 8px #ffb400, 0 0 16px #ff9100;
+      position: absolute; left: 50%; transform: translateX(-50%);
+    }
+    .header-left {
+      display: flex; gap: 20px; font-size: 14px;
+      color: #f8fafc; z-index: 1;
+    }
+
+    .container {
+      margin-left: 60px; padding: 20px;
+      transition: margin-left 0.3s;
+    }
+
+    h2 {
+      font-size: 20px; font-weight: 700;
+      color: #facc15;
+      display: flex; align-items: center; gap: 8px;
+      margin: 20px 0 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    th, td {
+      padding: 12px; text-align: left; font-size: 14px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      max-width: 180px;
+    }
+    th {
+      background: #1e293b; color: #fcd34d;
+      text-transform: uppercase; font-weight: 600;
+      position: sticky; top: 0;
+    }
+    tr:nth-child(even) { background: #1c2237; }
+    tr:nth-child(odd) { background: #141b2d; }
+    tr:hover { background: rgba(255,255,255,0.05); }
+    td[title] { cursor: help; }
+
+    @media (max-width: 768px) {
+      .container { margin-left: 0 !important; padding: 15px; }
+      .sidebar.open {
+        width: 100%; position: relative; height: auto;
+      }
+      table, th, td { font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar" id="sidebar">
+    <a href="#" onclick="toggleSidebar()" title="Toggle Sidebar Menu">
+      <i class="fas fa-bars"></i><span class="link-text">Toggle Menu</span>
+    </a>
+    <a href="PowerUp_Dashboard_v1.5.html" title="Dashboard">
+      <i class="fas fa-home"></i><span class="link-text">Dashboard</span>
+    </a>
+    <div class="sidebar-section">Submission Forms</div>
+    <a href="#" title="Submit a CI Suggestion"><i class="fas fa-lightbulb"></i><span class="link-text">CI Suggestion</span></a>
+    <a href="#" title="Submit a Safety Concern"><i class="fas fa-hard-hat"></i><span class="link-text">Safety Concern</span></a>
+    <a href="#" title="Submit a Quality Catch"><i class="fas fa-bug"></i><span class="link-text">Quality Catch</span></a>
+    <div class="sidebar-section">Other</div>
+    <a href="view-power-hours.html" class="active" title="View Power Hours"><i class="fas fa-clock"></i><span class="link-text">Power Hours</span></a>
+    <a href="#" title="Redeem Tokens"><i class="fas fa-coins"></i><span class="link-text">Redeem Tokens</span></a>
+    <a href="level-tracker.html" title="View Level Tracker"><i class="fas fa-chart-line"></i><span class="link-text">Level Tracker</span></a>
+  </div>
+
+  <header>
+    <div class="header-left">
+      <span><strong>Welcome:</strong> Jordan</span>
+      <span><strong>Month:</strong> June 2025</span>
+      <span><strong>Current Level:</strong> <span class="level-tag">L2</span></span>
+    </div>
+    <h1>Power Hours Tracker</h1>
+  </header>
+
+  <div class="container">
+    <h2><i class="fas fa-clock"></i> Power Hours Log</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>PH ID</th><th>Power Hour ID</th><th>Employee ID</th><th>Employee Name</th>
+          <th>Date</th><th>Scheduled</th><th>Completed</th><th>Activity Description</th>
+          <th>Duration (hrs)</th><th>Month Key</th><th>Day</th><th>Week #</th><th>Month</th><th>Year</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>PH-1</td><td>PH-1 (IKS968538)</td><td>IKS968538</td><td>Jordan Kilbourn</td>
+          <td>06/24/25</td><td>✔️</td><td>✔️</td><td>Kaizen Event</td>
+          <td>4.5</td><td>06/01/25</td><td>24</td><td>26</td><td>6</td><td>2025</td>
+        </tr>
+        <!-- Additional rows can be added manually or dynamically -->
+      </tbody>
+    </table>
+  </div>
+
+<script>
+  function toggleSidebar() {
+    const sb = document.getElementById("sidebar");
+    sb.classList.toggle("open");
+    document.querySelector(".container").style.marginLeft =
+      sb.classList.contains("open") ? "220px" : "60px";
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("td").forEach(td => {
+      if (!td.hasAttribute("title")) {
+        td.setAttribute("title", td.textContent.trim());
+      }
+    });
+    const currentPage = window.location.pathname.split("/").pop();
+    document.querySelectorAll(".sidebar a").forEach(link => {
+      if (link.getAttribute("href") === currentPage) {
+        link.classList.add("active");
+      }
+    });
+  });
+
+  // Ensure user is logged in
+  const empID = sessionStorage.getItem('empID');
+  if (!empID) {
+    alert('Please log in first.');
+    window.location.href = 'login.html';
+  }
+
+  const sheetUrl = 'https://app.smartsheet.com/b/publish?EQBCT=d3cf5c3898734506ae4126fc22f75b11&format=json'; // Power Hours Tracker
+
+  fetch(sheetUrl)
+    .then(res => res.json())
+    .then(sheet => {
+      const cols = sheet.columns;
+      const colMap = {};
+      cols.forEach(c => colMap[c.title.trim().toLowerCase()] = c.id);
+
+      const pidId     = colMap['employee id'];
+      const nameId    = colMap['employee name'];
+      const phIdId    = colMap['power hour id'];
+      const dateId    = colMap['date'];
+      const schedId   = colMap['scheduled'];
+      const compId    = colMap['completed'];
+      const descId    = colMap['activity description'];
+      const durId     = colMap['duration (hrs)'];
+      const otherCols = ['month key','day','week #','month','year'];
+      otherCols.forEach(t => {
+        if (colMap[t]) colMap[t] = colMap[t];
+      });
+
+      const tbody = document.querySelector('tbody');
+      tbody.innerHTML = '';
+
+      sheet.rows
+        .filter(r => r.cells.some(c => c.columnId === pidId && String(c.value).toUpperCase() === empID))
+        .forEach(r => {
+          const get = key => {
+            const c = r.cells.find(x => x.columnId === colMap[key]);
+            return c ? (c.displayValue ?? c.value) : '';
+          };
+          const tr = document.createElement('tr');
+          [
+            get('ph id'),
+            get('power hour id'),
+            empID,
+            get('employee name'),
+            get('date'),
+            get('scheduled'),
+            get('completed'),
+            get('activity description'),
+            get('duration (hrs)'),
+            get('month key'),
+            get('day'),
+            get('week #'),
+            get('month'),
+            get('year'),
+          ].forEach(v => {
+            const td = document.createElement('td');
+            td.textContent = v;
+            td.title = v;
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        });
+    })
+    .catch(err => {
+      console.error('Fetch error:', err);
+      alert('Unable to load Power Hours. Please try again later.');
+    });
+</script>
+
+
+</body>
+</html>

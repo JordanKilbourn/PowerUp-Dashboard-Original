@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PowerUp Dashboard — Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0f172a;
+      color: #f1f5f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .card {
+      background: #1e293b;
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.5);
+      max-width: 400px;
+      width: 100%;
+    }
+    h1 { margin-bottom: 24px; }
+    label { display: block; margin-bottom: 6px; font-weight: 600; }
+    input { width: 100%; padding: 10px; margin-bottom: 20px; border-radius: 4px; border: none; font-size: 16px; }
+    small { color: #94a3b8; display: block; margin-bottom: 20px; }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #38bdf8;
+      color: #0f172a;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:disabled { background: #555; cursor: not-allowed; }
+    .error { color: #f87171; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>PowerUp Login</h1>
+    <div id="errorMsg" class="error"></div>
+
+    <label for="empID">Employee ID</label>
+    <input id="empID" placeholder="e.g., IX7992648 or IKS968063" />
+
+    <small>Enter the <strong>letters + numbers</strong> from your Position ID (e.g., "<strong>IX7992648</strong>").</small>
+    <button id="loginBtn" disabled>Login</button>
+  </div>
+
+<script>
+  const sheetUrl = 'https://app.smartsheet.com/b/publish?EQBCT=f308bc37ed644a3aa7b2c371b24948eb&format=json'; // Employee Master
+
+  const empInput = document.getElementById('empID');
+  const loginBtn = document.getElementById('loginBtn');
+  const errorMsg = document.getElementById('errorMsg');
+
+  empInput.addEventListener('input', () => {
+    loginBtn.disabled = empInput.value.trim().length < 2;
+  });
+
+  loginBtn.addEventListener('click', tryLogin);
+
+  async function tryLogin() {
+    const empID = empInput.value.trim().toUpperCase();
+    errorMsg.textContent = '';
+
+    try {
+      const res = await fetch(sheetUrl);
+      const data = await res.json();
+
+      const pidCol = getColumnId(data.columns, 'Position ID');
+      const nameCol = getColumnId(data.columns, 'Display Name');
+
+      const match = data.rows.find(r =>
+        r.cells.some(c => c.columnId === pidCol && String(c.value).toUpperCase() === empID)
+      );
+
+      if (!match) {
+        errorMsg.textContent = `No match found for Employee ID "${empID}".`;
+        return;
+      }
+
+      const dispName = match.cells.find(c => c.columnId === nameCol);
+      const displayName = dispName?.displayValue || dispName?.value || empID;
+
+      sessionStorage.setItem('empID', empID);
+      sessionStorage.setItem('displayName', displayName);
+      window.location.href = 'PowerUp_Dashboard_v1.5.html';
+    } catch (err) {
+      console.error(err);
+      errorMsg.textContent = 'Error connecting to authentication service.';
+    }
+  }
+
+  function getColumnId(columns, title) {
+    const col = columns.find(c => c.title.trim().toLowerCase() === title.toLowerCase());
+    return col ? col.id : null;
+  }
+</script>
+
+</body>
+</html>
