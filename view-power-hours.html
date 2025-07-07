@@ -149,6 +149,7 @@
     }
     document.getElementById('userName').textContent = displayName || empID;
 
+    // Highlight active sidebar link
     const path = window.location.pathname.split("/").pop().toLowerCase();
     document.querySelectorAll(".sidebar a[href]").forEach(link => {
       if (link.getAttribute("href").toLowerCase() === path) {
@@ -163,23 +164,31 @@
     fetch(url)
       .then(res => res.json())
       .then(sheet => {
-        const cols = sheet.columns;
         const colMap = {};
-        cols.forEach(c => colMap[c.title.trim().toLowerCase()] = c.id);
+        sheet.columns.forEach(c => {
+          const key = c.title.trim().toLowerCase();
+          colMap[key] = c.id;
+        });
+
+        console.log("Smartsheet column keys:", Object.keys(colMap)); // Debug log
 
         const getVal = (row, colTitle) => {
-          const cell = row.cells.find(c => c.columnId === colMap[colTitle.toLowerCase()]);
-          return cell ? (cell.displayValue || cell.value || '') : '';
+          const colId = colMap[colTitle.toLowerCase()];
+          const cell = row.cells.find(c => c.columnId === colId);
+          return cell ? (cell.displayValue ?? cell.value ?? '') : '';
         };
 
-        const rows = sheet.rows.filter(r => getVal(r, 'Employee ID').toUpperCase() === empID);
+        const rows = sheet.rows.filter(r =>
+          getVal(r, 'Employee ID')?.toString().toUpperCase() === empID
+        );
+
         tbody.innerHTML = rows.length === 0
           ? '<tr><td colspan="8">No matching Power Hours records found.</td></tr>'
           : '';
 
         rows.forEach(r => {
           const tr = document.createElement('tr');
-          [
+          const values = [
             getVal(r, 'Power Hour ID'),
             getVal(r, 'Date'),
             getVal(r, 'Start Time'),
@@ -188,12 +197,15 @@
             getVal(r, 'Completed') === true ? '✔️' : '❌',
             getVal(r, 'Completed Hours'),
             getVal(r, 'Activity Description')
-          ].forEach(val => {
+          ];
+
+          values.forEach(val => {
             const td = document.createElement('td');
             td.textContent = val;
             td.title = val;
             tr.appendChild(td);
           });
+
           tbody.appendChild(tr);
         });
       })
