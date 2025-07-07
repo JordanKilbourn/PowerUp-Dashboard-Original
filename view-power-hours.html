@@ -112,6 +112,7 @@
 
 <div class="container">
   <h2><i class="fas fa-clock"></i> Power Hours Log</h2>
+  <p id="hoursTally" style="margin: 10px 0; font-weight: 600; font-size: 16px; color: #38bdf8;"></p>
   <table>
     <thead>
       <tr>
@@ -165,16 +166,10 @@
       .then(res => res.json())
       .then(sheet => {
         const colMap = {};
-        sheet.columns.forEach(c => {
-          const key = c.title.trim().toLowerCase();
-          colMap[key] = c.id;
-        });
-
-        console.log("Smartsheet column keys:", Object.keys(colMap)); // Debug log
+        sheet.columns.forEach(c => colMap[c.title.trim().toLowerCase()] = c.id);
 
         const getVal = (row, colTitle) => {
-          const colId = colMap[colTitle.toLowerCase()];
-          const cell = row.cells.find(c => c.columnId === colId);
+          const cell = row.cells.find(c => c.columnId === colMap[colTitle.toLowerCase()]);
           return cell ? (cell.displayValue ?? cell.value ?? '') : '';
         };
 
@@ -186,8 +181,13 @@
           ? '<tr><td colspan="8">No matching Power Hours records found.</td></tr>'
           : '';
 
+        let totalHours = 0;
+
         rows.forEach(r => {
           const tr = document.createElement('tr');
+          const completedHours = parseFloat(getVal(r, 'Completed Hours')) || 0;
+          totalHours += completedHours;
+
           const values = [
             getVal(r, 'Power Hour ID'),
             getVal(r, 'Date'),
@@ -195,7 +195,7 @@
             getVal(r, 'End Time'),
             getVal(r, 'Scheduled') === true ? '✔️' : '❌',
             getVal(r, 'Completed') === true ? '✔️' : '❌',
-            getVal(r, 'Completed Hours'),
+            completedHours,
             getVal(r, 'Activity Description')
           ];
 
@@ -208,6 +208,11 @@
 
           tbody.appendChild(tr);
         });
+
+        // Display total
+        const hoursDisplay = document.getElementById("hoursTally");
+        hoursDisplay.textContent = `Total Power Hours Logged: ${totalHours}`;
+        sessionStorage.setItem("totalPowerHoursLogged", totalHours);
       })
       .catch(err => {
         console.error('Fetch error:', err);
