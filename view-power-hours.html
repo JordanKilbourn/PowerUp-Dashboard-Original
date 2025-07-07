@@ -90,35 +90,17 @@
     <i class="fas fa-bars"></i><span class="link-text">Toggle Menu</span>
   </a>
 
-  <a href="PowerUp_Dashboard.html" title="Dashboard">
-    <i class="fas fa-home"></i><span class="link-text">Dashboard</span>
-  </a>
-
+  <a href="PowerUp_Dashboard.html" title="Dashboard"><i class="fas fa-home"></i><span class="link-text">Dashboard</span></a>
   <div class="sidebar-section">Submission Forms</div>
-  <a href="https://app.smartsheet.com/b/form/e60862d9ae0b44358d6f85dcd1c81d2b" target="_blank" title="Submit a CI Suggestion">
-    <i class="fas fa-lightbulb"></i><span class="link-text">CI Suggestion</span>
-  </a>
-  <a href="https://app.smartsheet.com/b/form/162129580c03440f88cc5f284627b52f" target="_blank" title="Submit a Safety Concern">
-    <i class="fas fa-hard-hat"></i><span class="link-text">Safety Concern</span>
-  </a>
-  <a href="https://app.smartsheet.com/b/form/2ba4ff03861d4d068ee5a0bff46308c3" target="_blank" title="Submit a Quality Catch">
-    <i class="fas fa-bug"></i><span class="link-text">Quality Catch</span>
-  </a>
+  <a href="https://app.smartsheet.com/b/form/e60862d9ae0b44358d6f85dcd1c81d2b" target="_blank"><i class="fas fa-lightbulb"></i><span class="link-text">CI Suggestion</span></a>
+  <a href="https://app.smartsheet.com/b/form/162129580c03440f88cc5f284627b52f" target="_blank"><i class="fas fa-hard-hat"></i><span class="link-text">Safety Concern</span></a>
+  <a href="https://app.smartsheet.com/b/form/2ba4ff03861d4d068ee5a0bff46308c3" target="_blank"><i class="fas fa-bug"></i><span class="link-text">Quality Catch</span></a>
 
   <div class="sidebar-section">Other</div>
-  <a href="view-power-hours.html" title="View Power Hours">
-    <i class="fas fa-clock"></i><span class="link-text">Power Hours</span>
-  </a>
-  <a href="https://app.smartsheet.com/b/form/165de2f61d2a4c5bb7855df59f70a1db" target="_blank" title="Redeem Tokens">
-    <i class="fas fa-coins"></i><span class="link-text">Redeem Tokens</span>
-  </a>
-  <a href="level-tracker.html" title="Level Tracker">
-    <i class="fas fa-chart-line"></i><span class="link-text">Level Tracker</span>
-  </a>
-
-  <a href="#" onclick="logout()" title="Log out">
-    <i class="fas fa-sign-out-alt"></i><span class="link-text">Logout</span>
-  </a>
+  <a href="view-power-hours.html" title="View Power Hours"><i class="fas fa-clock"></i><span class="link-text">Power Hours</span></a>
+  <a href="https://app.smartsheet.com/b/form/165de2f61d2a4c5bb7855df59f70a1db" target="_blank"><i class="fas fa-coins"></i><span class="link-text">Redeem Tokens</span></a>
+  <a href="level-tracker.html" title="Level Tracker"><i class="fas fa-chart-line"></i><span class="link-text">Level Tracker</span></a>
+  <a href="#" onclick="logout()" title="Log out"><i class="fas fa-sign-out-alt"></i><span class="link-text">Logout</span></a>
 </div>
 
 <header>
@@ -127,6 +109,7 @@
   </div>
   <h1>Power Hours Tracker</h1>
 </header>
+
 <div class="container">
   <h2><i class="fas fa-clock"></i> Power Hours Log</h2>
   <table>
@@ -141,6 +124,7 @@
     </tbody>
   </table>
 </div>
+
 <script>
   function toggleSidebar() {
     const sb = document.getElementById("sidebar");
@@ -148,66 +132,75 @@
     document.querySelector(".container").style.marginLeft = sb.classList.contains("open") ? "220px" : "60px";
   }
 
-  const empID = sessionStorage.getItem('empID');
-  const displayName = sessionStorage.getItem('displayName');
-  if (!empID) {
-    alert('Please log in first.');
-    window.location.href = 'index.html';
+  function logout() {
+    if (confirm("Are you sure you want to log out?")) {
+      sessionStorage.clear();
+      window.location.href = "index.html";
+    }
   }
-  document.getElementById('userName').textContent = displayName || empID;
 
-  const sheetID = '1240392906264452';
-  fetch(`http://localhost:3000/smartsheet/${sheetID}`)
-    .then(res => res.json())
-    .then(sheet => {
-      const cols = sheet.columns;
-      const colMap = {};
-      cols.forEach(c => colMap[c.title.trim().toLowerCase()] = c.id);
-
-      const getVal = (row, colTitle) => {
-        const cell = row.cells.find(c => c.columnId === colMap[colTitle.toLowerCase()]);
-        return cell ? (cell.displayValue || cell.value || '') : '';
-      };
-
-      const rows = sheet.rows.filter(r => getVal(r, 'Employee ID').toUpperCase() === empID);
-      const tbody = document.getElementById('powerHoursBody');
-      tbody.innerHTML = '';
-
-      rows.forEach(r => {
-        const tr = document.createElement('tr');
-        [
-          getVal(r, 'Power Hour ID'),
-          getVal(r, 'Date'),
-          getVal(r, 'Start Time'),
-          getVal(r, 'End Time'),
-          getVal(r, 'Scheduled') ? '✔️' : '❌',
-          getVal(r, 'Completed') ? '✔️' : '❌',
-          getVal(r, 'Completed Hours'),
-          getVal(r, 'Activity Description')
-        ].forEach(val => {
-          const td = document.createElement('td');
-          td.textContent = val;
-          td.title = val;
-          tr.appendChild(td);
-        });
-        tbody.appendChild(tr);
-      });
-    })
-    .catch(err => {
-      console.error('Fetch error:', err);
-      document.getElementById('powerHoursBody').innerHTML = '<tr><td colspan="8">Failed to load Power Hours data.</td></tr>';
-    });
-</script>
-
-<script>
   document.addEventListener("DOMContentLoaded", () => {
+    const empID = sessionStorage.getItem('empID');
+    const displayName = sessionStorage.getItem('displayName');
+    if (!empID) {
+      alert('Please log in first.');
+      window.location.href = 'index.html';
+      return;
+    }
+    document.getElementById('userName').textContent = displayName || empID;
+
     const path = window.location.pathname.split("/").pop().toLowerCase();
     document.querySelectorAll(".sidebar a[href]").forEach(link => {
-      const href = link.getAttribute("href").toLowerCase();
-      if (href === path) {
+      if (link.getAttribute("href").toLowerCase() === path) {
         link.classList.add("active");
       }
     });
+
+    const sheetID = '1240392906264452';
+    const url = `https://powerup-proxy.onrender.com/smartsheet/${sheetID}`;
+    const tbody = document.getElementById('powerHoursBody');
+
+    fetch(url)
+      .then(res => res.json())
+      .then(sheet => {
+        const cols = sheet.columns;
+        const colMap = {};
+        cols.forEach(c => colMap[c.title.trim().toLowerCase()] = c.id);
+
+        const getVal = (row, colTitle) => {
+          const cell = row.cells.find(c => c.columnId === colMap[colTitle.toLowerCase()]);
+          return cell ? (cell.displayValue || cell.value || '') : '';
+        };
+
+        const rows = sheet.rows.filter(r => getVal(r, 'Employee ID').toUpperCase() === empID);
+        tbody.innerHTML = rows.length === 0
+          ? '<tr><td colspan="8">No matching Power Hours records found.</td></tr>'
+          : '';
+
+        rows.forEach(r => {
+          const tr = document.createElement('tr');
+          [
+            getVal(r, 'Power Hour ID'),
+            getVal(r, 'Date'),
+            getVal(r, 'Start Time'),
+            getVal(r, 'End Time'),
+            getVal(r, 'Scheduled') === true ? '✔️' : '❌',
+            getVal(r, 'Completed') === true ? '✔️' : '❌',
+            getVal(r, 'Completed Hours'),
+            getVal(r, 'Activity Description')
+          ].forEach(val => {
+            const td = document.createElement('td');
+            td.textContent = val;
+            td.title = val;
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        });
+      })
+      .catch(err => {
+        console.error('Fetch error:', err);
+        tbody.innerHTML = '<tr><td colspan="8">Failed to load Power Hours data.</td></tr>';
+      });
   });
 </script>
 
