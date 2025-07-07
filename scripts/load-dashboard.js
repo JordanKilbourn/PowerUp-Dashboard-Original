@@ -9,19 +9,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   document.getElementById('userGreeting').textContent = displayName;
 
-  const sheets = {
-    ci: '6584024920182660',
-    safety: '4089265651666820',
-    quality: '1431258165890948',
-    level: '8346763116105604',
-    power: '1240392906264452'
+  const sources = {
+    ci: { id: '6584024920182660', type: 'report' },
+    safety: { id: '4089265651666820', type: 'report' },
+    quality: { id: '1431258165890948', type: 'report' },
+    level: { id: '8346763116105604', type: 'sheet' },
+    power: { id: '1240392906264452', type: 'sheet' }
   };
 
-  const proxy = 'http://localhost:3000/smartsheet/';
+  const proxyBase = 'https://powerup-proxy.onrender.com';
 
-  const fetchSheet = async (id) => {
-    const res = await fetch(`${proxy}${id}`);
-    if (!res.ok) throw new Error(`Error loading sheet ${id}`);
+  const fetchSource = async ({ id, type }) => {
+    const res = await fetch(`${proxyBase}/${type}/${id}`);
+    if (!res.ok) throw new Error(`Error loading ${type} ${id}`);
     return await res.json();
   };
 
@@ -38,6 +38,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const renderTable = (rows, colMap, fields, sectionId) => {
     const section = document.getElementById(sectionId);
+    section.innerHTML = ""; // clear any previous content
+
     const table = document.createElement("table");
     const thead = document.createElement("thead");
     const trHead = document.createElement("tr");
@@ -74,47 +76,43 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   try {
-    // Load and render CI Submissions
-    const ci = await fetchSheet(sheets.ci);
+    // CI Submissions
+    const ci = await fetchSource(sources.ci);
     const ciMap = getColMap(ci.columns);
     const ciRows = ci.rows.filter(r => getVal(r, ciMap, 'Employee ID').toUpperCase() === empID);
     renderTable(ciRows, ciMap, ['Submission Date', 'CI Title', 'Category', 'Status'], 'ciSection');
 
-    // Load and render Safety Concerns
-    const safety = await fetchSheet(sheets.safety);
+    // Safety Concerns
+    const safety = await fetchSource(sources.safety);
     const safetyMap = getColMap(safety.columns);
     const safetyRows = safety.rows.filter(r => getVal(r, safetyMap, 'Employee ID').toUpperCase() === empID);
     renderTable(safetyRows, safetyMap, ['Submission Date', 'Concern Description', 'Category', 'Status'], 'safetySection');
 
-    // Load and render Quality Catches
-    const qc = await fetchSheet(sheets.quality);
+    // Quality Catches
+    const qc = await fetchSource(sources.quality);
     const qcMap = getColMap(qc.columns);
     const qcRows = qc.rows.filter(r => getVal(r, qcMap, 'Employee ID').toUpperCase() === empID);
     renderTable(qcRows, qcMap, ['Submission Date', 'Issue Description', 'Category', 'Status'], 'qcSection');
 
-    // Load Power Hours progress from Power Hours Tracker
-    const ph = await fetchSheet(sheets.power);
+    // Power Hours (Completed)
+    const ph = await fetchSource(sources.power);
     const phMap = getColMap(ph.columns);
     const phRows = ph.rows.filter(r => getVal(r, phMap, 'Employee ID').toUpperCase() === empID && getVal(r, phMap, 'Completed') === true);
     const phCount = phRows.reduce((sum, r) => sum + Number(getVal(r, phMap, 'Completed Hours') || 0), 0);
     const progressPct = Math.min((phCount / 8) * 100, 100).toFixed(1);
-
     document.getElementById('phProgress').textContent = `${phCount} / 8`;
     document.getElementById('progressBar').style.width = `${progressPct}%`;
 
-    // Load Level Tracker to get Token Total and Current Level
-    const level = await fetchSheet(sheets.level);
+    // Level Tracker: Level, Tokens, Month, Pill Summary
+    const level = await fetchSource(sources.level);
     const lvlMap = getColMap(level.columns);
     const lvlRows = level.rows.filter(r => getVal(r, lvlMap, 'Employee ID').toUpperCase() === empID);
-    lvlRows.sort((a, b) => {
-      const dateA = new Date(getVal(a, lvlMap, 'Month Key'));
-      const dateB = new Date(getVal(b, lvlMap, 'Month Key'));
-      return dateB - dateA;
-    });
+    lvlRows.sort((a, b) => new Date(getVal(b, lvlMap, 'Month Key')) - new Date(getVal(a, lvlMap, 'Month Key')));
 
     if (lvlRows.length > 0) {
       const recent = lvlRows[0];
       document.getElementById('userLevel').textContent = getVal(recent, lvlMap, 'Level') || 'N/A';
+
       const month = getVal(recent, lvlMap, 'Month Key');
       if (month) {
         document.getElementById('currentMonth').textContent = new Date(month).toLocaleString('default', { month: 'long', year: 'numeric' });
@@ -124,7 +122,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById('tokenTotal').textContent = tokenTotal;
 
       const pillArea = document.getElementById('pillSummary');
-      ['Meets L1', 'Meets L2', 'Meets L3'].forEach((lvl, i) => {
+      ['Meets L1', 'Meets L2', 'Meets L3'].forEach((lvl) => {
         const pill = document.createElement('div');
         pill.className = 'pill ' + (getVal(recent, lvlMap, lvl) === true ? 'green' : 'red');
         pill.textContent = lvl;
