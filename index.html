@@ -57,14 +57,14 @@
     <div id="errorMsg" class="error"></div>
 
     <label for="empID">Employee ID</label>
-    <input id="empID" autocomplete="off" placeholder="e.g., IX7992648 or IKS968063" />
+    <input id="empID" autocomplete="off" placeholder="e.g., IX7992... or IKS968..." />
 
     <small>Enter the <strong>letters + numbers</strong> from your Position ID (e.g., "<strong>IX7992648</strong>").</small>
     <button id="loginBtn" disabled>Login</button>
   </div>
 
 <script>
-  const sheetUrl = 'http://localhost:3000/smartsheet/2195459817820036'; // Proxy to Employee Master
+  const sheetUrl = 'https://powerup-proxy.onrender.com/sheet/2195459817820036';
 
   const empInput = document.getElementById('empID');
   const loginBtn = document.getElementById('loginBtn');
