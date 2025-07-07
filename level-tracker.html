@@ -169,7 +169,6 @@
   </a>
 </div>
 
-
   <header>
     <div class="header-left">
       <span><strong>Welcome:</strong> <span id="userGreeting">User</span></span>
@@ -194,106 +193,111 @@
     </table>
   </div>
 
-  <script>
-    function toggleSidebar() {
-      const sb = document.getElementById("sidebar");
-      sb.classList.toggle("open");
-      document.querySelector(".container").style.marginLeft =
-        sb.classList.contains("open") ? "220px" : "60px";
-    }
-
-document.addEventListener("DOMContentLoaded", () => {
-  // Auto-highlight sidebar
-  const path = window.location.pathname.split("/").pop().toLowerCase();
-  document.querySelectorAll(".sidebar a[href]").forEach(link => {
-    const href = link.getAttribute("href").toLowerCase();
-    if (href === path) {
-      link.classList.add("active");
-    }
-  });
-
-  // Begin Smartsheet logic
-  const empID = sessionStorage.getItem('empID');
-  const displayName = sessionStorage.getItem('displayName') || 'User';
-  if (!empID) {
-    alert('Please log in first.');
-    window.location.href = 'index.html';
-    return;
+ <script>
+  function toggleSidebar() {
+    const sb = document.getElementById("sidebar");
+    sb.classList.toggle("open");
+    document.querySelector(".container").style.marginLeft =
+      sb.classList.contains("open") ? "220px" : "60px";
   }
 
-  const sheetId = '8346763116105604';
-  const proxyUrl = `http://localhost:3000/smartsheet/${sheetId}`;
-  const tbody = document.querySelector('.level-table tbody');
+  function logout() {
+    if (confirm("Are you sure you want to log out?")) {
+      sessionStorage.clear();
+      window.location.href = "index.html";
+    }
+  }
 
-  fetch(proxyUrl)
-    .then(res => res.json())
-    .then(sheet => {
-      const colMap = {};
-      sheet.columns.forEach(c => colMap[c.title.trim().toLowerCase()] = c.id);
+  document.addEventListener("DOMContentLoaded", () => {
+    const path = window.location.pathname.split("/").pop().toLowerCase();
+    document.querySelectorAll(".sidebar a[href]").forEach(link => {
+      const href = link.getAttribute("href").toLowerCase();
+      if (href === path) {
+        link.classList.add("active");
+      }
+    });
 
-      let rows = sheet.rows.filter(r =>
-        r.cells.some(c => c.columnId === colMap['employee id'] && String(c.value).toUpperCase() === empID)
-      );
+    const empID = sessionStorage.getItem('empID');
+    const displayName = sessionStorage.getItem('displayName') || 'User';
+    if (!empID) {
+      alert('Please log in first.');
+      window.location.href = 'index.html';
+      return;
+    }
 
-      rows.sort((a, b) => {
-        const getDate = r => {
-          const cell = r.cells.find(c => c.columnId === colMap['month key']);
-          return cell ? new Date(cell.value) : new Date(0);
+    const sheetId = '8346763116105604';
+    const proxyUrl = `https://powerup-proxy.onrender.com/sheet/${sheetId}`;
+    const tbody = document.querySelector('.level-table tbody');
+
+    fetch(proxyUrl)
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(sheet => {
+        const colMap = {};
+        sheet.columns.forEach(c => colMap[c.title.trim().toLowerCase()] = c.id);
+
+        const get = (r, title) => {
+          const cell = r.cells.find(x => x.columnId === colMap[title.toLowerCase()]);
+          return cell ? (cell.displayValue ?? cell.value ?? '') : '';
         };
-        return getDate(b) - getDate(a);
-      });
 
-      tbody.innerHTML = rows.length === 0
-        ? '<tr><td colspan="10">No data found.</td></tr>'
-        : '';
+        let rows = sheet.rows.filter(r =>
+          get(r, 'Employee ID').toUpperCase() === empID
+        );
 
-      const get = (r, title) => {
-        const c = r.cells.find(x => x.columnId === colMap[title.toLowerCase()]);
-        return c ? (c.displayValue ?? c.value ?? '') : '';
-      };
+        rows.sort((a, b) =>
+          new Date(get(b, 'Month Key')) - new Date(get(a, 'Month Key'))
+        );
 
-      if (rows[0]) {
+        if (rows.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="10">No records found for this employee.</td></tr>';
+          return;
+        }
+
+        // Set greeting, level, and month
         document.getElementById('userGreeting').textContent = displayName;
-        document.getElementById('userLevel').textContent = get(rows[0], 'Level');
+        document.getElementById('userLevel').textContent = get(rows[0], 'Level') || 'N/A';
         const monthKey = get(rows[0], 'Month Key');
         document.getElementById('monthText').textContent = monthKey
           ? new Date(monthKey).toLocaleString('default', { month: 'long', year: 'numeric' })
-          : 'This Month';
-      }
+          : 'Unknown';
 
-      rows.forEach(r => {
-        const tr = document.createElement('tr');
-        const values = [
-          get(r, 'Month Key'),
-          get(r, 'CI Submissions'),
-          get(r, 'Safety Submissions'),
-          get(r, 'Quality Submissions'),
-          get(r, 'Total Submissions'),
-          get(r, 'Power Hours Logged'),
-          get(r, 'Meets L1') === true ? '✓' : '✗',
-          get(r, 'Meets L2') === true ? '✓' : '✗',
-          get(r, 'Meets L3') === true ? '✓' : '✗',
-          get(r, 'Level')
-        ];
+        // Render rows
+        tbody.innerHTML = '';
+        rows.forEach(r => {
+          const tr = document.createElement('tr');
+          const values = [
+            get(r, 'Month Key'),
+            get(r, 'CI Submissions'),
+            get(r, 'Safety Submissions'),
+            get(r, 'Quality Submissions'),
+            get(r, 'Total Submissions'),
+            get(r, 'Power Hours Logged'),
+            get(r, 'Meets L1') === true ? '✓' : '✗',
+            get(r, 'Meets L2') === true ? '✓' : '✗',
+            get(r, 'Meets L3') === true ? '✓' : '✗',
+            get(r, 'Level')
+          ];
 
-        values.forEach((val, i) => {
-          const td = document.createElement('td');
-          td.textContent = val;
-          td.title = val;
-          if ([6, 7, 8].includes(i)) td.className = val === '✓' ? 'checkmark' : 'cross';
-          tr.appendChild(td);
+          values.forEach((val, i) => {
+            const td = document.createElement('td');
+            td.textContent = val;
+            td.title = val;
+            if ([6, 7, 8].includes(i)) td.className = val === '✓' ? 'checkmark' : 'cross';
+            tr.appendChild(td);
+          });
+
+          tbody.appendChild(tr);
         });
-
-        tbody.appendChild(tr);
+      })
+      .catch(err => {
+        console.error("Failed to load level data:", err);
+        tbody.innerHTML = '<tr><td colspan="10">Unable to load data.</td></tr>';
       });
-    })
-    .catch(err => {
-      console.error('Error loading level tracker:', err);
-      tbody.innerHTML = '<tr><td colspan="10">Unable to load data</td></tr>';
-    });
-});
-
-  </script>
+  });
+</script>
 
 </body>
 </html>
