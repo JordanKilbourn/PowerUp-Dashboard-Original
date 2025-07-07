@@ -26,7 +26,14 @@
     }
     h1 { margin-bottom: 24px; }
     label { display: block; margin-bottom: 6px; font-weight: 600; }
-    input { width: 100%; padding: 10px; margin-bottom: 20px; border-radius: 4px; border: none; font-size: 16px; }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+      border: none;
+      font-size: 16px;
+    }
     small { color: #94a3b8; display: block; margin-bottom: 20px; }
     button {
       width: 100%;
@@ -50,21 +57,36 @@
     <div id="errorMsg" class="error"></div>
 
     <label for="empID">Employee ID</label>
-    <input id="empID" placeholder="e.g., IX7992648 or IKS968063" />
+    <input id="empID" autocomplete="off" placeholder="e.g., IX7992648 or IKS968063" />
 
     <small>Enter the <strong>letters + numbers</strong> from your Position ID (e.g., "<strong>IX7992648</strong>").</small>
     <button id="loginBtn" disabled>Login</button>
   </div>
 
 <script>
-  const sheetUrl = 'https://app.smartsheet.com/b/publish?EQBCT=f308bc37ed644a3aa7b2c371b24948eb&format=json'; // Employee Master
+  const sheetUrl = 'http://localhost:3000/smartsheet/2195459817820036'; // Proxy to Employee Master
 
   const empInput = document.getElementById('empID');
   const loginBtn = document.getElementById('loginBtn');
   const errorMsg = document.getElementById('errorMsg');
 
+  window.onload = () => {
+    empInput.focus();
+  };
+
   empInput.addEventListener('input', () => {
     loginBtn.disabled = empInput.value.trim().length < 2;
+  });
+
+  empInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !loginBtn.disabled) tryLogin();
+  });
+
+  empInput.addEventListener('paste', () => {
+    setTimeout(() => {
+      empInput.value = empInput.value.trim().replace(/\s+/g, '');
+      loginBtn.disabled = empInput.value.length < 2;
+    }, 50);
   });
 
   loginBtn.addEventListener('click', tryLogin);
@@ -72,9 +94,12 @@
   async function tryLogin() {
     const empID = empInput.value.trim().toUpperCase();
     errorMsg.textContent = '';
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'Logging in...';
 
     try {
-      const res = await fetch(sheetUrl);
+      const res = await fetch(sheetUrl, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
 
       const pidCol = getColumnId(data.columns, 'Position ID');
@@ -86,6 +111,8 @@
 
       if (!match) {
         errorMsg.textContent = `No match found for Employee ID "${empID}".`;
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Login';
         return;
       }
 
@@ -98,6 +125,8 @@
     } catch (err) {
       console.error(err);
       errorMsg.textContent = 'Error connecting to authentication service.';
+      loginBtn.disabled = false;
+      loginBtn.textContent = 'Login';
     }
   }
 

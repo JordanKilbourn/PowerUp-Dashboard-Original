@@ -133,24 +133,48 @@
 </head>
 <body>
 
-  <div class="sidebar" id="sidebar">
-    <a href="#" onclick="toggleSidebar()" title="Toggle Sidebar Menu"><i class="fas fa-bars"></i><span class="link-text">Toggle Menu</span></a>
-    <a href="PowerUp_Dashboard.html" title="Go to Dashboard"><i class="fas fa-home"></i><span class="link-text">Dashboard</span></a>
-    <div class="sidebar-section">Submission Forms</div>
-    <a href="https://app.smartsheet.com/b/form/ci-submission-form" target="_blank" title="Submit a CI Suggestion"><i class="fas fa-lightbulb"></i><span class="link-text">CI Suggestion</span></a>
-    <a href="https://app.smartsheet.com/b/form/safety-catch-form" target="_blank" title="Submit a Safety Concern"><i class="fas fa-hard-hat"></i><span class="link-text">Safety Concern</span></a>
-    <a href="https://app.smartsheet.com/b/form/quality-issue-form" target="_blank" title="Submit a Quality Catch"><i class="fas fa-bug"></i><span class="link-text">Quality Catch</span></a>
-    <div class="sidebar-section">Other</div>
-    <a href="view-power-hours.html" title="View Power Hours"><i class="fas fa-clock"></i><span class="link-text">Power Hours</span></a>
-    <a href="https://app.smartsheet.com/b/form/token-redemption-form" target="_blank" title="Redeem Tokens"><i class="fas fa-coins"></i><span class="link-text">Redeem Tokens</span></a>
-    <a href="level-tracker.html" class="active" title="Level Tracker"><i class="fas fa-chart-line"></i><span class="link-text">Level Tracker</span></a>
-  </div>
+<div class="sidebar" id="sidebar">
+  <a href="#" onclick="toggleSidebar()" title="Toggle Sidebar Menu">
+    <i class="fas fa-bars"></i><span class="link-text">Toggle Menu</span>
+  </a>
+
+  <a href="PowerUp_Dashboard.html" title="Dashboard">
+    <i class="fas fa-home"></i><span class="link-text">Dashboard</span>
+  </a>
+
+  <div class="sidebar-section">Submission Forms</div>
+  <a href="https://app.smartsheet.com/b/form/e60862d9ae0b44358d6f85dcd1c81d2b" target="_blank" title="Submit a CI Suggestion">
+    <i class="fas fa-lightbulb"></i><span class="link-text">CI Suggestion</span>
+  </a>
+  <a href="https://app.smartsheet.com/b/form/162129580c03440f88cc5f284627b52f" target="_blank" title="Submit a Safety Concern">
+    <i class="fas fa-hard-hat"></i><span class="link-text">Safety Concern</span>
+  </a>
+  <a href="https://app.smartsheet.com/b/form/2ba4ff03861d4d068ee5a0bff46308c3" target="_blank" title="Submit a Quality Catch">
+    <i class="fas fa-bug"></i><span class="link-text">Quality Catch</span>
+  </a>
+
+  <div class="sidebar-section">Other</div>
+  <a href="view-power-hours.html" title="View Power Hours">
+    <i class="fas fa-clock"></i><span class="link-text">Power Hours</span>
+  </a>
+  <a href="https://app.smartsheet.com/b/form/165de2f61d2a4c5bb7855df59f70a1db" target="_blank" title="Redeem Tokens">
+    <i class="fas fa-coins"></i><span class="link-text">Redeem Tokens</span>
+  </a>
+  <a href="level-tracker.html" title="Level Tracker">
+    <i class="fas fa-chart-line"></i><span class="link-text">Level Tracker</span>
+  </a>
+
+  <a href="#" onclick="logout()" title="Log out">
+    <i class="fas fa-sign-out-alt"></i><span class="link-text">Logout</span>
+  </a>
+</div>
+
 
   <header>
     <div class="header-left">
-      <span><strong>Welcome:</strong> Jordan</span>
-      <span><strong>Month:</strong> June 2025</span>
-      <span><strong>Current Level:</strong> <span class="level-tag">L2</span></span>
+      <span><strong>Welcome:</strong> <span id="userGreeting">User</span></span>
+      <span><strong>Month:</strong> <span id="monthText">Loading...</span></span>
+      <span><strong>Current Level:</strong> <span class="level-tag" id="userLevel">Loading...</span></span>
     </div>
     <h1>Level Tracker</h1>
   </header>
@@ -165,14 +189,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td>06/01/2025</td><td>1</td><td>1</td><td>0</td><td>2</td><td>5</td>
-          <td class="checkmark">✓</td><td class="cross">✗</td><td class="cross">✗</td><td>Lvl 2</td>
-        </tr>
-        <tr>
-          <td>06/01/2025</td><td>0</td><td>0</td><td>1</td><td>1</td><td>9</td>
-          <td class="cross">✗</td><td class="checkmark">✓</td><td class="checkmark">✓</td><td>Lvl 3</td>
-        </tr>
+        <tr><td colspan="10">Loading...</td></tr>
       </tbody>
     </table>
   </div>
@@ -184,30 +201,98 @@
       document.querySelector(".container").style.marginLeft =
         sb.classList.contains("open") ? "220px" : "60px";
     }
-  </script>
 
-  <script>
-    // Add tooltips to all table cells
-    document.addEventListener("DOMContentLoaded", () => {
-      document.querySelectorAll("td").forEach(td => {
-        if (!td.hasAttribute("title")) {
-          td.setAttribute("title", td.innerText.trim());
-        }
-      });
-    });
-  </script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Auto-highlight sidebar
+  const path = window.location.pathname.split("/").pop().toLowerCase();
+  document.querySelectorAll(".sidebar a[href]").forEach(link => {
+    const href = link.getAttribute("href").toLowerCase();
+    if (href === path) {
+      link.classList.add("active");
+    }
+  });
 
-  <script>
-    // Highlight current page in sidebar
-    document.addEventListener("DOMContentLoaded", () => {
-      const currentPage = window.location.pathname.split("/").pop();
-      document.querySelectorAll(".sidebar a").forEach(link => {
-        const linkTarget = link.getAttribute("href");
-        if (linkTarget && linkTarget === currentPage) {
-          link.classList.add("active");
-        }
+  // Begin Smartsheet logic
+  const empID = sessionStorage.getItem('empID');
+  const displayName = sessionStorage.getItem('displayName') || 'User';
+  if (!empID) {
+    alert('Please log in first.');
+    window.location.href = 'index.html';
+    return;
+  }
+
+  const sheetId = '8346763116105604';
+  const proxyUrl = `http://localhost:3000/smartsheet/${sheetId}`;
+  const tbody = document.querySelector('.level-table tbody');
+
+  fetch(proxyUrl)
+    .then(res => res.json())
+    .then(sheet => {
+      const colMap = {};
+      sheet.columns.forEach(c => colMap[c.title.trim().toLowerCase()] = c.id);
+
+      let rows = sheet.rows.filter(r =>
+        r.cells.some(c => c.columnId === colMap['employee id'] && String(c.value).toUpperCase() === empID)
+      );
+
+      rows.sort((a, b) => {
+        const getDate = r => {
+          const cell = r.cells.find(c => c.columnId === colMap['month key']);
+          return cell ? new Date(cell.value) : new Date(0);
+        };
+        return getDate(b) - getDate(a);
       });
+
+      tbody.innerHTML = rows.length === 0
+        ? '<tr><td colspan="10">No data found.</td></tr>'
+        : '';
+
+      const get = (r, title) => {
+        const c = r.cells.find(x => x.columnId === colMap[title.toLowerCase()]);
+        return c ? (c.displayValue ?? c.value ?? '') : '';
+      };
+
+      if (rows[0]) {
+        document.getElementById('userGreeting').textContent = displayName;
+        document.getElementById('userLevel').textContent = get(rows[0], 'Level');
+        const monthKey = get(rows[0], 'Month Key');
+        document.getElementById('monthText').textContent = monthKey
+          ? new Date(monthKey).toLocaleString('default', { month: 'long', year: 'numeric' })
+          : 'This Month';
+      }
+
+      rows.forEach(r => {
+        const tr = document.createElement('tr');
+        const values = [
+          get(r, 'Month Key'),
+          get(r, 'CI Submissions'),
+          get(r, 'Safety Submissions'),
+          get(r, 'Quality Submissions'),
+          get(r, 'Total Submissions'),
+          get(r, 'Power Hours Logged'),
+          get(r, 'Meets L1') === true ? '✓' : '✗',
+          get(r, 'Meets L2') === true ? '✓' : '✗',
+          get(r, 'Meets L3') === true ? '✓' : '✗',
+          get(r, 'Level')
+        ];
+
+        values.forEach((val, i) => {
+          const td = document.createElement('td');
+          td.textContent = val;
+          td.title = val;
+          if ([6, 7, 8].includes(i)) td.className = val === '✓' ? 'checkmark' : 'cross';
+          tr.appendChild(td);
+        });
+
+        tbody.appendChild(tr);
+      });
+    })
+    .catch(err => {
+      console.error('Error loading level tracker:', err);
+      tbody.innerHTML = '<tr><td colspan="10">Unable to load data</td></tr>';
     });
+});
+
   </script>
 
 </body>

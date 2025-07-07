@@ -3,381 +3,123 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PowerUp Dashboard</title>
+  <title>Dashboard | PowerUp</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(180deg, #0f172a, #111827);
-      color: #f1f5f9;
-      font-size: 15px;
-      line-height: 1.6;
-    }
-
-    .sidebar {
-      position: fixed; top: 0; left: 0; height: 100%; width: 60px;
-      background: #0b0e2c; overflow-x: hidden;
-      transition: width 0.3s; box-shadow: 2px 0 8px rgba(0,0,0,0.4);
-      z-index: 1000; white-space: nowrap;
-    }
+    body { font-family: 'Inter', sans-serif; background: linear-gradient(180deg, #0f172a, #111827); color: #f1f5f9; font-size: 15px; line-height: 1.6; }
+    .sidebar { position: fixed; top: 0; left: 0; height: 100%; width: 60px; background: #0b0e2c; overflow-x: hidden; transition: width 0.3s; box-shadow: 2px 0 8px rgba(0,0,0,0.4); z-index: 1000; white-space: nowrap; }
     .sidebar.open { width: 220px; }
-    .sidebar a {
-      display: flex; align-items: center; padding: 16px;
-      color: #e2e8f0; text-decoration: none;
-      font-size: 15px; transition: all 0.3s;
-    }
+    .sidebar a { display: flex; align-items: center; padding: 16px; color: #e2e8f0; text-decoration: none; font-size: 15px; transition: all 0.3s; }
     .sidebar a:hover { background: #1a1f46; transform: translateX(5px); }
-    .sidebar a.active {
-      background: #1e293b;
-      font-weight: bold;
-      color: #fcd34d;
-    }
+    .sidebar a.active { background: #1e293b; font-weight: bold; color: #fcd34d; }
     .sidebar i { min-width: 24px; margin-right: 12px; }
     .link-text { display: none; }
     .sidebar.open .link-text { display: inline; }
-
-    .sidebar .sidebar-section {
-      color: #94a3b8;
-      text-transform: uppercase;
-      font-size: 12px;
-      padding: 12px 16px 4px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      display: none;
-    }
+    .sidebar .sidebar-section { color: #94a3b8; text-transform: uppercase; font-size: 12px; padding: 12px 16px 4px; font-weight: 600; letter-spacing: 0.5px; display: none; }
     .sidebar.open .sidebar-section { display: block; }
-
-    header {
-      display: flex; justify-content: space-between; align-items: center;
-      background: linear-gradient(to right, #1a1a40, #000);
-      padding: 20px 30px;
-      color: #fff;
-      margin-left: 60px;
-      position: relative;
-    }
-    header h1 {
-      font-size: 28px; font-weight: 700;
-      color: #ffb400;
-      text-shadow: 0 0 8px #ffb400, 0 0 16px #ff9100;
-      position: absolute;
-      left: 50%; transform: translateX(-50%);
-    }
-    .header-left {
-      display: flex; gap: 20px; font-size: 14px; color: #f8fafc; z-index: 1;
-    }
-    .level-tag {
-      background: #8b5cf6; color: #fff;
-      padding: 4px 12px; border-radius: 12px;
-      font-weight: 600;
-      box-shadow: 0 0 6px #8b5cf6;
-      margin-left: 5px;
-    }
-
-    .container {
-      margin-left: 60px;
-      padding: 20px;
-      transition: margin-left 0.3s;
-    }
-
-    .dashboard-header {
-      background: #0f172a;
-      border: 1px solid #1e293b;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 12px rgba(0,0,0,0.2);
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .goal-pill-group {
-      display: flex; flex-wrap: wrap; gap: 10px;
-    }
-    .pill {
-      padding: 6px 14px; border-radius: 30px;
-      font-weight: 600; font-size: 13px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.3);
-    }
+    header { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to right, #1a1a40, #000); padding: 20px 30px; color: #fff; margin-left: 60px; position: relative; }
+    header h1 { font-size: 28px; font-weight: 700; color: #ffb400; text-shadow: 0 0 8px #ffb400, 0 0 16px #ff9100; position: absolute; left: 50%; transform: translateX(-50%); }
+    .header-left { display: flex; gap: 20px; font-size: 14px; color: #f8fafc; z-index: 1; }
+    .level-tag { background: #8b5cf6; color: #fff; padding: 4px 12px; border-radius: 12px; font-weight: 600; box-shadow: 0 0 6px #8b5cf6; margin-left: 5px; }
+    .container { margin-left: 60px; padding: 20px; transition: margin-left 0.3s; }
+    .dashboard-header { background: #0f172a; border: 1px solid #1e293b; padding: 20px; border-radius: 12px; box-shadow: 0 0 12px rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 16px; }
+    .goal-pill-group { display: flex; flex-wrap: wrap; gap: 10px; }
+    .pill { padding: 6px 14px; border-radius: 30px; font-weight: 600; font-size: 13px; box-shadow: 0 0 5px rgba(0,0,0,0.3); }
     .pill.green { background: #4ade80; color: #1e3a1e; }
     .pill.yellow { background: #fde047; color: #3b3b1b; }
     .pill.red { background: #f87171; color: #fff; }
-
     .progress-container { margin-top: 5px; }
     .progress-label { font-weight: 600; font-size: 14px; margin-bottom: 5px; }
-    .progress-bar {
-      background: #2e2e40;
-      border-radius: 20px;
-      height: 16px;
-      overflow: hidden;
-      max-width: 400px;
-    }
-    .progress-bar-fill {
-      width: 62.5%; height: 100%;
-      background: linear-gradient(to right, #38bdf8, #3b82f6);
-      border-radius: 20px; transition: width 0.4s ease;
-    }
+    .progress-bar { background: #2e2e40; border-radius: 20px; height: 16px; overflow: hidden; max-width: 400px; }
+    .progress-bar-fill { width: 62.5%; height: 100%; background: linear-gradient(to right, #38bdf8, #3b82f6); border-radius: 20px; transition: width 0.4s ease; }
     .token-tracker { font-size: 16px; font-weight: 500; }
-
-    .section {
-      background: #0f172a;
-      border: 1px solid #1e293b;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 12px rgba(0,0,0,0.3);
-      margin-top: 30px;
-    }
-    h2 {
-      font-size: 20px; font-weight: 700;
-      color: #facc15;
-      display: flex; align-items: center; gap: 8px;
-      margin-bottom: 10px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    th {
-      position: sticky;
-      top: 0;
-      background: #1e293b;
-      color: #fcd34d;
-      text-transform: uppercase;
-      font-weight: 600;
-      z-index: 10;
-    }
-    th, td {
-      padding: 12px;
-      text-align: left;
-      font-size: 14px;
-    }
+    .section { background: #0f172a; border: 1px solid #1e293b; padding: 20px; border-radius: 10px; box-shadow: 0 0 12px rgba(0,0,0,0.3); margin-top: 30px; }
+    h2 { font-size: 20px; font-weight: 700; color: #facc15; display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; border-radius: 8px; overflow: hidden; }
+    th { position: sticky; top: 0; background: #1e293b; color: #fcd34d; text-transform: uppercase; font-weight: 600; z-index: 10; }
+    th, td { padding: 12px; text-align: left; font-size: 14px; }
     tr:nth-child(even) { background: #1c2237; }
     tr:nth-child(odd) { background: #141b2d; }
     tr:hover { background: rgba(255,255,255,0.05); }
-
-    td {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 200px;
-    }
+    td { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
     td[title] { cursor: help; }
-
-    @media (max-width: 768px) {
-      .container { margin-left: 0 !important; padding: 15px; }
-      .sidebar.open {
-        width: 100%;
-        position: relative;
-        height: auto;
-      }
-      table, th, td { font-size: 13px; }
-    }
+    @media (max-width: 768px) { .container { margin-left: 0 !important; padding: 15px; } .sidebar.open { width: 100%; position: relative; height: auto; } table, th, td { font-size: 13px; } }
   </style>
 </head>
 <body>
-
 <div class="sidebar" id="sidebar">
   <a href="#" onclick="toggleSidebar()" title="Toggle Sidebar Menu">
     <i class="fas fa-bars"></i><span class="link-text">Toggle Menu</span>
   </a>
 
-  <a href="PowerUp_Dashboard_v1.5.html" title="Dashboard">
+  <a href="PowerUp_Dashboard.html" title="Dashboard">
     <i class="fas fa-home"></i><span class="link-text">Dashboard</span>
   </a>
 
   <div class="sidebar-section">Submission Forms</div>
-  <a href="https://app.smartsheet.com/b/form/ci-submission-form" target="_blank" title="Submit a CI Suggestion">
+  <a href="https://app.smartsheet.com/b/form/e60862d9ae0b44358d6f85dcd1c81d2b" target="_blank" title="Submit a CI Suggestion">
     <i class="fas fa-lightbulb"></i><span class="link-text">CI Suggestion</span>
   </a>
-  <a href="https://app.smartsheet.com/b/form/safety-catch-form" target="_blank" title="Submit a Safety Concern">
+  <a href="https://app.smartsheet.com/b/form/162129580c03440f88cc5f284627b52f" target="_blank" title="Submit a Safety Concern">
     <i class="fas fa-hard-hat"></i><span class="link-text">Safety Concern</span>
   </a>
-  <a href="https://app.smartsheet.com/b/form/quality-issue-form" target="_blank" title="Submit a Quality Catch">
+  <a href="https://app.smartsheet.com/b/form/2ba4ff03861d4d068ee5a0bff46308c3" target="_blank" title="Submit a Quality Catch">
     <i class="fas fa-bug"></i><span class="link-text">Quality Catch</span>
   </a>
 
   <div class="sidebar-section">Other</div>
-  <a href="view-power-hours.html" title="View your Power Hour activity">
+  <a href="view-power-hours.html" title="View Power Hours">
     <i class="fas fa-clock"></i><span class="link-text">Power Hours</span>
   </a>
-  <a href="https://app.smartsheet.com/b/form/token-redemption-form" target="_blank" title="Redeem your earned tokens">
+  <a href="https://app.smartsheet.com/b/form/165de2f61d2a4c5bb7855df59f70a1db" target="_blank" title="Redeem Tokens">
     <i class="fas fa-coins"></i><span class="link-text">Redeem Tokens</span>
   </a>
-  <a href="level-tracker.html" title="View your Level Tracker progress">
+  <a href="level-tracker.html" title="Level Tracker">
     <i class="fas fa-chart-line"></i><span class="link-text">Level Tracker</span>
   </a>
 
   <a href="#" onclick="logout()" title="Log out">
     <i class="fas fa-sign-out-alt"></i><span class="link-text">Logout</span>
   </a>
-
 </div>
 
-  <header>
-    <div class="header-left">
-      <span><strong>Welcome:</strong> <span id="userGreeting">User</span></span>
-      <span><strong>Month:</strong> June 2025</span>
-      <span><strong>Current Level:</strong> <span class="level-tag" id="userLevel">Loading...</span></span>
-
-    </div>
-    <h1>PowerUp Dashboard</h1>
-  </header>
-
-<!-- Main Content -->
-  <div class="container">
-    <!-- Dashboard Summary -->
-    <div class="dashboard-header">
-      <div class="goal-pill-group">
-        <span class="pill green">CI Goal Met</span>
-        <span class="pill yellow">Safety Goal Pending</span>
-        <span class="pill red">Power Hour Goal Not Met</span>
-      </div>
-      <div class="progress-container">
-        <div class="progress-label">Power Hours Logged: <strong>5 / 8</strong></div>
-        <div class="progress-bar"><div class="progress-bar-fill"></div></div>
-      </div>
-      <div class="token-tracker">Tokens Earned: <strong>35</strong></div>
-    </div>
-
-    <!-- CI Submissions -->
-    <div class="section">
-      <h2><i class="fas fa-lightbulb"></i>CI Submissions</h2>
-      <table>
-        <tr>
-          <th>Date</th><th>Submission ID</th><th>Submitted By</th><th>Status</th>
-          <th>Problem Statement</th><th>Suggested Solution</th><th>Assigned To (Primary)</th>
-          <th>CI Approval</th><th>Last Meeting Action</th><th>Resourced</th>
-          <th>Resourced Date</th><th>Paid</th><th>Token Payout</th><th>Project Work Completed</th>
-        </tr>
-        <tr>
-          <td>06/16/2025</td><td>CI-004</td><td>Blair Snyder Jr.</td><td>Completed</td>
-          <td>Stainless 60x120 issue</td><td>Put stainless up on support bracket</td><td>Ed Heyler</td>
-          <td>Approved</td><td>–</td><td>✔️</td><td>12/16/2024</td><td>✔️</td><td>$5</td><td>✔️</td>
-        </tr>
-        <tr>
-          <td>06/16/2025</td><td>CI-005</td><td>Barry Hauck</td><td>Denied/Cancelled</td>
-          <td>Three workstations misaligned</td><td>If middle cutting station adjusted</td>
-          <td>Jordan Kilbourn</td><td>Denied</td><td>–</td><td>❌</td><td>–</td><td>❌</td><td>$0</td><td>❌</td>
-        </tr>
-      </table>
-    </div>
-
-    <!-- Safety Concerns -->
-    <div class="section">
-      <h2><i class="fas fa-hard-hat"></i>Safety Concerns</h2>
-      <table>
-        <tr>
-          <th>Date</th><th>Submitted By</th><th>Department/Area</th><th>Safety Concern</th>
-          <th>Description</th><th>Recommendation</th><th>Resolution</th>
-          <th>Escalated To</th><th>Spoke With Leadership?</th><th>Status</th><th>Maintenance W/O #</th>
-        </tr>
-        <tr>
-          <td>06/25/2025</td><td>Greg Brown</td><td>Weld</td><td>Guarding in disrepair</td>
-          <td>Tool rests misaligned</td><td>Adjust tool rest</td><td>Adjusted</td>
-          <td>Matt Longacre</td><td>YES</td><td>Accepted Safety</td><td>N/A</td>
-        </tr>
-        <tr>
-          <td>06/25/2025</td><td>Zach Woodcock</td><td>Weld</td><td>PPE obstructing safety area </td>
-          <td>Fab carts in front of fire extinguisher</td><td>Moved cart away</td><td>N/A</td>
-          <td>Matt Longacre</td><td>NO</td><td>Accepted Safety</td><td>N/A</td>
-        </tr>
-      </table>
-    </div>
-
-    <!-- Quality Catches -->
-    <div class="section">
-      <h2><i class="fas fa-bug"></i>Quality Catches</h2>
-      <table>
-        <tr>
-          <th>Catch ID</th><th>Entry Date</th><th>Submitted By</th><th>Area</th>
-          <th>Quality Catch</th><th>Part Number</th><th>Description</th>
-        </tr>
-        <tr>
-          <td>329</td><td>06/06/2025 12:19 PM</td><td>Lester Moore</td><td>Welding</td>
-          <td>Bad Material or Wrong Material</td><td>AFM9582 & AFM9497</td><td>Tubing had dents near weld</td>
-        </tr>
-        <tr>
-          <td>327</td><td>06/06/2025 8:58 AM</td><td>Matt Longacre</td><td>Welding</td>
-          <td>Part not made to print</td><td>afr0095</td><td>Hole was off & misaligned</td>
-        </tr>
-      </table>
-    </div>
+<header>
+  <div class="header-left">
+    <span><strong>Welcome:</strong> <span id="userGreeting">User</span></span>
+    <span><strong>Month:</strong> <span id="currentMonth"></span></span>
+    <span><strong>Current Level:</strong> <span class="level-tag" id="userLevel">Loading...</span></span>
   </div>
-
+  <h1>PowerUp Dashboard</h1>
+</header>
+<div class="container">
+  <div class="dashboard-header">
+    <div class="goal-pill-group" id="pillSummary"></div>
+    <div class="progress-container">
+      <div class="progress-label">Power Hours Logged: <strong id="phProgress">0 / 8</strong></div>
+      <div class="progress-bar"><div class="progress-bar-fill" id="progressBar"></div></div>
+    </div>
+    <div class="token-tracker">Tokens Earned: <strong id="tokenTotal">0</strong></div>
+  </div>
+  <div id="ciSection" class="section"></div>
+  <div id="safetySection" class="section"></div>
+  <div id="qcSection" class="section"></div>
+</div>
+<script src="/scripts/load-dashboard.js"></script>
 
 <script>
-  function toggleSidebar() {
-    const sb = document.getElementById("sidebar");
-    sb.classList.toggle("open");
-    document.querySelector(".container").style.marginLeft =
-      sb.classList.contains("open") ? "220px" : "60px";
-  }
-
   document.addEventListener("DOMContentLoaded", () => {
-    const cells = document.querySelectorAll("td");
-    cells.forEach(td => {
-      if (!td.hasAttribute("title")) {
-        td.setAttribute("title", td.innerText.trim());
-      }
-    });
-
-    const currentPage = window.location.pathname.split("/").pop();
-    document.querySelectorAll(".sidebar a").forEach(link => {
-      const linkTarget = link.getAttribute("href");
-      if (linkTarget && linkTarget === currentPage) {
+    const path = window.location.pathname.split("/").pop().toLowerCase();
+    document.querySelectorAll(".sidebar a[href]").forEach(link => {
+      const href = link.getAttribute("href").toLowerCase();
+      if (href === path) {
         link.classList.add("active");
       }
     });
   });
-
-  const empID = sessionStorage.getItem('empID');
-  if (!empID) {
-    alert('You must log in first.');
-    window.location.href = 'login.html';
-  }
-
-  const sheetUrl = 'https://app.smartsheet.com/b/publish?EQBCT=f308bc37ed644a3aa7b2c371b24948eb&format=json';
-
-  fetch(sheetUrl)
-    .then(res => res.json())
-    .then(sheet => {
-      const cols = sheet.columns;
-      const colMap = {};
-      cols.forEach(c => colMap[c.title.trim().toLowerCase()] = c.id);
-
-      const pidId = colMap['position id'];
-      const lvlId = colMap['current level'];
-      const nameId = colMap['display name'];
-
-      const row = sheet.rows.find(r => r.cells.some(c => c.columnId === pidId && String(c.value).toUpperCase() === empID));
-      if (row) {
-        const lvlCell = row.cells.find(c => c.columnId === lvlId);
-        const nameCell = row.cells.find(c => c.columnId === nameId);
-
-        if (lvlCell?.value) {
-          document.getElementById('userLevel').textContent = lvlCell.value;
-        }
-        if (nameCell?.displayValue) {
-          document.getElementById('userGreeting').textContent = nameCell.displayValue;
-        }
-      }
-    })
-    .catch(err => {
-      console.error('Sheet error:', err);
-    });
-
-  function logout() {
-    sessionStorage.clear();
-    window.location.href = 'login.html';
-  }
 </script>
-
-
 
 </body>
 </html>
+
