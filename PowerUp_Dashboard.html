@@ -45,10 +45,15 @@
     tr:hover { background: rgba(255,255,255,0.05); }
     td { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
     td[title] { cursor: help; }
-    @media (max-width: 768px) { .container { margin-left: 0 !important; padding: 15px; } .sidebar.open { width: 100%; position: relative; height: auto; } table, th, td { font-size: 13px; } }
+    @media (max-width: 768px) {
+      .container { margin-left: 0 !important; padding: 15px; }
+      .sidebar.open { width: 100%; position: relative; height: auto; }
+      table, th, td { font-size: 13px; }
+    }
   </style>
 </head>
 <body>
+
 <div class="sidebar" id="sidebar">
   <a href="#" onclick="toggleSidebar()" title="Toggle Sidebar Menu">
     <i class="fas fa-bars"></i><span class="link-text">Toggle Menu</span>
@@ -93,6 +98,7 @@
   </div>
   <h1>PowerUp Dashboard</h1>
 </header>
+
 <div class="container">
   <div class="dashboard-header">
     <div class="goal-pill-group" id="pillSummary"></div>
@@ -102,12 +108,16 @@
     </div>
     <div class="token-tracker">Tokens Earned: <strong id="tokenTotal">0</strong></div>
   </div>
+
   <div id="ciSection" class="section"></div>
   <div id="safetySection" class="section"></div>
   <div id="qcSection" class="section"></div>
 </div>
+
+<!-- Load main dashboard logic -->
 <script src="/scripts/load-dashboard.js"></script>
 
+<!-- Sidebar Highlight & Logout Behavior -->
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const path = window.location.pathname.split("/").pop().toLowerCase();
@@ -118,8 +128,20 @@
       }
     });
   });
+
+  function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("open");
+  }
+
+  function logout() {
+    if (confirm("Are you sure you want to log out?")) {
+      sessionStorage.clear();
+      window.location.href = "index.html";
+    }
+  }
 </script>
 
 </body>
 </html>
+
 
