@@ -99,15 +99,70 @@ document.addEventListener("DOMContentLoaded", async () => {
     const phMap = getColMap(ph.columns);
     const phRows = ph.rows.filter(r => getVal(r, phMap, 'Employee ID').toUpperCase() === empID && getVal(r, phMap, 'Completed') === true);
     const phCount = phRows.reduce((sum, r) => sum + Number(getVal(r, phMap, 'Completed Hours') || 0), 0);
-    const progressPct = Math.min((phCount / 8) * 100, 100).toFixed(1);
-    document.getElementById('phProgress').textContent = `${phCount} / 8`;
-    document.getElementById('progressBar').style.width = `${progressPct}%`;
 
-    // Level Tracker: Level, Tokens, Month, Pill Summary
+     // Level Tracker: Level, Tokens, Month, Pill Summary
     const level = await fetchSource(sources.level);
     const lvlMap = getColMap(level.columns);
     const lvlRows = level.rows.filter(r => getVal(r, lvlMap, 'Employee ID').toUpperCase() === empID);
     lvlRows.sort((a, b) => new Date(getVal(b, lvlMap, 'Month Key')) - new Date(getVal(a, lvlMap, 'Month Key')));
+
+    // Step 1: Fetch Power Hour Targets
+const powerTargets = await fetch(`${proxyBase}/sheet/3542697273937796`).then(res => res.json());
+const targetMap = {};
+const ptCols = getColMap(powerTargets.columns);
+powerTargets.rows.forEach(r => {
+  const level = getVal(r, ptCols, 'Level').toUpperCase();
+  targetMap[level] = {
+    min: Number(getVal(r, ptCols, 'Min Hours')) || 0,
+    max: Number(getVal(r, ptCols, 'Max Hours')) || 0
+  };
+});
+
+// Step 2: Get current level and month info from Level Tracker
+let userLevel = 'L1';
+let targetMin = 0;
+let targetMax = 8;
+let currentMonthKey = '';
+
+if (lvlRows.length > 0) {
+  const recent = lvlRows[0];
+  userLevel = (getVal(recent, lvlMap, 'Level') || 'L1').toUpperCase();
+  currentMonthKey = getVal(recent, lvlMap, 'Month Key');
+
+  const target = targetMap[userLevel];
+  if (target) {
+    targetMin = target.min;
+    targetMax = target.max;
+  }
+}
+
+// Step 3: Recalculate progress
+const currentDate = new Date();
+const [month, year] = currentMonthKey ? currentMonthKey.split('/') : [currentDate.getMonth() + 1, currentDate.getFullYear()];
+const monthStart = new Date(`${month}/01/${year}`);
+const nextMonth = new Date(monthStart);
+nextMonth.setMonth(monthStart.getMonth() + 1);
+nextMonth.setDate(0); // Last day of the month
+const daysLeft = Math.max((nextMonth - currentDate) / (1000 * 60 * 60 * 24), 0).toFixed(0);
+const hoursRemaining = Math.max(targetMin - phCount, 0);
+const pct = ((phCount / targetMax) * 100).toFixed(1);
+
+// Step 4: Update progress bar and message
+document.getElementById('phProgress').textContent = `${phCount} / ${targetMax}`;
+const bar = document.getElementById('progressBar');
+bar.style.width = `${pct}%`;
+bar.style.backgroundColor =
+  pct >= 100 ? '#22c55e' : // green
+  pct >= 50  ? '#facc15' : // yellow
+               '#f87171';  // red
+
+// Optional: Smart guidance message
+const smartMsg = document.getElementById('powerTips');
+if (smartMsg) {
+  smartMsg.textContent = hoursRemaining > 0
+    ? `You need ${hoursRemaining} more hours this month. ${daysLeft} days left!`
+    : `✅ Target met! Great job.`;
+}
 
     if (lvlRows.length > 0) {
       const recent = lvlRows[0];
