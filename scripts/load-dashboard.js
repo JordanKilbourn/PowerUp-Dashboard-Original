@@ -165,15 +165,6 @@ if (smartMsg) {
     smartMsg.textContent = `⏳ You need ${hoursRemaining} more hours this month. ${daysLeft} days left!`;
   }
 }
-
-// Optional: Smart guidance message
-const smartMsg = document.getElementById('powerTips');
-if (smartMsg) {
-  smartMsg.textContent = hoursRemaining > 0
-    ? `You need ${hoursRemaining} more hours this month. ${daysLeft} days left!`
-    : `✅ Target met! Great job.`;
-}
-
     if (lvlRows.length > 0) {
       const recent = lvlRows[0];
       document.getElementById('userLevel').textContent = getVal(recent, lvlMap, 'Level') || 'N/A';
