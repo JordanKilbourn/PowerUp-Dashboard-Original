@@ -1,4 +1,27 @@
 document.addEventListener("DOMContentLoaded", async () => {
+const style = document.createElement('style');
+  style.textContent = `
+    .scroll-table {
+      max-height: 11em;
+      overflow-y: auto;
+    }
+    .scroll-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .scroll-table th, .scroll-table td {
+      padding: 6px 10px;
+      text-align: left;
+      white-space: nowrap;
+    }
+    .scroll-table td.wrap {
+      white-space: normal;
+      word-break: break-word;
+      max-width: 300px;
+    }
+  `;
+  document.head.appendChild(style);
+
   const empID = (sessionStorage.getItem('empID') || '').toUpperCase().trim();
   const displayName = sessionStorage.getItem('displayName') || 'User';
   if (!empID) {
@@ -38,45 +61,53 @@ document.addEventListener("DOMContentLoaded", async () => {
     return cell ? (cell.displayValue || cell.value || '') : '';
   };
 
-  const renderTable = (rows, colMap, sectionId, columns) => {
-    const section = document.getElementById(sectionId);
-    section.innerHTML = "";
+const renderTable = (rows, colMap, sectionId, columns) => {
+  const section = document.getElementById(sectionId);
+  section.innerHTML = "";
+  section.classList.add('scroll-table');
 
-    const visibleHeaders = columns
-      .filter(c => c.hidden !== true && c.title.trim().toLowerCase() !== 'employee id')
-      .map(c => c.title.trim());
+  // Exclude unwanted columns
+  const excludedCols = ['employee id', 'valid row', 'submitted by'];
+  const visibleHeaders = columns
+    .filter(c => !c.hidden && !excludedCols.includes(c.title.trim().toLowerCase()))
+    .map(c => c.title.trim());
 
-    const table = document.createElement('table');
-    const thead = table.createTHead();
-    const headerRow = thead.insertRow();
+  const table = document.createElement('table');
+  const thead = table.createTHead();
+  const headerRow = thead.insertRow();
 
+  visibleHeaders.forEach(h => {
+    const th = document.createElement('th');
+    th.textContent = h;
+    headerRow.appendChild(th);
+  });
+
+  const tbody = table.createTBody();
+  rows.forEach(row => {
+    const tr = tbody.insertRow();
     visibleHeaders.forEach(h => {
-      const th = document.createElement('th');
-      th.textContent = h;
-      headerRow.appendChild(th);
+      const td = tr.insertCell();
+      const val = getVal(row, colMap, h);
+      td.textContent = val;
+      td.title = val;
+
+      // Apply wrap class to long text columns
+      if (h.toLowerCase().includes('problem') || h.toLowerCase().includes('solution')) {
+        td.classList.add('wrap');
+      }
     });
+  });
 
-    const tbody = table.createTBody();
-    rows.forEach(row => {
-      const tr = tbody.insertRow();
-      visibleHeaders.forEach(h => {
-        const td = tr.insertCell();
-        const val = getVal(row, colMap, h);
-        td.textContent = val;
-        td.title = val;
-      });
-    });
-
-    section.appendChild(table);
-  };
-
+  section.appendChild(table);
+};
+  
   try {
     // --- Power Hours ---
     const ph = await fetchSource(sources.power);
     const phMap = getColMap(ph.columns);
     const phRows = ph.rows.filter(r =>
       getVal(r, phMap, 'Employee ID').toUpperCase() === empID &&
-      getVal(r, phMap, 'Completed') === true
+      getVal(r, phMap, 'Completed').toString().toLowerCase() === 'true'
     );
     const phCount = phRows.reduce((sum, r) => sum + Number(getVal(r, phMap, 'Completed Hours') || 0), 0);
 
@@ -148,31 +179,26 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
-    // --- CI Mirror Sheet (filtered)
-    const ci = await fetchSource(sources.ci);
-    const ciMap = getColMap(ci.columns);
-    const ciRows = ci.rows.filter(r =>
-      getVal(r, ciMap, 'Employee ID').toUpperCase() === empID &&
-      getVal(r, ciMap, 'Valid Row').toLowerCase() === 'yes'
-    );
-    renderTable(ciRows, ciMap, 'ciSection', ci.columns);
+// --- CI Submissions Table (from CI Mirror Sheet) ---
+const ci = await fetchSource(sources.ci);
+const ciMap = getColMap(ci.columns);
+const ciRows = ci.rows.filter(r =>
+  getVal(r, ciMap, 'Employee ID').toUpperCase() === empID &&
+  getVal(r, ciMap, 'Valid Row').toLowerCase() === 'yes'
+);
+renderTable(ciRows, ciMap, 'ciSection', ci.columns);
 
-    // --- Safety Report (unchanged for now)
-    const safety = await fetchSource(sources.safety);
-    const safetyMap = getColMap(safety.columns);
-    const safetyRows = safety.rows.filter(r =>
-      getVal(r, safetyMap, 'Employee ID').toUpperCase() === empID
-    );
-    renderTable(safetyRows, safetyMap, 'safetySection', safety.columns);
+// --- Safety Concerns Table ---
+const safety = await fetchSource(sources.safety);
+const safetyMap = getColMap(safety.columns);
+const safetyRows = safety.rows.filter(r => getVal(r, safetyMap, 'Employee ID').toUpperCase() === empID);
+renderTable(safetyRows, safetyMap, 'safetySection', safety.columns);
 
-    // --- Quality Report (unchanged for now)
-    const qc = await fetchSource(sources.quality);
-    const qcMap = getColMap(qc.columns);
-    const qcRows = qc.rows.filter(r =>
-      getVal(r, qcMap, 'Employee ID').toUpperCase() === empID
-    );
-    renderTable(qcRows, qcMap, 'qcSection', qc.columns);
-
+// --- Quality Catches Table ---
+const qc = await fetchSource(sources.quality);
+const qcMap = getColMap(qc.columns);
+const qcRows = qc.rows.filter(r => getVal(r, qcMap, 'Employee ID').toUpperCase() === empID);
+renderTable(qcRows, qcMap, 'qcSection', qc.columns);
   } catch (err) {
     console.error("Dashboard load error:", err);
   }
