@@ -36,27 +36,32 @@ document.addEventListener("DOMContentLoaded", async () => {
     return cell ? (cell.displayValue || cell.value || '') : '';
   };
 
-  const renderTable = (rows, colMap, fields, sectionId) => {
+  const renderTableDynamic = (rows, columns, sectionId) => {
     const section = document.getElementById(sectionId);
-    section.innerHTML = "";
+    section.innerHTML = ""; // Clear previous content
+
+    const visibleCols = columns.filter(col => !col.hidden);
 
     const table = document.createElement("table");
     const thead = document.createElement("thead");
     const trHead = document.createElement("tr");
-    fields.forEach(f => {
+
+    visibleCols.forEach(col => {
       const th = document.createElement("th");
-      th.textContent = f;
+      th.textContent = col.title;
       trHead.appendChild(th);
     });
+
     thead.appendChild(trHead);
     table.appendChild(thead);
 
     const tbody = document.createElement("tbody");
     rows.forEach(r => {
       const tr = document.createElement("tr");
-      fields.forEach(f => {
+      visibleCols.forEach(col => {
         const td = document.createElement("td");
-        const val = getVal(r, colMap, f);
+        const cell = r.cells.find(c => c.columnId === col.id);
+        const val = cell ? (cell.displayValue || cell.value || '') : '';
         td.textContent = val;
         td.title = val;
         tr.appendChild(td);
@@ -65,89 +70,66 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     table.appendChild(tbody);
-    const title = document.createElement("h2");
-    title.innerHTML = {
-      ciSection: '<i class="fas fa-lightbulb"></i> CI Submissions',
-      safetySection: '<i class="fas fa-hard-hat"></i> Safety Concerns',
-      qcSection: '<i class="fas fa-bug"></i> Quality Catches'
-    }[sectionId];
-    section.appendChild(title);
     section.appendChild(table);
   };
 
   try {
-    // Fetch submissions
-    const [ci, safety, qc, level, power] = await Promise.all([
-      fetchSource(sources.ci),
-      fetchSource(sources.safety),
-      fetchSource(sources.quality),
-      fetchSource(sources.level),
-      fetchSource(sources.power)
-    ]);
-
-    const ciMap = getColMap(ci.columns);
-    const safetyMap = getColMap(safety.columns);
-    const qcMap = getColMap(qc.columns);
-    const lvlMap = getColMap(level.columns);
-    const phMap = getColMap(power.columns);
-
-    const ciRows = ci.rows.filter(r => getVal(r, ciMap, 'Employee ID').toUpperCase() === empID);
-    const safetyRows = safety.rows.filter(r => getVal(r, safetyMap, 'Employee ID').toUpperCase() === empID);
-    const qcRows = qc.rows.filter(r => getVal(r, qcMap, 'Employee ID').toUpperCase() === empID);
-    const lvlRows = level.rows.filter(r => getVal(r, lvlMap, 'Employee ID').toUpperCase() === empID);
-    const phRows = power.rows.filter(r =>
+    // --- Power Hours ---
+    const ph = await fetchSource(sources.power);
+    const phMap = getColMap(ph.columns);
+    const phRows = ph.rows.filter(r =>
       getVal(r, phMap, 'Employee ID').toUpperCase() === empID &&
       getVal(r, phMap, 'Completed') === true
     );
-
-    renderTable(ciRows, ciMap, ['Submission Date', 'CI Title', 'Category', 'Status'], 'ciSection');
-    renderTable(safetyRows, safetyMap, ['Submission Date', 'Concern Description', 'Category', 'Status'], 'safetySection');
-    renderTable(qcRows, qcMap, ['Submission Date', 'Issue Description', 'Category', 'Status'], 'qcSection');
-
-    // Sort level tracker
-    lvlRows.sort((a, b) => new Date(getVal(b, lvlMap, 'Month Key')) - new Date(getVal(a, lvlMap, 'Month Key')));
-    const latestRow = lvlRows[0] || {};
-
-    const userLevel = (getVal(latestRow, lvlMap, 'Level') || 'L1').toUpperCase();
-    const monthKey = getVal(latestRow, lvlMap, 'Month Key');
-    const tokenTotal = getVal(latestRow, lvlMap, 'Total Tokens Earned') || 0;
-
-    document.getElementById('userLevel').textContent = userLevel || 'N/A';
-    document.getElementById('tokenTotal').textContent = tokenTotal;
-    if (monthKey) {
-      document.getElementById('currentMonth').textContent = new Date(monthKey).toLocaleString('default', { month: 'long', year: 'numeric' });
-    }
-
-    const pillArea = document.getElementById('pillSummary');
-    ['Meets L1', 'Meets L2', 'Meets L3'].forEach(lvl => {
-      const pill = document.createElement('div');
-      pill.className = 'pill ' + (getVal(latestRow, lvlMap, lvl) === true ? 'green' : 'red');
-      pill.textContent = lvl;
-      pillArea.appendChild(pill);
-    });
-
-    // Fetch power hour targets
-    const targets = await fetch(`${proxyBase}/sheet/3542697273937796`).then(res => res.json());
-    const targetsMap = {};
-    const tCols = getColMap(targets.columns);
-    targets.rows.forEach(r => {
-      const lvl = getVal(r, tCols, 'Level').toUpperCase();
-      targetsMap[lvl] = {
-        min: Number(getVal(r, tCols, 'Min Hours')) || 0,
-        max: Number(getVal(r, tCols, 'Max Hours')) || 0
-      };
-    });
-
-    const { min: targetMin = 0, max: targetMax = 8 } = targetsMap[userLevel] || {};
     const phCount = phRows.reduce((sum, r) => sum + Number(getVal(r, phMap, 'Completed Hours') || 0), 0);
 
+    // --- Level Tracker ---
+    const level = await fetchSource(sources.level);
+    const lvlMap = getColMap(level.columns);
+    const lvlRows = level.rows.filter(r => getVal(r, lvlMap, 'Employee ID').toUpperCase() === empID);
+    lvlRows.sort((a, b) => new Date(getVal(b, lvlMap, 'Month Key')) - new Date(getVal(a, lvlMap, 'Month Key')));
+
+    let userLevel = 'L1';
+    let targetMin = 0;
+    let targetMax = 8;
+    let currentMonthKey = '';
+
+    if (lvlRows.length > 0) {
+      const recent = lvlRows[0];
+      userLevel = (getVal(recent, lvlMap, 'Level') || 'L1').toUpperCase();
+      currentMonthKey = getVal(recent, lvlMap, 'Month Key');
+      document.getElementById('userLevel').textContent = userLevel;
+      const month = getVal(recent, lvlMap, 'Month Key');
+      if (month) {
+        document.getElementById('currentMonth').textContent = new Date(month).toLocaleString('default', { month: 'long', year: 'numeric' });
+      }
+      document.getElementById('tokenTotal').textContent = getVal(recent, lvlMap, 'Total Tokens Earned') || 0;
+      const pillArea = document.getElementById('pillSummary');
+      ['Meets L1', 'Meets L2', 'Meets L3'].forEach((lvl) => {
+        const pill = document.createElement('div');
+        pill.className = 'pill ' + (getVal(recent, lvlMap, lvl) === true ? 'green' : 'red');
+        pill.textContent = lvl;
+        pillArea.appendChild(pill);
+      });
+    }
+
+    // --- Power Hour Targets Sheet ---
+    const targetSheet = await fetch(`${proxyBase}/sheet/3542697273937796`).then(res => res.json());
+    const ptCols = getColMap(targetSheet.columns);
+    const targetRow = targetSheet.rows.find(r => getVal(r, ptCols, 'Level').toUpperCase() === userLevel);
+    if (targetRow) {
+      targetMin = Number(getVal(targetRow, ptCols, 'Min Hours')) || 0;
+      targetMax = Number(getVal(targetRow, ptCols, 'Max Hours')) || 0;
+    }
+
+    // --- Smart Progress ---
     const currentDate = new Date();
-    const [m, y] = monthKey ? monthKey.split('/') : [currentDate.getMonth() + 1, currentDate.getFullYear()];
-    const start = new Date(`${m}/01/${y}`);
-    const end = new Date(start);
-    end.setMonth(start.getMonth() + 1);
-    end.setDate(0);
-    const daysLeft = Math.max((end - currentDate) / (1000 * 60 * 60 * 24), 0).toFixed(0);
+    const [month, year] = currentMonthKey ? currentMonthKey.split('/') : [currentDate.getMonth() + 1, currentDate.getFullYear()];
+    const monthStart = new Date(`${month}/01/${year}`);
+    const monthEnd = new Date(monthStart);
+    monthEnd.setMonth(monthStart.getMonth() + 1);
+    monthEnd.setDate(0);
+    const daysLeft = Math.max((monthEnd - currentDate) / (1000 * 60 * 60 * 24), 0).toFixed(0);
 
     const pct = targetMax > 0 ? ((phCount / targetMax) * 100).toFixed(1) : 0;
     document.getElementById('phProgress').textContent = `${phCount} / ${targetMax}`;
@@ -155,8 +137,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     bar.style.width = `${pct}%`;
     bar.style.backgroundColor =
       phCount >= targetMax ? '#22c55e' :
-      phCount >= targetMin ? '#facc15' :
-      '#f87171';
+      phCount >= targetMin ? '#facc15' : '#f87171';
 
     const smartMsg = document.getElementById('powerTips');
     if (smartMsg) {
@@ -165,14 +146,30 @@ document.addEventListener("DOMContentLoaded", async () => {
       } else if (phCount >= targetMin) {
         smartMsg.textContent = `✅ Target met! Great job.`;
       } else {
-        const remaining = (targetMin - phCount).toFixed(1);
-        smartMsg.textContent = `⏳ You need ${remaining} more hours this month. ${daysLeft} days left!`;
+        const hoursRemaining = (targetMin - phCount).toFixed(1);
+        smartMsg.textContent = `⏳ You need ${hoursRemaining} more hours this month. ${daysLeft} days left!`;
       }
     }
 
+    // --- CI Submissions Table ---
+    const ci = await fetchSource(sources.ci);
+    const ciMap = getColMap(ci.columns);
+    const ciRows = ci.rows.filter(r => getVal(r, ciMap, 'Employee ID').toUpperCase() === empID);
+    renderTableDynamic(ciRows, ci.columns, 'ciSection');
+
+    // --- Safety Concerns Table ---
+    const safety = await fetchSource(sources.safety);
+    const safetyMap = getColMap(safety.columns);
+    const safetyRows = safety.rows.filter(r => getVal(r, safetyMap, 'Employee ID').toUpperCase() === empID);
+    renderTableDynamic(safetyRows, safety.columns, 'safetySection');
+
+    // --- Quality Catches Table ---
+    const qc = await fetchSource(sources.quality);
+    const qcMap = getColMap(qc.columns);
+    const qcRows = qc.rows.filter(r => getVal(r, qcMap, 'Employee ID').toUpperCase() === empID);
+    renderTableDynamic(qcRows, qc.columns, 'qcSection');
+
   } catch (err) {
     console.error("Dashboard load error:", err);
-    const tips = document.getElementById('powerTips');
-    if (tips) tips.textContent = "⚠️ Unable to load dashboard data. Please try again later.";
   }
 });
