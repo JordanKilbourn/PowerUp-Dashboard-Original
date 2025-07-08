@@ -12,15 +12,21 @@ const style = document.createElement('style');
     color: white;
     font-size: 14px;
   }
-  .dashboard-table thead th {
-    background-color: #0f172a;
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    padding: 6px 10px;
-    white-space: normal;
-    word-break: break-word;
-  }
+  
+.dashboard-table thead th {
+  background-color: #0f172a;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 6px 10px;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: break-word;
+  max-width: 140px;
+  text-align: center;
+  font-weight: 600;
+  line-height: 1.2;
+}
   .dashboard-table tbody {
     display: block;
     max-height: 10.5em; /* ~4 rows tall */
@@ -43,7 +49,7 @@ const style = document.createElement('style');
   .dashboard-table td.wrap {
     white-space: normal;
     word-break: break-word;
-    max-width: 300px;
+    max-width: 600px;
   }
   .dashboard-table td.checkbox,
   .dashboard-table th.checkbox {
