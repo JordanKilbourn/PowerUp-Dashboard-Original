@@ -38,34 +38,38 @@ document.addEventListener("DOMContentLoaded", async () => {
     return cell ? (cell.displayValue || cell.value || '') : '';
   };
 
-  const renderTable = (rows, colMap, sectionId) => {
-    const section = document.getElementById(sectionId);
-    section.innerHTML = "";
+const renderTable = (rows, colMap, sectionId, columns) => {
+  const section = document.getElementById(sectionId);
+  section.innerHTML = "";
 
-    const headers = Object.keys(colMap).filter(k => k !== 'employee id');
-    const table = document.createElement('table');
-    const thead = table.createTHead();
-    const headerRow = thead.insertRow();
+  // Build headers using only visible columns, excluding Employee ID
+  const visibleHeaders = columns
+    .filter(c => c.hidden !== true && c.title.trim().toLowerCase() !== 'employee id')
+    .map(c => c.title.trim());
 
-    headers.forEach(h => {
-      const th = document.createElement('th');
-      th.textContent = h.replace(/(^|\s)\S/g, s => s.toUpperCase());
-      headerRow.appendChild(th);
+  const table = document.createElement('table');
+  const thead = table.createTHead();
+  const headerRow = thead.insertRow();
+
+  visibleHeaders.forEach(h => {
+    const th = document.createElement('th');
+    th.textContent = h;
+    headerRow.appendChild(th);
+  });
+
+  const tbody = table.createTBody();
+  rows.forEach(row => {
+    const tr = tbody.insertRow();
+    visibleHeaders.forEach(h => {
+      const td = tr.insertCell();
+      const val = getVal(row, colMap, h);
+      td.textContent = val;
+      td.title = val;
     });
+  });
 
-    const tbody = table.createTBody();
-    rows.forEach(row => {
-      const tr = tbody.insertRow();
-      headers.forEach(h => {
-        const td = tr.insertCell();
-        const val = getVal(row, colMap, h);
-        td.textContent = val;
-        td.title = val;
-      });
-    });
-
-    section.appendChild(table);
-  };
+  section.appendChild(table);
+};
 
   try {
     // --- Load Power Hours
@@ -146,12 +150,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // --- Dynamic Reports (CI, Safety, QC)
-    for (const key of ['ci', 'safety', 'quality']) {
-      const report = await fetchSource(sources[key]);
-      const colMap = getColMap(report.columns);
-      const rows = report.rows.filter(r => getVal(r, colMap, 'Employee ID').toUpperCase() === empID);
-      renderTable(rows, colMap, `${key}Section`);
-    }
+for (const key of ['ci', 'safety', 'quality']) {
+  const report = await fetchSource(sources[key]);
+  const colMap = getColMap(report.columns);
+  const rows = report.rows.filter(r => getVal(r, colMap, 'Employee ID').toUpperCase() === empID);
+  renderTable(rows, colMap, `${key}Section`, report.columns); // <-- pass columns
+}
 
   } catch (err) {
     console.error("Dashboard load error:", err);
