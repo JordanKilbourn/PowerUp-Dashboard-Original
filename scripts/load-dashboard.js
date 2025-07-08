@@ -106,7 +106,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const lvlRows = level.rows.filter(r => getVal(r, lvlMap, 'Employee ID').toUpperCase() === empID);
     lvlRows.sort((a, b) => new Date(getVal(b, lvlMap, 'Month Key')) - new Date(getVal(a, lvlMap, 'Month Key')));
 
-    // Step 1: Fetch Power Hour Targets
+// Step 1: Fetch Power Hour Targets
 const powerTargets = await fetch(`${proxyBase}/sheet/3542697273937796`).then(res => res.json());
 const targetMap = {};
 const ptCols = getColMap(powerTargets.columns);
@@ -128,7 +128,6 @@ if (lvlRows.length > 0) {
   const recent = lvlRows[0];
   userLevel = (getVal(recent, lvlMap, 'Level') || 'L1').toUpperCase();
   currentMonthKey = getVal(recent, lvlMap, 'Month Key');
-
   const target = targetMap[userLevel];
   if (target) {
     targetMin = target.min;
@@ -140,21 +139,32 @@ if (lvlRows.length > 0) {
 const currentDate = new Date();
 const [month, year] = currentMonthKey ? currentMonthKey.split('/') : [currentDate.getMonth() + 1, currentDate.getFullYear()];
 const monthStart = new Date(`${month}/01/${year}`);
-const nextMonth = new Date(monthStart);
-nextMonth.setMonth(monthStart.getMonth() + 1);
-nextMonth.setDate(0); // Last day of the month
-const daysLeft = Math.max((nextMonth - currentDate) / (1000 * 60 * 60 * 24), 0).toFixed(0);
-const hoursRemaining = Math.max(targetMin - phCount, 0);
-const pct = ((phCount / targetMax) * 100).toFixed(1);
+const monthEnd = new Date(monthStart);
+monthEnd.setMonth(monthStart.getMonth() + 1);
+monthEnd.setDate(0);
+const daysLeft = Math.max((monthEnd - currentDate) / (1000 * 60 * 60 * 24), 0).toFixed(0);
 
-// Step 4: Update progress bar and message
+const pct = targetMax > 0 ? ((phCount / targetMax) * 100).toFixed(1) : 0;
 document.getElementById('phProgress').textContent = `${phCount} / ${targetMax}`;
 const bar = document.getElementById('progressBar');
 bar.style.width = `${pct}%`;
 bar.style.backgroundColor =
-  pct >= 100 ? '#22c55e' : // green
-  pct >= 50  ? '#facc15' : // yellow
-               '#f87171';  // red
+  phCount >= targetMax ? '#22c55e' : // over max
+  phCount >= targetMin ? '#facc15' : // between min and max
+                          '#f87171'; // below min
+
+// Step 4: Smart message
+const smartMsg = document.getElementById('powerTips');
+if (smartMsg) {
+  if (phCount >= targetMax) {
+    smartMsg.textContent = `✅ You've exceeded your target! Keep it up.`;
+  } else if (phCount >= targetMin) {
+    smartMsg.textContent = `✅ Target met! Great job.`;
+  } else {
+    const hoursRemaining = (targetMin - phCount).toFixed(1);
+    smartMsg.textContent = `⏳ You need ${hoursRemaining} more hours this month. ${daysLeft} days left!`;
+  }
+}
 
 // Optional: Smart guidance message
 const smartMsg = document.getElementById('powerTips');
