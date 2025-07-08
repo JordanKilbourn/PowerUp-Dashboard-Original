@@ -150,7 +150,6 @@
     }
     document.getElementById('userName').textContent = displayName || empID;
 
-    // Highlight active sidebar link
     const path = window.location.pathname.split("/").pop().toLowerCase();
     document.querySelectorAll(".sidebar a[href]").forEach(link => {
       if (link.getAttribute("href").toLowerCase() === path) {
@@ -166,37 +165,45 @@
       .then(res => res.json())
       .then(sheet => {
         const colMap = {};
-        sheet.columns.forEach(c => colMap[c.title.trim().toLowerCase()] = c.id);
+        sheet.columns.forEach(col => {
+          colMap[col.title.trim().toLowerCase()] = col.id;
+        });
 
         const getVal = (row, colTitle) => {
-          const cell = row.cells.find(c => c.columnId === colMap[colTitle.toLowerCase()]);
+          const id = colMap[colTitle.trim().toLowerCase()];
+          const cell = row.cells.find(c => c.columnId === id);
           return cell ? (cell.displayValue ?? cell.value ?? '') : '';
         };
 
-        const rows = sheet.rows.filter(r =>
-          getVal(r, 'Employee ID')?.toString().toUpperCase() === empID
-        );
+        const matchingRows = sheet.rows.filter(r => {
+          const rawID = getVal(r, 'employee id');
+          return rawID?.toString().toUpperCase() === empID;
+        });
 
-        tbody.innerHTML = rows.length === 0
+        console.log('All rows:', sheet.rows);
+        console.log('Matching Power Hours rows:', matchingRows);
+        console.log('Filtering for empID:', empID);
+
+        tbody.innerHTML = matchingRows.length === 0
           ? '<tr><td colspan="8">No matching Power Hours records found.</td></tr>'
           : '';
 
         let totalHours = 0;
 
-        rows.forEach(r => {
+        matchingRows.forEach(r => {
           const tr = document.createElement('tr');
-          const completedHours = parseFloat(getVal(r, 'Completed Hours')) || 0;
+          const completedHours = parseFloat(getVal(r, 'completed hours')) || 0;
           totalHours += completedHours;
 
           const values = [
-            getVal(r, 'Power Hour ID'),
-            getVal(r, 'Date'),
-            getVal(r, 'Start Time'),
-            getVal(r, 'End Time'),
-            getVal(r, 'Scheduled') === true ? '✔️' : '❌',
-            getVal(r, 'Completed') === true ? '✔️' : '❌',
+            getVal(r, 'power hour id'),
+            getVal(r, 'date'),
+            getVal(r, 'start time'),
+            getVal(r, 'end time'),
+            getVal(r, 'scheduled') === true ? '✔️' : '❌',
+            getVal(r, 'completed') === true ? '✔️' : '❌',
             completedHours,
-            getVal(r, 'Activity Description')
+            getVal(r, 'activity description')
           ];
 
           values.forEach(val => {
@@ -209,7 +216,6 @@
           tbody.appendChild(tr);
         });
 
-        // Display total
         const hoursDisplay = document.getElementById("hoursTally");
         hoursDisplay.textContent = `Total Power Hours Logged: ${totalHours}`;
         sessionStorage.setItem("totalPowerHoursLogged", totalHours);
@@ -220,6 +226,6 @@
       });
   });
 </script>
-
+  
 </body>
 </html>
