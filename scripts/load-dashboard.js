@@ -1,25 +1,66 @@
 document.addEventListener("DOMContentLoaded", async () => {
 const style = document.createElement('style');
-  style.textContent = `
-    .scroll-table {
-      max-height: 11em;
-      overflow-y: auto;
-    }
-    .scroll-table table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .scroll-table th, .scroll-table td {
-      padding: 6px 10px;
-      text-align: left;
-      white-space: nowrap;
-    }
-    .scroll-table td.wrap {
-      white-space: normal;
-      word-break: break-word;
-      max-width: 300px;
-    }
-  `;
+ style.textContent = `
+  .dashboard-table-container {
+    margin-bottom: 24px;
+    overflow-x: auto;
+  }
+  .dashboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #1e293b;
+    color: white;
+    font-size: 14px;
+  }
+  .dashboard-table thead th {
+    background-color: #0f172a;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 6px 10px;
+    white-space: normal;
+    word-break: break-word;
+  }
+  .dashboard-table tbody {
+    display: block;
+    max-height: 10.5em; /* ~4 rows tall */
+    overflow-y: auto;
+  }
+  .dashboard-table thead,
+  .dashboard-table tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+  .dashboard-table td {
+    padding: 6px 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: top;
+    border: 1px solid #334155;
+  }
+  .dashboard-table td.wrap {
+    white-space: normal;
+    word-break: break-word;
+    max-width: 300px;
+  }
+  .dashboard-table td.checkbox,
+  .dashboard-table th.checkbox {
+    width: 60px;
+    text-align: center;
+  }
+  .dashboard-table tbody::-webkit-scrollbar {
+    width: 6px;
+  }
+  .dashboard-table tbody::-webkit-scrollbar-thumb {
+    background-color: #64748b;
+    border-radius: 3px;
+  }
+  .dashboard-table tbody::-webkit-scrollbar-track {
+    background: transparent;
+  }
+`;
   document.head.appendChild(style);
 
   const empID = (sessionStorage.getItem('empID') || '').toUpperCase().trim();
@@ -64,7 +105,9 @@ const style = document.createElement('style');
 const renderTable = (rows, colMap, sectionId, columns) => {
   const section = document.getElementById(sectionId);
   section.innerHTML = "";
-  section.classList.add('scroll-table');
+
+  const container = document.createElement('div');
+  container.className = 'dashboard-table-container';
 
   // Exclude unwanted columns
   const excludedCols = ['employee id', 'valid row', 'submitted by'];
@@ -73,34 +116,49 @@ const renderTable = (rows, colMap, sectionId, columns) => {
     .map(c => c.title.trim());
 
   const table = document.createElement('table');
-  const thead = table.createTHead();
-  const headerRow = thead.insertRow();
+  table.className = 'dashboard-table';
 
+  // Build thead
+  const thead = document.createElement('thead');
+  const headerRow = document.createElement('tr');
   visibleHeaders.forEach(h => {
     const th = document.createElement('th');
     th.textContent = h;
+    if (h.toLowerCase().includes('checkbox') || h.toLowerCase().includes('resourced')) {
+      th.classList.add('checkbox');
+    }
     headerRow.appendChild(th);
   });
+  thead.appendChild(headerRow);
 
-  const tbody = table.createTBody();
+  // Build tbody
+  const tbody = document.createElement('tbody');
   rows.forEach(row => {
-    const tr = tbody.insertRow();
+    const tr = document.createElement('tr');
     visibleHeaders.forEach(h => {
-      const td = tr.insertCell();
+      const td = document.createElement('td');
       const val = getVal(row, colMap, h);
       td.textContent = val;
       td.title = val;
 
-      // Apply wrap class to long text columns
       if (h.toLowerCase().includes('problem') || h.toLowerCase().includes('solution')) {
         td.classList.add('wrap');
       }
+
+      if (h.toLowerCase().includes('checkbox') || h.toLowerCase().includes('resourced')) {
+        td.classList.add('checkbox');
+      }
+
+      tr.appendChild(td);
     });
+    tbody.appendChild(tr);
   });
 
-  section.appendChild(table);
+  table.appendChild(thead);
+  table.appendChild(tbody);
+  container.appendChild(table);
+  section.appendChild(container);
 };
-  
   try {
     // --- Power Hours ---
     const ph = await fetchSource(sources.power);
