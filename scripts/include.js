@@ -1,22 +1,35 @@
-// /scripts/include.js
 function includeHTML(callback) {
-  const includes = document.querySelectorAll('[w3-include-html]');
-  let remaining = includes.length;
+  const elements = document.querySelectorAll('[w3-include-html]');
+  let remaining = elements.length;
 
-  if (remaining === 0 && typeof callback === "function") callback();
+  if (remaining === 0 && typeof callback === 'function') {
+    callback();
+    return;
+  }
 
-  includes.forEach(async (el) => {
+  elements.forEach(el => {
     const file = el.getAttribute("w3-include-html");
-    try {
-      const res = await fetch(file);
-      if (!res.ok) throw new Error(`Missing include: ${file}`);
-      el.innerHTML = await res.text();
-    } catch (e) {
-      console.error(e);
-    }
-
-    remaining--;
-    if (remaining === 0 && typeof callback === "function") callback();
+    fetch(file)
+      .then(response => {
+        if (!response.ok) throw new Error(`Failed to load ${file}`);
+        return response.text();
+      })
+      .then(data => {
+        el.innerHTML = data;
+        el.removeAttribute("w3-include-html");
+        remaining--;
+        if (remaining === 0 && typeof callback === 'function') {
+          callback();
+        }
+      })
+      .catch(err => {
+        console.error("Include error:", err);
+        el.innerHTML = "<!-- Failed to load include -->";
+        remaining--;
+        if (remaining === 0 && typeof callback === 'function') {
+          callback();
+        }
+      });
   });
 }
 
