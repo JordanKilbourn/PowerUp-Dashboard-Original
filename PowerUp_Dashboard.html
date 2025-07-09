@@ -6,12 +6,21 @@
   <title>Dashboard | PowerUp</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
   <link rel="stylesheet" href="/styles/powerup.css">
 </head>
 <body>
   
-<div w3-include-html="/components/sidebar.html" id="sidebar-wrapper"></div>
-<div w3-include-html="/components/header.html"></div>
+<div w3-include-html="/components/sidebar.html"></div>
+
+<header>
+  <div class="header-left">
+    <span><strong>Welcome:</strong> <span id="userGreeting">User</span></span>
+    <span><strong>Month:</strong> <span id="currentMonth"></span></span>
+    <span><strong>Current Level:</strong> <span class="level-tag" id="userLevel">Loading...</span></span>
+  </div>
+  <h1>PowerUp Dashboard</h1>
+</header>
 
 <div class="container">
   <div class="dashboard-header">
@@ -30,35 +39,10 @@
 </div>
 
 <!-- Sidebar Highlight & Logout Behavior -->
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const path = window.location.pathname.split("/").pop().toLowerCase();
-    document.querySelectorAll(".sidebar a[href]").forEach(link => {
-      const href = link.getAttribute("href").toLowerCase();
-      if (href === path) {
-        link.classList.add("active");
-      }
-    });
-  });
-
-  function toggleSidebar() {
-    document.getElementById("sidebar").classList.toggle("open");
-  }
-
-  function logout() {
-    if (confirm("Are you sure you want to log out?")) {
-      sessionStorage.clear();
-      window.location.href = "index.html";
-    }
-  }
-</script>
-
+<script src="/scripts/load-dashboard.js"></script>
 <script src="/scripts/include.js"></script>
 <script>
   includeHTML(() => {
-    const titleEl = document.getElementById("pageTitle");
-    if (titleEl) titleEl.textContent = "PowerUp Dashboard";
-
     // Sidebar Highlight
     const path = window.location.pathname.split("/").pop().toLowerCase();
     document.querySelectorAll(".sidebar a[href]").forEach(link => {
@@ -78,19 +62,11 @@
         window.location.href = "index.html";
       }
     };
-
-    // ✅ Now actually load the dashboard logic file (in a RELIABLE way)
-    const dashboardScript = document.createElement('script');
-    dashboardScript.src = "/scripts/load-dashboard.js";
-    dashboardScript.onload = () => {
-      console.log("[Debug] load-dashboard.js successfully loaded.");
-    };
-    document.body.appendChild(dashboardScript);
   });
 </script>
 
-  
 </body>
 </html>
+
 
 
