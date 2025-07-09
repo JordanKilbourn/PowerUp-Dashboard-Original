@@ -54,13 +54,38 @@
 </script>
 
 <script src="/scripts/include.js"></script>
-<script src="/scripts/load-dashboard.js" defer></script>
 <script>
   includeHTML(() => {
     const titleEl = document.getElementById("pageTitle");
     if (titleEl) titleEl.textContent = "PowerUp Dashboard";
+
+    // Sidebar Highlight
+    const path = window.location.pathname.split("/").pop().toLowerCase();
+    document.querySelectorAll(".sidebar a[href]").forEach(link => {
+      const href = link.getAttribute("href").toLowerCase();
+      if (href === path) {
+        link.classList.add("active");
+      }
+    });
+
+    // Enable toggle + logout
+    window.toggleSidebar = () => {
+      document.getElementById("sidebar").classList.toggle("open");
+    };
+    window.logout = () => {
+      if (confirm("Are you sure you want to log out?")) {
+        sessionStorage.clear();
+        window.location.href = "index.html";
+      }
+    };
+
+    // ✅ Only now, after includes are loaded, load dashboard logic
+    const script = document.createElement('script');
+    script.src = '/scripts/load-dashboard.js';
+    document.body.appendChild(script);
   });
 </script>
+
 
 </body>
 </html>
