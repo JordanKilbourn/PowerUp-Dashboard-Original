@@ -97,7 +97,7 @@
         document.getElementById('userGreeting').textContent = displayName;
         document.getElementById('userLevel').textContent = get(rows[0], 'Level') || 'N/A';
         const monthKey = get(rows[0], 'Month Key');
-        document.getElementById('monthText').textContent = monthKey
+        document.getElementById('currentMonth').textContent = monthKey
           ? new Date(monthKey).toLocaleString('default', { month: 'long', year: 'numeric' })
           : 'Unknown';
 
