@@ -57,6 +57,9 @@
 <script src="/scripts/include.js"></script>
 <script>
   includeHTML(() => {
+   const titleEl = document.getElementById("pageTitle");
+   if (titleEl) titleEl.textContent = "PowerUp Dashboard";
+
     // Sidebar Highlight
     const path = window.location.pathname.split("/").pop().toLowerCase();
     document.querySelectorAll(".sidebar a[href]").forEach(link => {
