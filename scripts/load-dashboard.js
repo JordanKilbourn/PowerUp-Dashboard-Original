@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", async () => {
 const style = document.createElement('style');
+ console.log("[Debug] load-dashboard.js is executing");
  style.textContent = `
   .dashboard-table-container {
     margin-bottom: 24px;
