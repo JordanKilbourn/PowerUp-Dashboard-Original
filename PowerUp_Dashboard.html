@@ -79,14 +79,17 @@
       }
     };
 
-    // ✅ Only now, after includes are loaded, load dashboard logic
-    const script = document.createElement('script');
-    script.src = '/scripts/load-dashboard.js';
-    document.body.appendChild(script);
+    // ✅ Now actually load the dashboard logic file (in a RELIABLE way)
+    const dashboardScript = document.createElement('script');
+    dashboardScript.src = "/scripts/load-dashboard.js";
+    dashboardScript.onload = () => {
+      console.log("[Debug] load-dashboard.js successfully loaded.");
+    };
+    document.body.appendChild(dashboardScript);
   });
 </script>
 
-
+  
 </body>
 </html>
 
