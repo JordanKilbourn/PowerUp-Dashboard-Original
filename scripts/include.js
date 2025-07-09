@@ -1,12 +1,15 @@
 // /scripts/include.js
 document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll('[data-include]').forEach(async el => {
-    const file = el.getAttribute('data-include');
-    const res = await fetch(file);
-    if (res.ok) {
+  const includes = document.querySelectorAll('[id]');
+  includes.forEach(async (el) => {
+    const file = `/components/${el.id}.html`;
+    try {
+      const res = await fetch(file);
+      if (!res.ok) throw new Error(`Missing include: ${file}`);
       el.innerHTML = await res.text();
-    } else {
-      el.innerHTML = `<p>Failed to load ${file}</p>`;
+    } catch (e) {
+      console.error(e);
     }
   });
 });
+
