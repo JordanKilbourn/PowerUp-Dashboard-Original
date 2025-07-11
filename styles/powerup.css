@@ -118,11 +118,24 @@ h2 {
   max-height: 300px;
   overflow-y: auto;
   position: relative;
-  scrollbar-width: none;
+  scrollbar-width: none; /* Firefox */
 }
 .dashboard-table-container::-webkit-scrollbar {
   width: 0;
   height: 0;
+  background: transparent;
+}
+
+/* Optional: smoother dark-themed scrollbars (for inner tbody) */
+.dashboard-table tbody::-webkit-scrollbar {
+  width: 6px;
+}
+.dashboard-table tbody::-webkit-scrollbar-thumb {
+  background-color: #334155;
+  border-radius: 3px;
+}
+.dashboard-table tbody::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .dashboard-table {
