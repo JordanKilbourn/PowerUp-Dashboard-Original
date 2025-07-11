@@ -187,3 +187,36 @@ td.check-cell {
   .sidebar.open { width: 100%; position: relative; height: auto; }
   table, th, td { font-size: 13px; }
 }
+
+.collapsible-section .collapsible-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+
+.collapsible-section.open .collapsible-body {
+  max-height: 500px; /* adjust this if needed */
+}
+
+.collapsible-header {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  color: #facc15;
+  transition: color 0.3s ease;
+}
+
+.collapsible-header:hover {
+  color: #fde047;
+}
+
+.rotate-icon {
+  transition: transform 0.3s ease;
+}
+
+.collapsible-section.open .rotate-icon {
+  transform: rotate(90deg);
+}
+
