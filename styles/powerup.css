@@ -131,49 +131,30 @@ h2 {
   table-layout: fixed;
   border-radius: 8px;
   overflow: hidden;
-}
-
-.dashboard-table thead {
-  display: table;
-  width: 100%;
-  table-layout: fixed;
-}
-
-.dashboard-table tbody {
-  display: block;
-  max-height: 250px;
-  overflow-y: auto;
-}
-
-.dashboard-table tbody::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-}
-
-.dashboard-table tr {
-  display: table;
-  width: 100%;
-  table-layout: fixed;
+  background-color: #1e293b;
+  font-size: 14px;
+  color: white;
 }
 
 .dashboard-table th {
-  background: #1e293b;
-  color: #fcd34d;
-  font-size: 13px;
-  padding: 10px 8px;
-  text-transform: uppercase;
-  font-weight: 600;
-  line-height: 1.3;
-  word-break: break-word;
-  white-space: normal;
-  text-align: left;
   position: sticky;
   top: 0;
+  background: #0f172a;
+  color: #fcd34d;
+  font-size: 13px;
+  padding: 6px 10px;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  max-width: 140px;
+  text-align: center;
+  font-weight: 600;
+  line-height: 1.2;
   z-index: 2;
 }
 
 .dashboard-table td {
-  padding: 10px 8px;
+  padding: 6px 10px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -182,13 +163,25 @@ h2 {
   border-bottom: 1px solid #334155;
 }
 
-/* Alternating rows */
-.dashboard-table tr:nth-child(even) { background: #1c2237; }
-.dashboard-table tr:nth-child(odd) { background: #141b2d; }
-.dashboard-table tr:hover { background: rgba(255,255,255,0.05); }
+.dashboard-table tr:nth-child(even) {
+  background: #1c2237;
+}
+.dashboard-table tr:nth-child(odd) {
+  background: #141b2d;
+}
+.dashboard-table tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
 
-.checkmark { color: #4ade80; font-weight: bold; }
-.cross { color: #f87171; font-weight: bold; }
+.checkmark {
+  color: #4ade80;
+  font-weight: bold;
+}
+.cross {
+  color: #f87171;
+  font-weight: bold;
+}
+
 
 /* ================= COLLAPSIBLES ================= */
 .collapsible-header {
