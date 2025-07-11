@@ -127,20 +127,21 @@ function renderTable(sheet, containerId, title) {
     return;
   }
 
-  // Define checkbox columns
   const checkboxCols = ["Resourced", "Paid", "Project Work Completed"];
   const excludeCols = ["Submitted By", "Valid Row", "Employee ID"];
-
   const visibleCols = sheet.columns.filter(c =>
     !c.hidden && !excludeCols.includes(c.title.trim())
   );
 
-  // Build HTML table
-  let html = `<div class="dashboard-table-container"><table class="dashboard-table"><thead><tr>`;
+  let html = `<table class="dashboard-table">
+    <thead>
+      <tr>`;
   visibleCols.forEach(c => {
     html += `<th>${c.title}</th>`;
   });
-  html += "</tr></thead><tbody>";
+  html += `</tr>
+    </thead>
+    <tbody class="dashboard-table-body">`;
 
   rows.forEach(r => {
     html += "<tr>";
@@ -163,7 +164,8 @@ function renderTable(sheet, containerId, title) {
     html += "</tr>";
   });
 
-  html += "</tbody></table></div>";
+  html += `</tbody></table>`;
   container.innerHTML = html;
 }
+
 
