@@ -11,8 +11,8 @@
 </head>
 <body>
   
-<div w3-include-html="/components/sidebar.html"></div>
-<div w3-include-html="/components/header.html"></div>
+<div id="sidebar"></div>
+<div id="header"></div>
 
 <div class="container">
   <div class="dashboard-header">
@@ -32,10 +32,10 @@
 
 <!-- Sidebar Highlight & Logout Behavior -->
 <script src="/scripts/load-dashboard.js"></script>
+  
 <script src="/scripts/include.js"></script>
 <script>
-  includeHTML(() => {
-    // Sidebar Highlight
+  includeComponents(() => {
     const path = window.location.pathname.split("/").pop().toLowerCase();
     document.querySelectorAll(".sidebar a[href]").forEach(link => {
       const href = link.getAttribute("href").toLowerCase();
@@ -44,10 +44,10 @@
       }
     });
 
-    // Enable toggle + logout
     window.toggleSidebar = () => {
       document.getElementById("sidebar").classList.toggle("open");
     };
+
     window.logout = () => {
       if (confirm("Are you sure you want to log out?")) {
         sessionStorage.clear();
