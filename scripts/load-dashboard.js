@@ -26,9 +26,9 @@ function loadDashboard() {
     .then(([level, hours, ci, safety, qc]) => {
       updateLevelInfo(level);
       updatePowerHours(hours);
-renderTable(ci, "ciContent", "CI Submissions");
-renderTable(safety, "safetyContent", "Safety Concerns");
-renderTable(qc, "qcContent", "Quality Catches");
+      renderTable(ci, "ciContent", "CI Submissions");
+      renderTable(safety, "safetyContent", "Safety Concerns");
+      renderTable(qc, "qcContent", "Quality Catches");
     })
     .catch(err => {
       console.error("Failed to load dashboard data:", err);
@@ -44,7 +44,6 @@ function updateLevelInfo(sheet) {
 
   if (rows.length === 0) return;
 
-  // Grab latest row (sorted by Month Key)
   const latest = rows.sort((a, b) =>
     new Date(b.cells[0].value) - new Date(a.cells[0].value)
   )[0];
@@ -61,7 +60,6 @@ function updateLevelInfo(sheet) {
     ? new Date(monthKey).toLocaleString("default", { month: "long", year: "numeric" })
     : "Unknown";
 
-  // Store in session + update UI
   sessionStorage.setItem("currentLevel", level);
   sessionStorage.setItem("currentMonth", monthStr);
 
@@ -91,18 +89,14 @@ function updatePowerHours(sheet) {
   phEl.textContent = `${totalHours.toFixed(1)} / 8`;
   barEl.style.width = `${Math.min((totalHours / 8) * 100, 100)}%`;
 
-  if (totalHours >= 8) {
-    tipsEl.textContent = "Target met! Great job!";
-  } else {
-    const remaining = (8 - totalHours).toFixed(1);
-    tipsEl.textContent = `You're ${remaining} hour(s) away from your monthly goal.`;
-  }
+  tipsEl.textContent = totalHours >= 8
+    ? "Target met! Great job!"
+    : `You're ${(8 - totalHours).toFixed(1)} hour(s) away from your monthly goal.`;
 
-  // Save to session if needed by other pages
   sessionStorage.setItem("powerHours", totalHours.toFixed(1));
 }
 
-// 🧾 Basic table rendering logic
+// 🧾 Basic table rendering logic (✅ FIXED)
 function renderTable(sheet, containerId, title) {
   const empID = sessionStorage.getItem("empID");
   const container = document.getElementById(containerId);
@@ -133,7 +127,7 @@ function renderTable(sheet, containerId, title) {
     !c.hidden && !excludeCols.includes(c.title.trim())
   );
 
-  let html = `<table class="dashboard-table">
+  let html = `<div class="dashboard-table-container"><table class="dashboard-table">
     <thead>
       <tr>`;
   visibleCols.forEach(c => {
@@ -164,8 +158,6 @@ function renderTable(sheet, containerId, title) {
     html += "</tr>";
   });
 
-  html += `</tbody></table>`;
+  html += `</tbody></table></div>`;
   container.innerHTML = html;
 }
-
-
