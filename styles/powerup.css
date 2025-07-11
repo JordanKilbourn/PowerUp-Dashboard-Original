@@ -117,6 +117,7 @@ h2 {
 .dashboard-table-container {
   max-height: 300px;
   overflow-y: auto;
+  position: relative;
   scrollbar-width: none;
 }
 .dashboard-table-container::-webkit-scrollbar {
@@ -222,8 +223,6 @@ h2 {
 .collapsible-body {
   margin-top: 10px;
   display: none;
-  overflow-y: auto;       /* ✅ Allows sticky headers to work */
-  max-height: 300px;      /* ✅ Scroll container with fixed height */
 }
 
 /* ================= LEVEL TRACKER ================= */
