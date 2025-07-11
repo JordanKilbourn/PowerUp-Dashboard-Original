@@ -28,36 +28,31 @@
       <div class="token-tracker">Tokens Earned: <strong id="tokenTotal">0</strong></div>
     </div>
 
-    <!-- CI Section -->
-    <div class="section collapsible-section">
-      <h2 class="collapsible-header">
-        <i class="fas fa-chevron-right rotate-icon"></i> CI Submissions
-      </h2>
-      <div class="collapsible-body">
-        <div class="dashboard-table-container" id="ciSection"></div>
-      </div>
-    </div>
+<!-- Accordion Section - "CI"-->
+<div class="accordion">
+  <div class="accordion-item">
+    <h2 class="accordion-header" data-target="ciContent">
+      <i class="fas fa-chevron-right rotate-icon"></i> CI Submissions
+    </h2>
+    <div class="accordion-content" id="ciContent"></div>
+  </div>
 
-    <!-- Safety Section -->
-    <div class="section collapsible-section">
-      <h2 class="collapsible-header">
-        <i class="fas fa-chevron-right rotate-icon"></i> Safety Concerns
-      </h2>
-      <div class="collapsible-body">
-        <div class="dashboard-table-container" id="safetySection"></div>
-      </div>
-    </div>
+    <!-- Safety Section - "Safety"-->
+ <div class="accordion-item">
+    <h2 class="accordion-header" data-target="safetyContent">
+      <i class="fas fa-chevron-right rotate-icon"></i> Safety Concerns
+    </h2>
+    <div class="accordion-content" id="safetyContent"></div>
+  </div>
 
     <!-- Quality Section -->
-    <div class="section collapsible-section">
-      <h2 class="collapsible-header">
-        <i class="fas fa-chevron-right rotate-icon"></i> Quality Catches
-      </h2>
-      <div class="collapsible-body">
-        <div class="dashboard-table-container" id="qcSection"></div>
-      </div>
-    </div>
+  <div class="accordion-item">
+    <h2 class="accordion-header" data-target="qcContent">
+      <i class="fas fa-chevron-right rotate-icon"></i> Quality Catches
+    </h2>
+    <div class="accordion-content" id="qcContent"></div>
   </div>
+</div>
 
   <!-- Script Loading -->
   <script src="/scripts/include.js"></script>
