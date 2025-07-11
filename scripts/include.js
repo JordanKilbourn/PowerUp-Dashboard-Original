@@ -1,24 +1,28 @@
-// /scripts/include.js
-function includeHTML(callback) {
-  const includes = document.querySelectorAll('[w3-include-html]');
-  let remaining = includes.length;
+function includeComponents(callback) {
+  const includeTargets = [
+    { id: "sidebar", path: "/components/sidebar.html" },
+    { id: "header", path: "/components/header.html" },
+    { id: "footer", path: "/components/footer.html" } // optional
+  ];
 
-  if (remaining === 0 && typeof callback === "function") callback();
+  let remaining = includeTargets.length;
 
-  includes.forEach(async (el) => {
-    const file = el.getAttribute("w3-include-html");
-    try {
-      const res = await fetch(file);
-      if (!res.ok) throw new Error(`Missing include: ${file}`);
-      el.innerHTML = await res.text();
-    } catch (e) {
-      console.error(e);
-    }
+  includeTargets.forEach(({ id, path }) => {
+    const el = document.getElementById(id);
+    if (!el) return;
 
-    remaining--;
-    if (remaining === 0 && typeof callback === "function") callback();
+    fetch(path)
+      .then(res => {
+        if (!res.ok) throw new Error(`Failed to load: ${path}`);
+        return res.text();
+      })
+      .then(html => {
+        el.innerHTML = html;
+        if (--remaining === 0 && typeof callback === "function") callback();
+      })
+      .catch(err => {
+        console.error(`Error including ${id}:`, err);
+        if (--remaining === 0 && typeof callback === "function") callback();
+      });
   });
 }
-
-
-
