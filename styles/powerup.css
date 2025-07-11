@@ -250,3 +250,55 @@ h2 {
   .sidebar.open { width: 100%; position: relative; height: auto; }
   table, th, td { font-size: 13px; }
 }
+
+
+.accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.accordion-item {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+}
+
+.accordion-header {
+  background: #1e293b;
+  color: #fcd34d;
+  padding: 14px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.2s ease;
+}
+
+.accordion-header:hover {
+  background: #2c354b;
+}
+
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  padding: 0 20px;
+}
+
+.accordion-item.open .accordion-content {
+  max-height: 1000px;
+  padding: 16px 20px;
+}
+
+.accordion-item.open .rotate-icon {
+  transform: rotate(90deg);
+}
+
+.rotate-icon {
+  transition: transform 0.3s ease;
+}
