@@ -37,14 +37,16 @@
   <script src="/scripts/include.js"></script>
   <script src="/scripts/session.js"></script>
   <script src="/scripts/load-dashboard.js"></script>
-  <script>
-    window.addEventListener("DOMContentLoaded", () => {
-      loadComponents().then(() => {
-        initializeSession();
-        loadDashboard(); // your main dashboard data logic
-      });
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    loadComponents().then(() => {
+      initializeSession();
+      setupSidebarBehavior(); // ⬅️ this is the NEW line
+      loadDashboard();
     });
-  </script>
+  });
+</script>
+
 </body>
 </html>
 
