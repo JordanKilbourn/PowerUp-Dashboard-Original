@@ -4,22 +4,24 @@ function loadDashboard() {
   const empID = sessionStorage.getItem("empID");
   if (!empID) return;
 
-  const levelSheet = '8346763116105604';       // Level Tracker
-  const hoursSheet = '1240392906264452';       // Power Hours
-  const ciSheet = '6584024920182660';          // CI Submissions
-  const safetySheet = '4089265651666820';       // Safety Concerns
-  const qcSheet = '1431258165890948';           // Quality Catches
+  // Sheet and report IDs
+  const levelSheet = '8346763116105604';        // Level Tracker (sheet)
+  const hoursSheet = '1240392906264452';        // Power Hours (sheet)
+  const ciSheet = '7397205473185668';           // ✅ CI Submission Mirror (sheet)
+  const safetySheet = '4089265651666820';        // Safety Concerns (report)
+  const qcSheet = '1431258165890948';            // Quality Catches (report)
 
-  const proxy = 'https://powerup-proxy.onrender.com/sheet';
+  const proxy = 'https://powerup-proxy.onrender.com';
 
-  const loadSheet = (id) => fetch(`${proxy}/${id}`).then(res => res.json());
+  const loadSheet = (id, type = 'sheet') =>
+    fetch(`${proxy}/${type}/${id}`).then(res => res.json());
 
   Promise.all([
     loadSheet(levelSheet),
     loadSheet(hoursSheet),
-    loadSheet(ciSheet),
-    loadSheet(safetySheet),
-    loadSheet(qcSheet)
+    loadSheet(ciSheet, 'sheet'),
+    loadSheet(safetySheet, 'report'),
+    loadSheet(qcSheet, 'report')
   ])
     .then(([level, hours, ci, safety, qc]) => {
       updateLevelInfo(level);
@@ -115,13 +117,10 @@ function renderTable(sheet, containerId, title) {
     return cell?.displayValue || cell?.value || '';
   };
 
-console.log(`[${title}] Sheet received with ${sheet.rows.length} rows`);
-console.log(`[${title}] Columns:`, sheet.columns.map(c => c.title));
-
-const rows = sheet.rows.filter(r => {
-  const idVal = get(r, "Employee ID");
-  return idVal && idVal.toString().toUpperCase() === empID;
-});
+  const rows = sheet.rows.filter(r => {
+    const idVal = get(r, "Employee ID");
+    return idVal && idVal.toString().toUpperCase() === empID;
+  });
 
   if (rows.length === 0) {
     container.innerHTML = `<h2>${title}</h2><p>No records found.</p>`;
