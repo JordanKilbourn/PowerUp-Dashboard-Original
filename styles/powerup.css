@@ -116,13 +116,22 @@ h2 {
 
 /* Outer container scrolls table body */
 .dashboard-table-container {
+  max-height: 240px; /* 👈 Adjust this height as needed */
+  overflow-y: auto;
   position: relative;
-  scrollbar-width: none;          /* Firefox */
-  -ms-overflow-style: none;       /* IE/Edge */
+  padding-right: 4px; /* optional spacing for scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: #334155 transparent;
 }
+
 .dashboard-table-container::-webkit-scrollbar {
-  width: 0;
-  height: 0;
+  width: 6px;
+}
+.dashboard-table-container::-webkit-scrollbar-thumb {
+  background-color: #334155;
+  border-radius: 4px;
+}
+.dashboard-table-container::-webkit-scrollbar-track {
   background: transparent;
 }
 
