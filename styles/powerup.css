@@ -203,11 +203,16 @@ h2 {
   transform: rotate(90deg);
 }
 .collapsible-body {
-  margin-top: 10px;
-  display: none;
   max-height: 300px;
   overflow-y: auto;
   position: relative;
+  margin-top: 10px;
+  display: none;
+  padding-right: 2px; /* For scroll gap */
+}
+
+.collapsible-section.open .collapsible-body {
+  display: block;
 }
 
 /* ================= LEVEL TRACKER ================= */
