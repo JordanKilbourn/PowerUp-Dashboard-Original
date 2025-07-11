@@ -222,6 +222,8 @@ h2 {
 .collapsible-body {
   margin-top: 10px;
   display: none;
+  overflow-y: auto;       /* ✅ Allows sticky headers to work */
+  max-height: 300px;      /* ✅ Scroll container with fixed height */
 }
 
 /* ================= LEVEL TRACKER ================= */
