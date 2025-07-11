@@ -26,9 +26,9 @@ function loadDashboard() {
     .then(([level, hours, ci, safety, qc]) => {
       updateLevelInfo(level);
       updatePowerHours(hours);
-      renderTable(ci, "ciSection", "CI Submissions");
-      renderTable(safety, "safetySection", "Safety Concerns");
-      renderTable(qc, "qcSection", "Quality Catches");
+renderTable(ci, "ciContent", "CI Submissions");
+renderTable(safety, "safetyContent", "Safety Concerns");
+renderTable(qc, "qcContent", "Quality Catches");
     })
     .catch(err => {
       console.error("Failed to load dashboard data:", err);
