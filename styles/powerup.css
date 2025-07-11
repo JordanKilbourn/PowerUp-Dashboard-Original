@@ -1,6 +1,14 @@
+/* Reset + Base */
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Inter', sans-serif; background: linear-gradient(180deg, #0f172a, #111827); color: #f1f5f9; font-size: 15px; line-height: 1.6; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(180deg, #0f172a, #111827);
+  color: #f1f5f9;
+  font-size: 15px;
+  line-height: 1.6;
+}
 
+/* Sidebar */
 .sidebar {
   position: fixed; top: 0; left: 0; height: 100%; width: 60px;
   background: #0b0e2c; overflow-x: hidden;
@@ -18,23 +26,19 @@ body { font-family: 'Inter', sans-serif; background: linear-gradient(180deg, #0f
 .sidebar i { min-width: 24px; margin-right: 12px; }
 .link-text { display: none; }
 .sidebar.open .link-text { display: inline; }
-
 .sidebar .sidebar-section {
-  color: #94a3b8;
-  text-transform: uppercase;
-  font-size: 12px;
-  padding: 12px 16px 4px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
+  color: #94a3b8; text-transform: uppercase;
+  font-size: 12px; padding: 12px 16px 4px;
+  font-weight: 600; letter-spacing: 0.5px;
   display: none;
 }
 .sidebar.open .sidebar-section { display: block; }
 
+/* Header */
 header {
   display: flex; justify-content: space-between; align-items: center;
   background: linear-gradient(to right, #1a1a40, #000);
-  padding: 20px 30px; color: #fff;
-  margin-left: 60px;
+  padding: 20px 30px; color: #fff; margin-left: 60px;
   position: relative;
 }
 header h1 {
@@ -43,9 +47,7 @@ header h1 {
   text-shadow: 0 0 8px #ffb400, 0 0 16px #ff9100;
   position: absolute; left: 50%; transform: translateX(-50%);
 }
-.header-left {
-  display: flex; gap: 20px; font-size: 14px; color: #f8fafc; z-index: 1;
-}
+.header-left { display: flex; gap: 20px; font-size: 14px; color: #f8fafc; z-index: 1; }
 .level-tag {
   background: #8b5cf6; color: #fff;
   padding: 4px 12px; border-radius: 12px;
@@ -53,6 +55,7 @@ header h1 {
   margin-left: 5px;
 }
 
+/* Layout */
 .container { margin-left: 60px; padding: 20px; transition: margin-left 0.3s; }
 
 .dashboard-header {
@@ -84,11 +87,22 @@ header h1 {
 }
 .token-tracker { font-size: 16px; font-weight: 500; }
 
+/* Sections */
 .section {
   background: #0f172a; border: 1px solid #1e293b;
   padding: 20px; border-radius: 10px;
   box-shadow: 0 0 12px rgba(0,0,0,0.3);
   margin-top: 30px;
+}
+.section table {
+  display: block;
+  max-height: 300px;
+  overflow-y: auto;
+  border-radius: 10px;
+  scrollbar-width: none;
+}
+.section table::-webkit-scrollbar {
+  display: none;
 }
 
 h2 {
@@ -98,6 +112,7 @@ h2 {
   margin-bottom: 10px;
 }
 
+/* Table Styling */
 table {
   width: 100%; border-collapse: collapse;
   margin-top: 10px; border-radius: 8px; overflow: hidden;
@@ -114,13 +129,23 @@ th, td {
 tr:nth-child(even) { background: #1c2237; }
 tr:nth-child(odd) { background: #141b2d; }
 tr:hover { background: rgba(255,255,255,0.05); }
+
 td {
-  white-space: nowrap;
+  white-space: normal;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 200px;
+  max-width: 250px;
+  line-height: 1.5;
+  height: auto;
+  padding: 10px 12px;
+  max-height: 4.5em;
 }
 td[title] { cursor: help; }
+
+td.check-cell {
+  text-align: center;
+  font-size: 18px;
+}
 
 /* ===== Unique to Level Tracker ===== */
 .level-table {
