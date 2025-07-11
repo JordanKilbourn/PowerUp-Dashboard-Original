@@ -5,10 +5,10 @@ document.addEventListener("DOMContentLoaded", () => {
     initializeSession();
     setupSidebarBehavior(); // ✅ keep this
     loadDashboard();
-    setupCollapsibles();    // optional function if you modularize it
+    // Removed setupCollapsibles(); — it's already defined below inline
   });
 
-  // Handle collapsible section toggles
+  // ✅ Collapsible toggle logic
   document.querySelectorAll(".collapsible-header").forEach(header => {
     header.addEventListener("click", () => {
       const section = header.closest(".collapsible-section");
@@ -26,4 +26,3 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 });
-
