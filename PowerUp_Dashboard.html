@@ -3,66 +3,51 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard | PowerUp</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-  <link rel="stylesheet" href="/styles/powerup.css">
+  <title>PowerUp Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="/styles/powerup.css" />
 </head>
 <body>
-  
-<div id="sidebar"></div>
-<div id="header"></div>
 
-<div class="container">
-  <div class="dashboard-header">
-    <div class="goal-pill-group" id="pillSummary"></div>
-    <div class="progress-container">
-      <div class="progress-label">Power Hours Logged: <strong id="phProgress">0 / 8</strong></div>
-      <div class="progress-bar"><div class="progress-bar-fill" id="progressBar"></div></div>
-      <p id="powerTips" style="font-size: 14px; color: #93c5fd; margin-top: 8px;"></p>
+  <!-- Injected Components -->
+  <div id="sidebar"></div>
+  <div id="header"></div>
+
+  <!-- Main Content -->
+  <div class="container">
+    <div class="dashboard-header">
+      <div class="goal-pill-group" id="pillSummary"></div>
+      <div class="progress-container">
+        <div class="progress-label">Power Hours Logged: <strong id="phProgress">0 / 8</strong></div>
+        <div class="progress-bar">
+          <div class="progress-bar-fill" id="progressBar"></div>
+        </div>
+        <p id="powerTips" style="font-size: 14px; color: #93c5fd; margin-top: 8px;"></p>
+      </div>
+      <div class="token-tracker">Tokens Earned: <strong id="tokenTotal">0</strong></div>
     </div>
-    <div class="token-tracker">Tokens Earned: <strong id="tokenTotal">0</strong></div>
+
+    <div id="ciSection" class="section"></div>
+    <div id="safetySection" class="section"></div>
+    <div id="qcSection" class="section"></div>
   </div>
 
-  <div id="ciSection" class="section"></div>
-  <div id="safetySection" class="section"></div>
-  <div id="qcSection" class="section"></div>
-</div>
-
-<!-- Sidebar Highlight & Logout Behavior -->
-<script src="/scripts/include.js"></script>
-<script>
-  includeComponents(() => {
-    const path = window.location.pathname.split("/").pop().toLowerCase();
-    document.querySelectorAll(".sidebar a[href]").forEach(link => {
-      const href = link.getAttribute("href").toLowerCase();
-      if (href === path) {
-        link.classList.add("active");
-      }
+  <!-- Script Loading -->
+  <script src="/scripts/include.js"></script>
+  <script src="/scripts/session.js"></script>
+  <script src="/scripts/load-dashboard.js"></script>
+  <script>
+    window.addEventListener("DOMContentLoaded", () => {
+      loadComponents().then(() => {
+        initializeSession();
+        loadDashboard(); // your main dashboard data logic
+      });
     });
-
-    window.toggleSidebar = () => {
-      document.getElementById("sidebar").classList.toggle("open");
-    };
-
-    window.logout = () => {
-      if (confirm("Are you sure you want to log out?")) {
-        sessionStorage.clear();
-        window.location.href = "index.html";
-      }
-    };
-
-    // ✅ ✅ ✅ Load data AFTER includes are injected
-    const script = document.createElement('script');
-    script.src = '/scripts/load-dashboard.js';
-    document.body.appendChild(script);
-  });
-</script>
-
-  
+  </script>
 </body>
 </html>
+
 
 
 
