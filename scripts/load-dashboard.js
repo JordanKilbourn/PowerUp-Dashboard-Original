@@ -114,7 +114,7 @@ function renderTable(sheet, containerId, title) {
   const get = (row, title) => {
     const colId = colMap[title.toLowerCase()];
     const cell = row.cells.find(c => c.columnId === colId);
-    return cell?.displayValue ?? cell?.value ?? '';
+    return cell?.displayValue || cell?.value || '';
   };
 
   const rows = sheet.rows.filter(r => {
@@ -127,16 +127,16 @@ function renderTable(sheet, containerId, title) {
     return;
   }
 
-  // Columns to exclude from display
-  const HIDDEN_TITLES = ["Employee ID", "Submitted By", "Valid Row"];
-  const CHECKBOX_COLUMNS = ["Paid", "Resourced"];
+  // Define checkbox columns
+  const checkboxCols = ["Resourced", "Paid", "Project Work Completed"];
+  const excludeCols = ["Submitted By", "Valid Row", "Employee ID"];
 
-  // Build table
-  let html = `<h2>${title}</h2><table class="dashboard-table"><thead><tr>`;
   const visibleCols = sheet.columns.filter(c =>
-    !c.hidden && !HIDDEN_TITLES.includes(c.title.trim())
+    !c.hidden && !excludeCols.includes(c.title.trim())
   );
 
+  // Build HTML table
+  let html = `<div class="dashboard-table-container"><table class="dashboard-table"><thead><tr>`;
   visibleCols.forEach(c => {
     html += `<th>${c.title}</th>`;
   });
@@ -146,17 +146,24 @@ function renderTable(sheet, containerId, title) {
     html += "<tr>";
     visibleCols.forEach(c => {
       const cell = r.cells.find(x => x.columnId === c.id);
-      const val = cell?.displayValue ?? cell?.value ?? "";
+      const val = cell?.displayValue || cell?.value || "";
 
-      if (CHECKBOX_COLUMNS.includes(c.title.trim())) {
-        html += `<td class="check-cell">${val === true ? "✅" : ""}</td>`;
-      } else {
-        html += `<td title="${val}">${val}</td>`;
-      }
+      const colName = c.title.trim().toLowerCase();
+      const isCheckbox = checkboxCols.map(x => x.toLowerCase()).includes(colName);
+      const icon = isCheckbox
+        ? val === true
+          ? `<span class="checkmark">&#10003;</span>`
+          : val === false
+            ? `<span class="cross">&#10007;</span>`
+            : ""
+        : val;
+
+      html += `<td title="${val}">${icon}</td>`;
     });
     html += "</tr>";
   });
 
-  html += "</tbody></table>";
+  html += "</tbody></table></div>";
   container.innerHTML = html;
 }
+
