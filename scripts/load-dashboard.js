@@ -115,9 +115,13 @@ function renderTable(sheet, containerId, title) {
     return cell?.displayValue || cell?.value || '';
   };
 
-  const rows = sheet.rows.filter(r =>
-    get(r, "Employee ID").toUpperCase() === empID
-  );
+console.log(`[${title}] Sheet received with ${sheet.rows.length} rows`);
+console.log(`[${title}] Columns:`, sheet.columns.map(c => c.title));
+
+const rows = sheet.rows.filter(r => {
+  const idVal = get(r, "Employee ID");
+  return idVal && idVal.toString().toUpperCase() === empID;
+});
 
   if (rows.length === 0) {
     container.innerHTML = `<h2>${title}</h2><p>No records found.</p>`;
