@@ -8,21 +8,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // Removed setupCollapsibles(); — it's already defined below inline
   });
 
-  // ✅ Collapsible toggle logic
-  document.querySelectorAll(".collapsible-header").forEach(header => {
+// Accordion behavior
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".accordion-header").forEach(header => {
     header.addEventListener("click", () => {
-      const section = header.closest(".collapsible-section");
-      const body = section.querySelector(".collapsible-body");
-      const icon = header.querySelector(".rotate-icon");
-
-      section.classList.toggle("open");
-
-      if (body) {
-        body.style.display = section.classList.contains("open") ? "block" : "none";
-      }
-      if (icon) {
-        icon.classList.toggle("open");
-      }
+      const item = header.closest(".accordion-item");
+      item.classList.toggle("open");
     });
   });
 });
+
