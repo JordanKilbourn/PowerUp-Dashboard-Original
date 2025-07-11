@@ -1,3 +1,4 @@
+
 /* ================= BASE STYLES ================= */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -26,7 +27,6 @@ body {
 .sidebar i { min-width: 24px; margin-right: 12px; }
 .link-text { display: none; }
 .sidebar.open .link-text { display: inline; }
-
 .sidebar .sidebar-section {
   color: #94a3b8;
   text-transform: uppercase;
@@ -104,169 +104,52 @@ header h1 {
 }
 
 /* ================= TABLES ================= */
-h2 {
-  font-size: 20px;
-  font-weight: 700;
-  color: #facc15;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-/* Outer container scrolls table body */
-.dashboard-table-container {
-  max-height: 240px; /* 👈 Adjust this height as needed */
+.accordion-table-wrapper {
+  max-height: 12em;
   overflow-y: auto;
   position: relative;
-  padding-right: 4px; /* optional spacing for scrollbar */
-  scrollbar-width: thin;
-  scrollbar-color: #334155 transparent;
 }
-
-.dashboard-table-container::-webkit-scrollbar {
-  width: 6px;
-}
-.dashboard-table-container::-webkit-scrollbar-thumb {
-  background-color: #334155;
-  border-radius: 4px;
-}
-.dashboard-table-container::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-/* Table structure */
-.dashboard-table {
-  width: 100%;
+.accordion-table-wrapper table {
   border-collapse: collapse;
+  width: 100%;
   table-layout: fixed;
-  border-radius: 8px;
-  overflow: hidden;
-  background-color: #1e293b;
-  font-size: 14px;
-  color: white;
 }
-
-/* Sticky header */
-.dashboard-table thead th {
+.accordion-table-wrapper thead th {
   position: sticky;
   top: 0;
-  background-color: #0f172a;
-  color: #fcd34d;
-  padding: 6px 10px;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.3;
+  background: #1e293b;
   z-index: 2;
-  white-space: normal;
-  word-break: break-word;
-  overflow-wrap: break-word;
-  text-align: center;
+  color: #fcd34d;
+  font-weight: 600;
+  padding: 8px 12px;
+  text-align: left;
 }
-
-/* Table cells */
-.dashboard-table td {
-  padding: 6px 10px;
+.accordion-table-wrapper td {
+  padding: 8px 12px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  vertical-align: top;
-  color: #e2e8f0;
   border-bottom: 1px solid #334155;
 }
-
-/* Alternating row colors */
-.dashboard-table tr:nth-child(even) {
-  background: #1c2237;
+.accordion-table-wrapper td.wrap {
+  white-space: normal;
+  word-break: break-word;
+  max-width: 400px;
 }
-.dashboard-table tr:nth-child(odd) {
-  background: #141b2d;
+.accordion-table-wrapper::-webkit-scrollbar {
+  width: 6px;
 }
-.dashboard-table tr:hover {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-/* Checkbox icons */
-.checkmark {
-  color: #4ade80;
-  font-weight: bold;
-}
-.cross {
-  color: #f87171;
-  font-weight: bold;
+.accordion-table-wrapper::-webkit-scrollbar-thumb {
+  background-color: #64748b;
+  border-radius: 3px;
 }
 
-/* ================= COLLAPSIBLES ================= */
-.collapsible-header {
-  cursor: pointer;
-  user-select: none;
-  display: flex;
-  align-items: center;
-}
-.rotate-icon {
-  transition: transform 0.3s ease;
-}
-.rotate-icon.open {
-  transform: rotate(90deg);
-}
-.collapsible-body {
-  max-height: 300px;
-  overflow-y: auto;
-  position: relative;
-  margin-top: 10px;
-  display: none;
-  padding-right: 2px; /* For scroll gap */
-}
-
-.collapsible-section.open .collapsible-body {
-  display: block;
-}
-
-/* ================= LEVEL TRACKER ================= */
-.level-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: #0f172a;
-  border: 1px solid #1e293b;
-  border-radius: 10px;
-  box-shadow: 0 0 12px rgba(0,0,0,0.3);
-  overflow: hidden;
-  margin-top: 10px;
-}
-.level-table th, .level-table td {
-  padding: 12px; text-align: left; font-size: 14px;
-}
-.level-table th {
-  background: #1e293b;
-  color: #fcd34d;
-  text-transform: uppercase;
-  font-weight: 600;
-  position: sticky; top: 0;
-}
-.level-table tr:nth-child(even) { background: #1c2237; }
-.level-table tr:nth-child(odd) { background: #141b2d; }
-.level-table td {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 180px;
-  cursor: help;
-}
-
-/* ================= MOBILE ================= */
-@media (max-width: 768px) {
-  .container { margin-left: 0 !important; padding: 15px; }
-  .sidebar.open { width: 100%; position: relative; height: auto; }
-  table, th, td { font-size: 13px; }
-}
-
-
+/* ================= COLLAPSIBLE ACCORDIONS ================= */
 .accordion {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
-
 .accordion-item {
   background: #0f172a;
   border: 1px solid #1e293b;
@@ -274,7 +157,6 @@ h2 {
   overflow: hidden;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
 }
-
 .accordion-header {
   background: #1e293b;
   color: #fcd34d;
@@ -287,27 +169,29 @@ h2 {
   gap: 10px;
   transition: background 0.2s ease;
 }
-
 .accordion-header:hover {
   background: #2c354b;
 }
-
 .accordion-content {
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.3s ease;
   padding: 0 20px;
 }
-
 .accordion-item.open .accordion-content {
   max-height: 1000px;
   padding: 16px 20px;
 }
-
 .accordion-item.open .rotate-icon {
   transform: rotate(90deg);
 }
-
 .rotate-icon {
   transition: transform 0.3s ease;
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 768px) {
+  .container { margin-left: 0 !important; padding: 15px; }
+  .sidebar.open { width: 100%; position: relative; height: auto; }
+  table, th, td { font-size: 13px; }
 }
