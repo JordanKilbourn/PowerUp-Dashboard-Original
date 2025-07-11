@@ -96,14 +96,13 @@ header h1 {
 }
 .token-tracker { font-size: 16px; font-weight: 500; }
 
+/* ================= TABLE SECTIONS ================= */
 .section {
   background: #0f172a; border: 1px solid #1e293b;
   padding: 20px; border-radius: 10px;
   box-shadow: 0 0 12px rgba(0,0,0,0.3);
   margin-top: 30px;
 }
-
-/* ================= TABLES ================= */
 h2 {
   font-size: 20px;
   font-weight: 700;
@@ -114,75 +113,73 @@ h2 {
   margin-bottom: 10px;
 }
 
+/* ================= TABLE STYLING ================= */
+.dashboard-table-container {
+  max-height: 300px;
+  overflow-y: auto;
+  position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: #64748b transparent;
+}
+.dashboard-table-container::-webkit-scrollbar {
+  width: 6px;
+}
+.dashboard-table-container::-webkit-scrollbar-thumb {
+  background-color: #64748b;
+  border-radius: 3px;
+}
+.dashboard-table-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 .dashboard-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
   border-radius: 8px;
-  table-layout: fixed;
-  background-color: #1e293b;
-  overflow: hidden;
-}
-
-.dashboard-table thead {
-  display: table;
-  width: 100%;
-  table-layout: fixed;
-}
-
-.dashboard-table tbody {
-  display: block;
-  max-height: 300px;
-  overflow-y: auto;
 }
 
 .dashboard-table thead th {
   position: sticky;
   top: 0;
-  z-index: 2;
   background: #1e293b;
   color: #fcd34d;
-  padding: 12px 10px;
-  text-align: left;
-  font-weight: 600;
   text-transform: uppercase;
+  font-weight: 600;
+  padding: 10px 8px;
+  text-align: left;
+  font-size: 13px;
+  z-index: 2;
   word-break: break-word;
-  white-space: normal;
-  line-height: 1.3;
-}
-
-.dashboard-table tbody tr {
-  display: table;
-  width: 100%;
-  table-layout: fixed;
 }
 
 .dashboard-table td {
-  padding: 12px 10px;
+  padding: 10px 8px;
+  font-size: 14px;
   color: #e2e8f0;
   vertical-align: top;
+  overflow-wrap: break-word;
   word-break: break-word;
+}
+
+.dashboard-table tr:nth-child(even) { background: #1c2237; }
+.dashboard-table tr:nth-child(odd) { background: #141b2d; }
+.dashboard-table tr:hover { background: rgba(255,255,255,0.05); }
+
+/* Column width tweaks */
+.dashboard-table td.checkbox,
+.dashboard-table th.checkbox {
+  width: 60px;
+  text-align: center;
+}
+.dashboard-table td.wrap {
   white-space: normal;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  border-bottom: 1px solid #334155;
-  background: #141b2d;
+  max-width: 600px;
 }
 
-.dashboard-table tr:nth-child(even) td {
-  background: #1c2237;
-}
-.dashboard-table tr:hover td {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.checkmark {
-  color: #4ade80;
-  font-weight: bold;
-}
-.cross {
-  color: #f87171;
-  font-weight: bold;
-}
+/* ================= CHECKMARKS ================= */
+.checkmark { color: #4ade80; font-weight: bold; }
+.cross { color: #f87171; font-weight: bold; }
 
 /* ================= COLLAPSIBLES ================= */
 .collapsible-header {
