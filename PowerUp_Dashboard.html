@@ -60,15 +60,5 @@
   <script src="/scripts/load-dashboard.js"></script>
   <script src="/scripts/dashboard-ui.js"></script>
 
-<script>
-  window.addEventListener("DOMContentLoaded", () => {
-    loadComponents().then(() => {
-      initializeSession();
-      setupSidebarBehavior(); // ⬅️ this is the NEW line
-      loadDashboard();
-    });
-  });
-</script>
-
 </body>
 </html>
