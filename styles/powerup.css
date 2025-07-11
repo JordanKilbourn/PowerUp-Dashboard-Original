@@ -116,8 +116,6 @@ h2 {
 
 /* Outer container scrolls table body */
 .dashboard-table-container {
-  max-height: 300px;
-  overflow-y: auto;
   position: relative;
   scrollbar-width: none;          /* Firefox */
   -ms-overflow-style: none;       /* IE/Edge */
