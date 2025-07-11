@@ -3,18 +3,18 @@
 document.addEventListener("DOMContentLoaded", () => {
   loadComponents().then(() => {
     initializeSession();
-    setupSidebarBehavior(); // ✅ keep this
+    setupSidebarBehavior();
     loadDashboard();
-    // Removed setupCollapsibles(); — it's already defined below inline
+    setupAccordionBehavior(); // Attach accordion click behavior AFTER content is loaded
   });
+});
 
-// Accordion behavior
-document.addEventListener("DOMContentLoaded", () => {
+function setupAccordionBehavior() {
   document.querySelectorAll(".accordion-header").forEach(header => {
     header.addEventListener("click", () => {
       const item = header.closest(".accordion-item");
       item.classList.toggle("open");
     });
   });
-});
+}
 
