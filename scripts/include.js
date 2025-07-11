@@ -1,28 +1,23 @@
-function includeComponents(callback) {
-  const includeTargets = [
-    { id: "sidebar", path: "/components/sidebar.html" },
-    { id: "header", path: "/components/header.html" },
-    { id: "footer", path: "/components/footer.html" } // optional
-  ];
+// /scripts/include.js
+async function loadComponents() {
+  const sidebarEl = document.getElementById("sidebar");
+  const headerEl = document.getElementById("header");
 
-  let remaining = includeTargets.length;
+  const sidebarPromise = fetch("/components/sidebar.html")
+    .then(res => {
+      if (!res.ok) throw new Error("Sidebar include failed");
+      return res.text();
+    })
+    .then(html => sidebarEl.innerHTML = html)
+    .catch(err => console.error(err));
 
-  includeTargets.forEach(({ id, path }) => {
-    const el = document.getElementById(id);
-    if (!el) return;
+  const headerPromise = fetch("/components/header.html")
+    .then(res => {
+      if (!res.ok) throw new Error("Header include failed");
+      return res.text();
+    })
+    .then(html => headerEl.innerHTML = html)
+    .catch(err => console.error(err));
 
-    fetch(path)
-      .then(res => {
-        if (!res.ok) throw new Error(`Failed to load: ${path}`);
-        return res.text();
-      })
-      .then(html => {
-        el.innerHTML = html;
-        if (--remaining === 0 && typeof callback === "function") callback();
-      })
-      .catch(err => {
-        console.error(`Error including ${id}:`, err);
-        if (--remaining === 0 && typeof callback === "function") callback();
-      });
-  });
+  return Promise.all([sidebarPromise, headerPromise]);
 }
