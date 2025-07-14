@@ -1,10 +1,8 @@
 // /scripts/init-level-tracker.js
 import { SHEET_IDS, fetchSheet } from './api.js';
 import { renderTable } from './table.js';
-import './session.js';
-import { initializeAccordions } from './dashboard-ui.js'; // Optional if you want accordions
+import './session.js';  // session code expects header elements to exist
 
-// Inject shared header/sidebar
 async function loadIncludes() {
   const [sidebarHtml, headerHtml] = await Promise.all([
     fetch('/components/sidebar.html').then(r => r.text()),
@@ -12,21 +10,24 @@ async function loadIncludes() {
   ]);
   document.getElementById('sidebar').innerHTML = sidebarHtml;
   document.getElementById('header').innerHTML = headerHtml;
-  // session.js already sets userGreeting, userLevel, currentMonth
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
   await loadIncludes();
 
+  // Now session.js will have executed, populating name/month/level
+
   const empID = sessionStorage.getItem('empID');
   if (!empID) return;
 
-  // Now run your original logic...
+  // Fetch Level Tracker sheet
   try {
     const sheet = await fetchSheet(SHEET_IDS.levelTracker);
 
     const latest = [...sheet.rows]
-      .filter(r => r.cells.some(c => c.value?.toString().toUpperCase() === empID))
+      .filter(r => 
+        r.cells.some(c => c.value?.toString().toUpperCase() === empID)
+      )
       .sort((a,b) => new Date(b.cells[0].value) - new Date(a.cells[0].value))[0];
 
     if (latest) {
@@ -40,14 +41,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         ? new Date(monthKey).toLocaleString('default', { month: 'long', year: 'numeric' })
         : 'Unknown';
 
-      // Update session & header now that header is present
       sessionStorage.setItem('currentLevel', level);
       sessionStorage.setItem('currentMonth', monthStr);
+
       document.getElementById('userLevel').textContent = level;
       document.getElementById('currentMonth').textContent = monthStr;
     }
 
-    // Render table
+    // Then render the full table
     renderTable({
       sheet,
       containerId: 'levelTableContainer',
@@ -61,7 +62,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   } catch (err) {
     console.error('Error loading Level Tracker:', err);
-    document.getElementById('levelTableContainer').innerHTML =
-      '<p>Failed to load level data.</p>';
+    document.getElementById('levelTableContainer').innerHTML = `<p>Failed to load level data.</p>`;
   }
 });
