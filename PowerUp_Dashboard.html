@@ -61,13 +61,9 @@
     </div>
   </div>
 
-  <!-- Script Loader (only this one needed!) -->
-<!-- PowerUp_Dashboard.html (bottom of <body>) -->
-<script src="/scripts/include.js"></script>
-<script type="module">
-  import { loadDashboard } from '/scripts/load-dashboard.js';
-  loadDashboard();
-</script>
+<!-- Modern entry point (no include.js needed anymore!) -->
+<script type="module" src="/scripts/init-dashboard.js"></script>
+
 
 </body>
 </html>
