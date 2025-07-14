@@ -1,8 +1,8 @@
-// /scripts/init-power-hours.js
+import { loadPageComponents } from './loadPageComponents.js';
 import { SHEET_IDS, fetchSheet } from './api.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await window.loadPageComponents?.();
+  await loadPageComponents();
 
   const empID = sessionStorage.getItem('empID');
   if (!empID) return;
@@ -10,26 +10,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   const tbody = document.getElementById('powerHoursBody');
   try {
     const sheet = await fetchSheet(SHEET_IDS.powerHours);
-    const colMap = Object.fromEntries(sheet.columns.map(c => [c.title.trim().toLowerCase(), c.id]));
-
-    const getVal = (row, title) => {
-      const cell = row.cells.find(c => c.columnId === colMap[title.toLowerCase()]);
-      return cell?.displayValue ?? cell?.value ?? '';
-    };
-
-    const rows = sheet.rows.filter(r => {
-      const rawID = getVal(r, 'employee id');
-      return rawID.toString().toUpperCase() === empID;
+    const colMap = {};
+    sheet.columns.forEach(col => {
+      colMap[col.title.trim().toLowerCase()] = col.id;
     });
 
-    tbody.innerHTML = rows.length
-      ? ''
-      : '<tr><td colspan="8">No Power Hours records found.</td></tr>';
+    const getVal = (row, colTitle) => {
+      const id = colMap[colTitle.trim().toLowerCase()];
+      const cell = row.cells.find(c => c.columnId === id);
+      return cell ? (cell.displayValue ?? cell.value ?? '') : '';
+    };
 
-    let total = 0;
-    for (const r of rows) {
-      const completed = parseFloat(getVal(r, 'completed hours')) || 0;
-      total += completed;
+    const matchingRows = sheet.rows.filter(r => {
+      const rawID = getVal(r, 'employee id');
+      return rawID?.toString().toUpperCase() === empID;
+    });
+
+    tbody.innerHTML = matchingRows.length === 0
+      ? '<tr><td colspan="8">No Power Hours records found.</td></tr>'
+      : '';
+
+    let totalHours = 0;
+    matchingRows.forEach(r => {
+      const tr = document.createElement('tr');
+      const completedHours = parseFloat(getVal(r, 'completed hours')) || 0;
+      totalHours += completedHours;
+
       const values = [
         getVal(r, 'power hour id'),
         getVal(r, 'date'),
@@ -37,24 +43,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         getVal(r, 'end time'),
         getVal(r, 'scheduled') === true ? '✔️' : '❌',
         getVal(r, 'completed') === true ? '✔️' : '❌',
-        completed,
+        completedHours,
         getVal(r, 'activity description')
       ];
 
-      const tr = document.createElement('tr');
-      for (const v of values) {
+      values.forEach(val => {
         const td = document.createElement('td');
-        td.textContent = v;
-        td.title = v;
+        td.textContent = val;
+        td.title = val;
         tr.appendChild(td);
-      }
-      tbody.appendChild(tr);
-    }
+      });
 
-    document.getElementById('hoursTally').textContent = `Total Power Hours Logged: ${total}`;
-    sessionStorage.setItem('totalPowerHoursLogged', total);
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById("hoursTally").textContent = `Total Power Hours Logged: ${totalHours}`;
+    sessionStorage.setItem("totalPowerHoursLogged", totalHours);
   } catch (err) {
-    console.error('Error loading Power Hours data:', err);
+    console.error("Error loading Power Hours data:", err);
     tbody.innerHTML = '<tr><td colspan="8">Failed to load Power Hours data.</td></tr>';
   }
 });
