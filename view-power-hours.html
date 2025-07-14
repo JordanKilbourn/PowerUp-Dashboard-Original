@@ -4,228 +4,33 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>View Power Hours | PowerUp Dashboard</title>
+
+  <!-- Fonts + Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(180deg, #0f172a, #111827);
-      color: #f1f5f9;
-      font-size: 15px;
-    }
-    .sidebar {
-      position: fixed; top: 0; left: 0; height: 100%; width: 60px;
-      background: #0b0e2c; overflow-x: hidden;
-      transition: width 0.3s; box-shadow: 2px 0 8px rgba(0,0,0,0.4);
-      z-index: 1000; white-space: nowrap;
-    }
-    .sidebar.open { width: 220px; }
-    .sidebar a {
-      display: flex; align-items: center; padding: 16px;
-      color: #e2e8f0; text-decoration: none;
-      font-size: 15px; transition: all 0.3s;
-    }
-    .sidebar a:hover { background: #1a1f46; transform: translateX(5px); }
-    .sidebar a.active {
-      background: #1e293b; font-weight: bold; color: #fcd34d;
-    }
-    .sidebar i { min-width: 24px; margin-right: 12px; }
-    .link-text { display: none; }
-    .sidebar.open .link-text { display: inline; }
-    .sidebar .sidebar-section {
-      color: #94a3b8; text-transform: uppercase;
-      font-size: 12px; padding: 12px 16px 4px;
-      font-weight: 600; letter-spacing: 0.5px;
-      display: none;
-    }
-    .sidebar.open .sidebar-section { display: block; }
-    header {
-      display: flex; justify-content: space-between; align-items: center;
-      background: linear-gradient(to right, #1a1a40, #000);
-      padding: 20px 30px; color: #fff;
-      margin-left: 60px; position: relative;
-    }
-    header h1 {
-      font-size: 28px; font-weight: 700; color: #ffb400;
-      text-shadow: 0 0 8px #ffb400, 0 0 16px #ff9100;
-      position: absolute; left: 50%; transform: translateX(-50%);
-    }
-    .header-left { display: flex; gap: 20px; font-size: 14px; color: #f8fafc; z-index: 1; }
-    .container { margin-left: 60px; padding: 20px; transition: margin-left 0.3s; }
-    h2 {
-      font-size: 20px; font-weight: 700; color: #facc15;
-      display: flex; align-items: center; gap: 8px; margin: 20px 0 10px;
-    }
-    table {
-      width: 100%; border-collapse: collapse;
-      background: #0f172a; border: 1px solid #1e293b;
-      border-radius: 10px; box-shadow: 0 0 12px rgba(0,0,0,0.3);
-      overflow: hidden;
-    }
-    th, td {
-      padding: 12px; text-align: left; font-size: 14px;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      max-width: 180px;
-    }
-    th {
-      background: #1e293b; color: #fcd34d; text-transform: uppercase;
-      font-weight: 600; position: sticky; top: 0;
-    }
-    tr:nth-child(even) { background: #1c2237; }
-    tr:nth-child(odd) { background: #141b2d; }
-    tr:hover { background: rgba(255,255,255,0.05); }
-    td[title] { cursor: help; }
-    @media (max-width: 768px) {
-      .container { margin-left: 0 !important; padding: 15px; }
-      .sidebar.open { width: 100%; position: relative; height: auto; }
-      table, th, td { font-size: 13px; }
-    }
-  </style>
+  <link rel="stylesheet" href="/styles/powerup.css">
 </head>
 <body>
+  <div id="sidebar"></div>
+  <div id="header"></div>
 
-<div class="sidebar" id="sidebar">
-  <a href="#" onclick="toggleSidebar()" title="Toggle Sidebar Menu">
-    <i class="fas fa-bars"></i><span class="link-text">Toggle Menu</span>
-  </a>
-
-  <a href="PowerUp_Dashboard.html" title="Dashboard"><i class="fas fa-home"></i><span class="link-text">Dashboard</span></a>
-  <div class="sidebar-section">Submission Forms</div>
-  <a href="https://app.smartsheet.com/b/form/e60862d9ae0b44358d6f85dcd1c81d2b" target="_blank"><i class="fas fa-lightbulb"></i><span class="link-text">CI Suggestion</span></a>
-  <a href="https://app.smartsheet.com/b/form/162129580c03440f88cc5f284627b52f" target="_blank"><i class="fas fa-hard-hat"></i><span class="link-text">Safety Concern</span></a>
-  <a href="https://app.smartsheet.com/b/form/2ba4ff03861d4d068ee5a0bff46308c3" target="_blank"><i class="fas fa-bug"></i><span class="link-text">Quality Catch</span></a>
-
-  <div class="sidebar-section">Other</div>
-  <a href="view-power-hours.html" title="View Power Hours"><i class="fas fa-clock"></i><span class="link-text">Power Hours</span></a>
-  <a href="https://app.smartsheet.com/b/form/165de2f61d2a4c5bb7855df59f70a1db" target="_blank"><i class="fas fa-coins"></i><span class="link-text">Redeem Tokens</span></a>
-  <a href="level-tracker.html" title="Level Tracker"><i class="fas fa-chart-line"></i><span class="link-text">Level Tracker</span></a>
-  <a href="#" onclick="logout()" title="Log out"><i class="fas fa-sign-out-alt"></i><span class="link-text">Logout</span></a>
-</div>
-
-<header>
-  <div class="header-left">
-    <span><strong>Welcome:</strong> <span id="userName">Loading...</span></span>
+  <div class="container">
+    <h2><i class="fas fa-clock"></i> Power Hours Log</h2>
+    <p id="hoursTally" style="margin: 10px 0; font-weight: 600; font-size: 16px; color: #38bdf8;"></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Power Hour ID</th><th>Date</th><th>Start Time</th><th>End Time</th>
+          <th>Scheduled</th><th>Completed</th><th>Completed Hours</th><th>Activity Description</th>
+        </tr>
+      </thead>
+      <tbody id="powerHoursBody">
+        <tr><td colspan="8">Loading...</td></tr>
+      </tbody>
+    </table>
   </div>
-  <h1>Power Hours Tracker</h1>
-</header>
 
-<div class="container">
-  <h2><i class="fas fa-clock"></i> Power Hours Log</h2>
-  <p id="hoursTally" style="margin: 10px 0; font-weight: 600; font-size: 16px; color: #38bdf8;"></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Power Hour ID</th><th>Date</th><th>Start Time</th><th>End Time</th>
-        <th>Scheduled</th><th>Completed</th><th>Completed Hours</th><th>Activity Description</th>
-      </tr>
-    </thead>
-    <tbody id="powerHoursBody">
-      <tr><td colspan="8">Loading...</td></tr>
-    </tbody>
-  </table>
-</div>
-
-<script>
-  function toggleSidebar() {
-    const sb = document.getElementById("sidebar");
-    sb.classList.toggle("open");
-    document.querySelector(".container").style.marginLeft = sb.classList.contains("open") ? "220px" : "60px";
-  }
-
-  function logout() {
-    if (confirm("Are you sure you want to log out?")) {
-      sessionStorage.clear();
-      window.location.href = "index.html";
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    const empID = sessionStorage.getItem('empID');
-    const displayName = sessionStorage.getItem('displayName');
-    if (!empID) {
-      alert('Please log in first.');
-      window.location.href = 'index.html';
-      return;
-    }
-    document.getElementById('userName').textContent = displayName || empID;
-
-    const path = window.location.pathname.split("/").pop().toLowerCase();
-    document.querySelectorAll(".sidebar a[href]").forEach(link => {
-      if (link.getAttribute("href").toLowerCase() === path) {
-        link.classList.add("active");
-      }
-    });
-
-    const sheetID = '1240392906264452';
-    const url = `https://powerup-proxy.onrender.com/sheet/${sheetID}`;
-    const tbody = document.getElementById('powerHoursBody');
-
-    fetch(url)
-      .then(res => res.json())
-      .then(sheet => {
-        const colMap = {};
-        sheet.columns.forEach(col => {
-          colMap[col.title.trim().toLowerCase()] = col.id;
-        });
-
-        const getVal = (row, colTitle) => {
-          const id = colMap[colTitle.trim().toLowerCase()];
-          const cell = row.cells.find(c => c.columnId === id);
-          return cell ? (cell.displayValue ?? cell.value ?? '') : '';
-        };
-
-        const matchingRows = sheet.rows.filter(r => {
-          const rawID = getVal(r, 'employee id');
-          return rawID?.toString().toUpperCase() === empID;
-        });
-
-        console.log('All rows:', sheet.rows);
-        console.log('Matching Power Hours rows:', matchingRows);
-        console.log('Filtering for empID:', empID);
-
-        tbody.innerHTML = matchingRows.length === 0
-          ? '<tr><td colspan="8">No matching Power Hours records found.</td></tr>'
-          : '';
-
-        let totalHours = 0;
-
-        matchingRows.forEach(r => {
-          const tr = document.createElement('tr');
-          const completedHours = parseFloat(getVal(r, 'completed hours')) || 0;
-          totalHours += completedHours;
-
-          const values = [
-            getVal(r, 'power hour id'),
-            getVal(r, 'date'),
-            getVal(r, 'start time'),
-            getVal(r, 'end time'),
-            getVal(r, 'scheduled') === true ? '✔️' : '❌',
-            getVal(r, 'completed') === true ? '✔️' : '❌',
-            completedHours,
-            getVal(r, 'activity description')
-          ];
-
-          values.forEach(val => {
-            const td = document.createElement('td');
-            td.textContent = val;
-            td.title = val;
-            tr.appendChild(td);
-          });
-
-          tbody.appendChild(tr);
-        });
-
-        const hoursDisplay = document.getElementById("hoursTally");
-        hoursDisplay.textContent = `Total Power Hours Logged: ${totalHours}`;
-        sessionStorage.setItem("totalPowerHoursLogged", totalHours);
-      })
-      .catch(err => {
-        console.error('Fetch error:', err);
-        tbody.innerHTML = '<tr><td colspan="8">Failed to load Power Hours data.</td></tr>';
-      });
-  });
-</script>
-  
+  <!-- 📦 Entry point -->
+  <script type="module" src="/scripts/init-power-hours.js"></script>
 </body>
 </html>
