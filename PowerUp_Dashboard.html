@@ -62,6 +62,9 @@
   </div>
 
   <!-- Script Loader (only this one needed!) -->
-  <script src="/scripts/include.js"></script>
+<script type="module">
+  import { loadDashboard } from '/scripts/load-dashboard.js';
+  loadDashboard(); // ✅ Trigger dashboard loading after components are ready
+</script>
 </body>
 </html>
