@@ -188,3 +188,11 @@ header h1 {
 .rotate-icon.open {
   transform: rotate(90deg);
 }
+
+/* Collapse sidebar on smaller viewports by default */
+@media (max-width: 768px) {
+  .sidebar.collapsed-by-default:not(.open) {
+    width: 60px;
+  }
+}
+
