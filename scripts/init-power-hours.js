@@ -1,6 +1,8 @@
-// scripts/init-power-hours.js
 import { loadPageComponents } from './loadPageComponents.js';
-import { SHEET_IDS, fetchSheet } from './api.js';
+import { getSheetRows }        from './api.js';
+import { renderTable }         from './table.js';
+
+const SHEET_ID = '1240392906264452';  // Power Hours Tracker
 
 document.addEventListener('DOMContentLoaded', async () => {
   await loadPageComponents();
@@ -8,47 +10,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   const empID = sessionStorage.getItem('empID');
   if (!empID) { window.location.href = 'index.html'; return; }
 
-  try {
-    const sheet = await fetchSheet(SHEET_IDS.powerHours);
-    const colMap = {};
-    sheet.columns.forEach(c => colMap[c.title.trim().toLowerCase()] = c.id);
+  /* 1️⃣ fetch and filter */
+  const sheet = await getSheetRows(SHEET_ID);
+  const rows  = sheet.rows.filter(r =>
+     (r.cells.find(c => c.columnId === sheet.columnsByTitle['Employee ID'].id)
+              ?.displayValue ?? '').toUpperCase() === empID.toUpperCase());
 
-    const getVal = (row, key) => {
-      const cell = row.cells.find(c => c.columnId === colMap[key.toLowerCase()]);
-      return cell?.displayValue ?? cell?.value ?? '';
-    };
+  /* 2️⃣ render table */
+  renderTable({
+    sheet,
+    containerId: 'powerHoursBody',
+    rowFilter: rows,
+    checkmarkCols: ['Scheduled','Completed'],
+    columnOrder: ['Power Hour ID','Date','Start Time','End Time',
+                  'Scheduled','Completed','Completed Hours','Activity Description']
+  });
 
-    const rows = sheet.rows.filter(r =>
-      getVal(r,'employee id').toString().toUpperCase() === empID
-    );
-
-    let total = 0;
-    const tbody = document.getElementById('powerHoursBody');
-    tbody.innerHTML = ''; 
-    
-    rows.forEach(row => {
-      const ch = parseFloat(getVal(row,'completed hours')) || 0;
-      total += ch;
-      const tr = document.createElement('tr');
-      ['power hour id','date','start time','end time','scheduled','completed','completed hours','activity description']
-        .forEach(key => {
-          const td = document.createElement('td');
-          if (['scheduled','completed'].includes(key)) {
-            td.textContent = getVal(row,key) === true ? '✔️' : '❌';
-          } else {
-            td.textContent = key === 'completed hours' ? ch : getVal(row, key);
-          }
-          td.title = td.textContent;
-          tr.appendChild(td);
-        });
-      tbody.appendChild(tr);
-    });
-
-    document.getElementById('hoursTally').textContent =
-      `Total Power Hours Logged: ${total}`;
-  } catch (err) {
-    console.error(err);
-    document.getElementById('powerHoursBody').innerHTML =
-      '<tr><td colspan="8">Failed to load Power Hours.</td></tr>';
-  }
+  /* 3️⃣ tally */
+  const tally = rows.reduce((sum, r) =>
+      sum + Number(r.cells.find(c => c.columnId === sheet.columnsByTitle['Completed Hours'].id)
+                             ?.value || 0), 0);
+  document.getElementById('hoursTally').textContent =
+    `Total Power Hours Logged: ${tally}`;
 });
