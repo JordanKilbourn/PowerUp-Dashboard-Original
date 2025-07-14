@@ -1,56 +1,37 @@
-// /scripts/session.js
+// scripts/session.js
 
 function initializeSession() {
-  const empID = sessionStorage.getItem("empID");
   const displayName = sessionStorage.getItem("displayName") || "User";
   const level = sessionStorage.getItem("currentLevel") || "N/A";
   const month = sessionStorage.getItem("currentMonth") || "Unknown";
 
-  // Update UI if elements exist
-  updateTextById("userGreeting", displayName);
-  updateTextById("userLevel", level);
-  updateTextById("currentMonth", month);
+  const greetingEl = document.getElementById("userGreeting");
+  const levelEl = document.getElementById("userLevel");
+  const monthEl = document.getElementById("currentMonth");
 
-  // Redirect if not authenticated
-  if (!empID && !window.location.pathname.includes("index.html")) {
-    alert("Please log in first.");
-    window.location.href = "index.html";
-  }
+  if (greetingEl) greetingEl.textContent = displayName;
+  if (levelEl) levelEl.textContent = level;
+  if (monthEl) monthEl.textContent = month;
 }
 
-/**
- * Update element textContent by ID if it exists
- * @param {string} id 
- * @param {string} text 
- */
-function updateTextById(id, text) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = text;
-}
-
-/**
- * Toggle sidebar open/close class
- */
-function toggleSidebar() {
+function setupSidebarBehavior() {
   const sidebar = document.querySelector(".sidebar");
-  if (sidebar) {
-    sidebar.classList.toggle("open");
+  const toggleLinks = document.querySelectorAll(".sidebar a[onclick*='toggleSidebar']");
+  toggleLinks.forEach(link =>
+    link.addEventListener("click", () => sidebar?.classList.toggle("open"))
+  );
+
+  highlightSidebar();
+
+  const logoutBtn = document.querySelector(".sidebar a[onclick*='logout']");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      sessionStorage.clear();
+      window.location.href = "index.html";
+    });
   }
 }
 
-/**
- * Log out and redirect
- */
-function logout() {
-  if (confirm("Are you sure you want to log out?")) {
-    sessionStorage.clear();
-    window.location.href = "index.html";
-  }
-}
-
-/**
- * Highlight active page link in sidebar
- */
 function highlightSidebar() {
   const path = window.location.pathname.split("/").pop().toLowerCase();
   document.querySelectorAll(".sidebar a[href]").forEach(link => {
@@ -60,15 +41,7 @@ function highlightSidebar() {
   });
 }
 
-/**
- * Setup sidebar-related features and window-accessible handlers
- */
-function setupSidebarBehavior() {
-  highlightSidebar();
-  window.toggleSidebar = toggleSidebar;
-  window.logout = logout;
-}
+// Export globally so other files can trigger them
+window.initializeSession = initializeSession;
+window.setupSidebarBehavior = setupSidebarBehavior;
 
-// 🔁 INIT SESSION + SIDEBAR LOGIC
-initializeSession();
-setupSidebarBehavior();
