@@ -161,3 +161,7 @@ function renderTable(sheet, containerId, title) {
   html += `</tbody></table></div>`;
   container.innerHTML = html;
 }
+
+// ✅ ACTIVATE:
+loadDashboard();
+
