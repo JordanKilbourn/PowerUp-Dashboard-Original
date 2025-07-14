@@ -6,21 +6,31 @@ function initializeSession() {
   const level = sessionStorage.getItem("currentLevel") || "N/A";
   const month = sessionStorage.getItem("currentMonth") || "Unknown";
 
-  const userEl = document.getElementById("userGreeting");
-  const levelEl = document.getElementById("userLevel");
-  const monthEl = document.getElementById("currentMonth");
+  // Update UI if elements exist
+  updateTextById("userGreeting", displayName);
+  updateTextById("userLevel", level);
+  updateTextById("currentMonth", month);
 
-  if (userEl) userEl.textContent = displayName;
-  if (levelEl) levelEl.textContent = level;
-  if (monthEl) monthEl.textContent = month;
-
-  if (!empID && !window.location.href.includes("index.html")) {
+  // Redirect if not authenticated
+  if (!empID && !window.location.pathname.includes("index.html")) {
     alert("Please log in first.");
     window.location.href = "index.html";
   }
 }
 
-// 🔁 Sidebar toggling logic
+/**
+ * Update element textContent by ID if it exists
+ * @param {string} id 
+ * @param {string} text 
+ */
+function updateTextById(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+
+/**
+ * Toggle sidebar open/close class
+ */
 function toggleSidebar() {
   const sidebar = document.querySelector(".sidebar");
   if (sidebar) {
@@ -28,7 +38,9 @@ function toggleSidebar() {
   }
 }
 
-// 🚪 Logout logic
+/**
+ * Log out and redirect
+ */
 function logout() {
   if (confirm("Are you sure you want to log out?")) {
     sessionStorage.clear();
@@ -36,24 +48,27 @@ function logout() {
   }
 }
 
-// 🟨 Optional: Automatically highlight sidebar item based on page
+/**
+ * Highlight active page link in sidebar
+ */
 function highlightSidebar() {
   const path = window.location.pathname.split("/").pop().toLowerCase();
   document.querySelectorAll(".sidebar a[href]").forEach(link => {
-    const href = link.getAttribute("href").toLowerCase();
-    if (href === path) {
+    if (link.getAttribute("href").toLowerCase() === path) {
       link.classList.add("active");
     }
   });
 }
 
-// 👇 Call after includes are injected
+/**
+ * Setup sidebar-related features and window-accessible handlers
+ */
 function setupSidebarBehavior() {
   highlightSidebar();
   window.toggleSidebar = toggleSidebar;
   window.logout = logout;
 }
 
-// ✅ ACTIVATE:
+// 🔁 INIT SESSION + SIDEBAR LOGIC
 initializeSession();
 setupSidebarBehavior();
