@@ -3,19 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>PowerUp Login</title>
-
   <link rel="stylesheet" href="styles/powerup.css" />
 </head>
 <body class="login-page">
   <main class="login-card">
     <h2>Log in to PowerUp</h2>
+
     <form id="loginForm">
       <label for="empID">Employee ID</label>
       <input type="text" id="empID" required autocomplete="off" />
-
-      <label for="displayName">Name (as you’d like it shown)</label>
-      <input type="text" id="displayName" required autocomplete="off" />
-
       <button type="submit">Enter</button>
     </form>
   </main>
@@ -25,13 +21,12 @@
 
     document.getElementById('loginForm').addEventListener('submit', e => {
       e.preventDefault();
-      const empID       = document.getElementById('empID').value.trim();
-      const displayName = document.getElementById('displayName').value.trim();
+      const empID = document.getElementById('empID').value.trim();
+      if (!empID) return;
 
-      if (!empID || !displayName) return;
-      setSession('empID',        empID.toUpperCase());
-      setSession('displayName',  displayName);
-      /* month/level will get hydrated by dashboard later */
+      /* Store only what we know now.  displayName ⇢ filled after first sheet fetch */
+      setSession('empID', empID.toUpperCase());
+
       window.location.href = 'PowerUp_Dashboard.html';
     });
   </script>
