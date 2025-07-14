@@ -11,26 +11,38 @@
   <link rel="stylesheet" href="/styles/powerup.css">
 </head>
 <body>
+  <!-- Modular Components -->
   <div id="sidebar"></div>
   <div id="header"></div>
 
+  <!-- Page Content -->
   <div class="container">
     <h2><i class="fas fa-clock"></i> Power Hours Log</h2>
     <p id="hoursTally" style="margin: 10px 0; font-weight: 600; font-size: 16px; color: #38bdf8;"></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Power Hour ID</th><th>Date</th><th>Start Time</th><th>End Time</th>
-          <th>Scheduled</th><th>Completed</th><th>Completed Hours</th><th>Activity Description</th>
-        </tr>
-      </thead>
-      <tbody id="powerHoursBody">
-        <tr><td colspan="8">Loading...</td></tr>
-      </tbody>
-    </table>
+
+    <!-- ✅ Styled Table Container -->
+    <div class="dashboard-table-container">
+      <table class="dashboard-table">
+        <thead>
+          <tr>
+            <th>Power Hour ID</th>
+            <th>Date</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Scheduled</th>
+            <th>Completed</th>
+            <th>Completed Hours</th>
+            <th>Activity Description</th>
+          </tr>
+        </thead>
+        <tbody id="powerHoursBody">
+          <tr><td colspan="8">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
-  <!-- 📦 Entry point -->
+  <!-- 📦 Page Script Entry -->
   <script type="module" src="/scripts/init-power-hours.js"></script>
 </body>
 </html>
