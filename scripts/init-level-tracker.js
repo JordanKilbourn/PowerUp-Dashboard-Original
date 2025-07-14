@@ -1,36 +1,44 @@
-// /scripts/init-level-tracker.js
+// scripts/init-level-tracker.js
 import { SHEET_IDS, fetchSheet } from './api.js';
 import { renderTable } from './table.js';
-import './session.js';  // session code expects header elements to exist
 
 async function loadIncludes() {
+  console.log('Loading sidebar/header');
   const [sidebarHtml, headerHtml] = await Promise.all([
     fetch('/components/sidebar.html').then(r => r.text()),
     fetch('/components/header.html').then(r => r.text()),
   ]);
   document.getElementById('sidebar').innerHTML = sidebarHtml;
   document.getElementById('header').innerHTML = headerHtml;
+  console.log('Includes injected, now loading session');
+  await import('./session.js'); // dynamically load session logic after injection
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
   await loadIncludes();
 
-  // Now session.js will have executed, populating name/month/level
+  console.log('Session should be initialized now');
 
   const empID = sessionStorage.getItem('empID');
-  if (!empID) return;
+  if (!empID) {
+    console.warn('No empID in sessionStorage—aborting');
+    return;
+  }
 
-  // Fetch Level Tracker sheet
+  console.log('empID found:', empID);
+
   try {
     const sheet = await fetchSheet(SHEET_IDS.levelTracker);
+    console.log('Level Tracker sheet fetched:', sheet.columns.length, 'columns');
 
-    const latest = [...sheet.rows]
-      .filter(r => 
+    const latest = sheet.rows
+      .filter(r =>
         r.cells.some(c => c.value?.toString().toUpperCase() === empID)
       )
-      .sort((a,b) => new Date(b.cells[0].value) - new Date(a.cells[0].value))[0];
+      .sort((a, b) => new Date(b.cells[0].value) - new Date(a.cells[0].value))[0];
 
     if (latest) {
+      console.log('Latest record found for empID', empID);
       const getCell = key => {
         const col = sheet.columns.find(c => c.title.trim().toLowerCase() === key.toLowerCase());
         return latest.cells.find(c => c.columnId === col?.id)?.displayValue || '';
@@ -41,14 +49,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         ? new Date(monthKey).toLocaleString('default', { month: 'long', year: 'numeric' })
         : 'Unknown';
 
+      console.log('Setting sessionStorage and header values:', level, monthStr);
       sessionStorage.setItem('currentLevel', level);
       sessionStorage.setItem('currentMonth', monthStr);
-
       document.getElementById('userLevel').textContent = level;
       document.getElementById('currentMonth').textContent = monthStr;
+    } else {
+      console.warn('No matching row found for empID');
     }
 
-    // Then render the full table
     renderTable({
       sheet,
       containerId: 'levelTableContainer',
@@ -59,7 +68,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         'Total Submissions','Power Hours Logged','Meets L1','Meets L2','Meets L3','Level'
       ]
     });
-
   } catch (err) {
     console.error('Error loading Level Tracker:', err);
     document.getElementById('levelTableContainer').innerHTML = `<p>Failed to load level data.</p>`;
