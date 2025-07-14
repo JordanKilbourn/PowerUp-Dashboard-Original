@@ -6,34 +6,29 @@
   <title>PowerUp Dashboard</title>
 
   <!-- Fonts & Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
-  <!-- App Styles -->
-  <link rel="stylesheet" href="/styles/powerup.css" />
+  <!-- Styles -->
+  <link rel="stylesheet" href="/styles/powerup.css"/>
 </head>
 <body>
-
-  <!-- Sidebar + Header injected via JS -->
   <div id="sidebar"></div>
   <div id="header"></div>
 
   <main class="container">
     <section class="dashboard-header">
       <div class="goal-pill-group" id="pillSummary"></div>
-
       <div class="progress-container">
         <div class="progress-label">Power Hours Logged: <strong id="phProgress">0 / 8</strong></div>
         <div class="progress-bar">
           <div class="progress-bar-fill" id="progressBar"></div>
         </div>
-        <p id="powerTips" style="font-size: 14px; color: #93c5fd; margin-top: 8px;"></p>
+        <p id="powerTips"></p>
       </div>
-
       <div class="token-tracker">Tokens Earned: <strong id="tokenTotal">0</strong></div>
     </section>
 
-    <!-- Accordion Tables -->
     <section class="accordion">
       <div class="accordion-item">
         <h2 class="accordion-header" data-target="ciContent">
@@ -58,8 +53,6 @@
     </section>
   </main>
 
-  <!-- Main Entry Script -->
   <script type="module" src="/scripts/init-dashboard.js"></script>
-
 </body>
 </html>
