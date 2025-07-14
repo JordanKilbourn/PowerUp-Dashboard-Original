@@ -1,26 +1,28 @@
-// scripts/loadPageComponents.js
 import './session.js';
 
-/**
- * Loads header and sidebar HTML into the page
- * Ensures session and sidebar logic is wired
- */
 export async function loadPageComponents() {
   const sidebarEl = document.getElementById('sidebar');
   const headerEl = document.getElementById('header');
-  if (!sidebarEl || !headerEl) return;
+
+  if (!sidebarEl || !headerEl) {
+    console.error("Missing #sidebar or #header elements.");
+    return;
+  }
 
   try {
-    const [sHTML, hHTML] = await Promise.all([
+    const [sidebarHTML, headerHTML] = await Promise.all([
       fetch('/components/sidebar.html').then(r => r.text()),
       fetch('/components/header.html').then(r => r.text())
     ]);
-    sidebarEl.innerHTML = sHTML;
-    headerEl.innerHTML = hHTML;
 
+    sidebarEl.innerHTML = sidebarHTML;
+    headerEl.innerHTML = headerHTML;
+
+    // Activate UI behavior and session rendering
     window.initializeSession?.();
     window.setupSidebarBehavior?.();
+
   } catch (err) {
-    console.error('Failed to load header/sidebar:', err);
+    console.error("Failed loading components:", err);
   }
 }
