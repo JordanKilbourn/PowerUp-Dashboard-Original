@@ -1,20 +1,28 @@
 // /scripts/dashboard-ui.js
 
 document.addEventListener("DOMContentLoaded", () => {
-  loadComponents().then(() => {
-    initializeSession();
-    setupSidebarBehavior();
-    loadDashboard();
-    setupAccordionBehavior(); // Attach accordion click behavior AFTER content is loaded
-  });
-});
+  const headers = document.querySelectorAll(".accordion-header");
 
-function setupAccordionBehavior() {
-  document.querySelectorAll(".accordion-header").forEach(header => {
+  headers.forEach(header => {
     header.addEventListener("click", () => {
       const item = header.closest(".accordion-item");
-      item.classList.toggle("open");
+      const content = item.querySelector(".accordion-content");
+      const icon = header.querySelector(".rotate-icon");
+
+      const isOpen = item.classList.contains("open");
+
+      // Collapse all others
+      document.querySelectorAll(".accordion-item").forEach(i => {
+        i.classList.remove("open");
+        i.querySelector(".accordion-content").style.maxHeight = null;
+        i.querySelector(".rotate-icon").classList.remove("open");
+      });
+
+      if (!isOpen) {
+        item.classList.add("open");
+        content.style.maxHeight = content.scrollHeight + "px";
+        icon.classList.add("open");
+      }
     });
   });
-}
-
+});
