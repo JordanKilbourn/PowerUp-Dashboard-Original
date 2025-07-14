@@ -13,10 +13,9 @@ export function renderTable({
   const container = document.getElementById(containerId);
   if (!sheet || !container) return;
 
-  const colMap = {};
-  sheet.columns.forEach(c => {
-    colMap[c.title.trim().toLowerCase()] = c.id;
-  });
+  const colMap = Object.fromEntries(
+    sheet.columns.map(c => [c.title.trim().toLowerCase(), c.id])
+  );
 
   const get = (row, title) => {
     const colId = colMap[title.toLowerCase()];
@@ -32,46 +31,47 @@ export function renderTable({
     });
   }
 
-  if (rows.length === 0) {
+  if (!rows.length) {
     container.innerHTML = `<h2>${title}</h2><p>No records found.</p>`;
     return;
   }
 
-  // Columns to show
+  // 📊 Determine which columns to show
   const visibleCols = columnOrder
     ? columnOrder.filter(c => !excludeCols.includes(c))
-    : sheet.columns.filter(c =>
-        !c.hidden && !excludeCols.includes(c.title.trim())
-      ).map(c => c.title);
+    : sheet.columns
+        .filter(c => !c.hidden && !excludeCols.includes(c.title.trim()))
+        .map(c => c.title.trim());
 
-  let html = `<div class="dashboard-table-container"><table class="dashboard-table">
-    <thead>
-      <tr>`;
-  visibleCols.forEach(c => {
-    html += `<th>${c}</th>`;
-  });
-  html += `</tr></thead><tbody class="dashboard-table-body">`;
+  let html = `
+    <div class="dashboard-table-container">
+      <table class="dashboard-table">
+        <thead><tr>
+          ${visibleCols.map(col => `<th>${col}</th>`).join('')}
+        </tr></thead>
+        <tbody class="dashboard-table-body">
+  `;
 
   rows.forEach(r => {
-    html += `<tr>`;
+    html += '<tr>';
     visibleCols.forEach(title => {
       const val = get(r, title);
       const isCheck = checkmarkCols.map(c => c.toLowerCase()).includes(title.toLowerCase());
-
       let content = val;
+
       if (isCheck) {
         if (val === true || val === '✓') {
           content = `<span class="checkmark">&#10003;</span>`;
-        } else if (val === false || val === '✗' || val === 'X') {
+        } else if (val === false || val === '✗' || val === 'X' || val === '✘') {
           content = `<span class="cross">&#10007;</span>`;
         }
       }
 
       html += `<td title="${val}">${content}</td>`;
     });
-    html += `</tr>`;
+    html += '</tr>';
   });
 
-  html += `</tbody></table></div>`;
+  html += '</tbody></table></div>';
   container.innerHTML = html;
 }
