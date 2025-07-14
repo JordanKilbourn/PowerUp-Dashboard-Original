@@ -62,9 +62,12 @@
   </div>
 
   <!-- Script Loader (only this one needed!) -->
+<!-- PowerUp_Dashboard.html (bottom of <body>) -->
+<script src="/scripts/include.js"></script>
 <script type="module">
   import { loadDashboard } from '/scripts/load-dashboard.js';
-  loadDashboard(); // ✅ Trigger dashboard loading after components are ready
+  loadDashboard();
 </script>
+
 </body>
 </html>
