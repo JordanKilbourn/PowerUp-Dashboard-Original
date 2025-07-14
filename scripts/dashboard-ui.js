@@ -12,7 +12,6 @@ function initializeAccordions() {
 
       const isOpen = item.classList.contains("open");
 
-      // Collapse all other accordion items
       document.querySelectorAll(".accordion-item").forEach(i => {
         i.classList.remove("open");
         const c = i.querySelector(".accordion-content");
@@ -21,7 +20,6 @@ function initializeAccordions() {
         if (ic) ic.classList.remove("open");
       });
 
-      // Expand clicked one if it wasn't already open
       if (!isOpen) {
         item.classList.add("open");
         content.style.maxHeight = content.scrollHeight + "px";
@@ -31,5 +29,6 @@ function initializeAccordions() {
   });
 }
 
-// ✅ ACTIVATE
-initializeAccordions();
+// Export to global so include.js can call it
+window.initializeAccordions = initializeAccordions;
+
