@@ -53,3 +53,7 @@ function setupSidebarBehavior() {
   window.toggleSidebar = toggleSidebar;
   window.logout = logout;
 }
+
+// ✅ ACTIVATE:
+initializeSession();
+setupSidebarBehavior();
