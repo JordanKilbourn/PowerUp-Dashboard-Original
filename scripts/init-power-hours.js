@@ -1,26 +1,20 @@
 // /scripts/init-power-hours.js
-import './session.js';
+import { SHEET_IDS, fetchSheet } from './api.js';
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
   const empID = sessionStorage.getItem("empID");
-  const displayName = sessionStorage.getItem("displayName");
-
   if (!empID) {
     alert("Please log in first.");
     window.location.href = "index.html";
     return;
   }
 
-  // Inject components
-  const [sidebarHTML, headerHTML] = await Promise.all([
-    fetch("/components/sidebar.html").then(res => res.text()),
-    fetch("/components/header.html").then(res => res.text())
-  ]);
+  // Load session values into header
+  document.getElementById("userName").textContent = sessionStorage.getItem("displayName") || empID;
+  document.getElementById("userLevel").textContent = sessionStorage.getItem("currentLevel") || "N/A";
+  document.getElementById("currentMonth").textContent = sessionStorage.getItem("currentMonth") || "Unknown";
 
-  document.getElementById("sidebar").innerHTML = sidebarHTML;
-  document.getElementById("header").innerHTML = headerHTML;
-
-  // Set active link
+  // Highlight active sidebar link
   const path = window.location.pathname.split("/").pop().toLowerCase();
   document.querySelectorAll(".sidebar a[href]").forEach(link => {
     if (link.getAttribute("href").toLowerCase() === path) {
@@ -28,20 +22,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  const nameEl = document.getElementById("userGreeting");
-  if (nameEl) nameEl.textContent = displayName || empID;
-
-  // ✅ Load Power Hours
-  loadPowerHours(empID);
-});
-
-function loadPowerHours(empID) {
-  const sheetID = '1240392906264452';
-  const url = `https://powerup-proxy.onrender.com/sheet/${sheetID}`;
   const tbody = document.getElementById('powerHoursBody');
-
-  fetch(url)
-    .then(res => res.json())
+  fetchSheet(SHEET_IDS.powerHours)
     .then(sheet => {
       const colMap = {};
       sheet.columns.forEach(col => {
@@ -60,7 +42,7 @@ function loadPowerHours(empID) {
       });
 
       tbody.innerHTML = matchingRows.length === 0
-        ? '<tr><td colspan="8">No matching Power Hours records found.</td></tr>'
+        ? '<tr><td colspan="8">No Power Hours records found.</td></tr>'
         : '';
 
       let totalHours = 0;
@@ -91,12 +73,11 @@ function loadPowerHours(empID) {
         tbody.appendChild(tr);
       });
 
-      const hoursDisplay = document.getElementById("hoursTally");
-      hoursDisplay.textContent = `Total Power Hours Logged: ${totalHours}`;
+      document.getElementById("hoursTally").textContent = `Total Power Hours Logged: ${totalHours}`;
       sessionStorage.setItem("totalPowerHoursLogged", totalHours);
     })
     .catch(err => {
-      console.error('Fetch error:', err);
+      console.error("Error loading Power Hours data:", err);
       tbody.innerHTML = '<tr><td colspan="8">Failed to load Power Hours data.</td></tr>';
     });
-}
+});
