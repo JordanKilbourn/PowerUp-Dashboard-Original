@@ -9,12 +9,20 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // Load session values into header
-  document.getElementById("userName").textContent = sessionStorage.getItem("displayName") || empID;
-  document.getElementById("userLevel").textContent = sessionStorage.getItem("currentLevel") || "N/A";
-  document.getElementById("currentMonth").textContent = sessionStorage.getItem("currentMonth") || "Unknown";
+  // 🧠 Load session values into header
+  const displayName = sessionStorage.getItem("displayName") || empID;
+  const level = sessionStorage.getItem("currentLevel") || "N/A";
+  const month = sessionStorage.getItem("currentMonth") || "Unknown";
 
-  // Highlight active sidebar link
+  const userEl = document.getElementById("userName");
+  const levelEl = document.getElementById("userLevel");
+  const monthEl = document.getElementById("currentMonth");
+
+  if (userEl) userEl.textContent = displayName;
+  if (levelEl) levelEl.textContent = level;
+  if (monthEl) monthEl.textContent = month;
+
+  // 🌐 Highlight active nav link
   const path = window.location.pathname.split("/").pop().toLowerCase();
   document.querySelectorAll(".sidebar a[href]").forEach(link => {
     if (link.getAttribute("href").toLowerCase() === path) {
@@ -22,30 +30,30 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // 🧾 Load power hour table
   const tbody = document.getElementById('powerHoursBody');
   fetchSheet(SHEET_IDS.powerHours)
     .then(sheet => {
-      const colMap = {};
-      sheet.columns.forEach(col => {
-        colMap[col.title.trim().toLowerCase()] = col.id;
-      });
+      const colMap = Object.fromEntries(
+        sheet.columns.map(col => [col.title.trim().toLowerCase(), col.id])
+      );
 
-      const getVal = (row, colTitle) => {
-        const id = colMap[colTitle.trim().toLowerCase()];
-        const cell = row.cells.find(c => c.columnId === id);
+      const getVal = (row, title) => {
+        const cell = row.cells.find(c => c.columnId === colMap[title.toLowerCase()]);
         return cell ? (cell.displayValue ?? cell.value ?? '') : '';
       };
 
-      const matchingRows = sheet.rows.filter(r => {
-        const rawID = getVal(r, 'employee id');
-        return rawID?.toString().toUpperCase() === empID;
-      });
+      const matchingRows = sheet.rows.filter(r =>
+        getVal(r, 'employee id').toString().toUpperCase() === empID
+      );
 
-      tbody.innerHTML = matchingRows.length === 0
-        ? '<tr><td colspan="8">No Power Hours records found.</td></tr>'
-        : '';
+      if (!matchingRows.length) {
+        tbody.innerHTML = '<tr><td colspan="8">No Power Hours records found.</td></tr>';
+        return;
+      }
 
       let totalHours = 0;
+      tbody.innerHTML = ''; // Clear default loader row
 
       matchingRows.forEach(r => {
         const tr = document.createElement('tr');
@@ -73,7 +81,8 @@ document.addEventListener("DOMContentLoaded", () => {
         tbody.appendChild(tr);
       });
 
-      document.getElementById("hoursTally").textContent = `Total Power Hours Logged: ${totalHours}`;
+      const totalText = `Total Power Hours Logged: ${totalHours}`;
+      document.getElementById("hoursTally").textContent = totalText;
       sessionStorage.setItem("totalPowerHoursLogged", totalHours);
     })
     .catch(err => {
