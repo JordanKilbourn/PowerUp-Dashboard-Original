@@ -63,73 +63,82 @@
     <button id="loginBtn" disabled>Login</button>
   </div>
 
-  <script type="module">
-    const SHEET_ID = '2195459817820036';
-    const PROXY_URL = 'https://powerup-proxy.onrender.com';
-    const SHEET_URL = `${PROXY_URL}/sheet/${SHEET_ID}`;
+<script type="module">
+  const SHEET_ID = '2195459817820036';
+  const PROXY_URL = 'https://powerup-proxy.onrender.com';
+  const SHEET_URL = `${PROXY_URL}/sheet/${SHEET_ID}`;
 
-    const empInput = document.getElementById('empID');
-    const loginBtn = document.getElementById('loginBtn');
-    const errorMsg = document.getElementById('errorMsg');
+  const empInput = document.getElementById('empID');
+  const loginBtn = document.getElementById('loginBtn');
+  const errorMsg = document.getElementById('errorMsg');
 
-    empInput.focus();
+  empInput.focus();
 
-    empInput.addEventListener('input', () => {
-      loginBtn.disabled = empInput.value.trim().length < 2;
-    });
+  empInput.addEventListener('input', () => {
+    loginBtn.disabled = empInput.value.trim().length < 2;
+  });
 
-    empInput.addEventListener('keypress', e => {
-      if (e.key === 'Enter' && !loginBtn.disabled) handleLogin();
-    });
+  empInput.addEventListener('keypress', e => {
+    if (e.key === 'Enter' && !loginBtn.disabled) handleLogin();
+  });
 
-    empInput.addEventListener('paste', () => {
-      setTimeout(() => {
-        empInput.value = empInput.value.trim().replace(/\s+/g, '');
-        loginBtn.disabled = empInput.value.length < 2;
-      }, 50);
-    });
+  empInput.addEventListener('paste', () => {
+    setTimeout(() => {
+      empInput.value = empInput.value.trim().replace(/\s+/g, '');
+      loginBtn.disabled = empInput.value.length < 2;
+    }, 50);
+  });
 
-    loginBtn.addEventListener('click', handleLogin);
+  loginBtn.addEventListener('click', handleLogin);
 
-    async function handleLogin() {
-      const empID = empInput.value.trim().toUpperCase();
-      loginBtn.disabled = true;
-      loginBtn.textContent = 'Logging in...';
-      errorMsg.textContent = '';
+  async function handleLogin() {
+    const empID = empInput.value.trim().toUpperCase();
+    console.log("🔑 Logging in with ID:", empID);
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'Logging in...';
+    errorMsg.textContent = '';
 
-      try {
-        const res = await fetch(SHEET_URL, { cache: 'no-store' });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
+    try {
+      const res = await fetch(SHEET_URL, { cache: 'no-store' });
+      console.log("📡 Response status:", res.status);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-        const pidCol = getColumnId(data.columns, 'Position ID');
-        const nameCol = getColumnId(data.columns, 'Display Name');
+      const data = await res.json();
+      console.log("📋 Sheet data received:", data?.rows?.length || 0, "rows");
 
-        const userRow = data.rows.find(r =>
-          r.cells.some(c => c.columnId === pidCol && String(c.value).toUpperCase() === empID)
-        );
+      const pidCol = getColumnId(data.columns, 'Position ID');
+      const nameCol = getColumnId(data.columns, 'Display Name');
+      console.log("🔎 PID column ID:", pidCol, "| Name column ID:", nameCol);
 
-        if (!userRow) {
-          throw new Error(`No match found for Employee ID "${empID}".`);
-        }
+      const userRow = data.rows.find(r =>
+        r.cells.some(c => c.columnId === pidCol && String(c.value).toUpperCase() === empID)
+      );
+      console.log("✅ User match:", !!userRow);
 
-        const displayName = userRow.cells.find(c => c.columnId === nameCol)?.displayValue || empID;
-
-        sessionStorage.setItem('empID', empID);
-        sessionStorage.setItem('displayName', displayName);
-        window.location.href = 'PowerUp_Dashboard.html';
-      } catch (err) {
-        errorMsg.textContent = err.message.includes("match") ? err.message : 'Authentication service failed.';
-        loginBtn.disabled = false;
-        loginBtn.textContent = 'Login';
-        console.error(err);
+      if (!userRow) {
+        throw new Error(`No match found for Employee ID "${empID}".`);
       }
-    }
 
-    function getColumnId(columns, title) {
-      return columns.find(c => c.title.trim().toLowerCase() === title.toLowerCase())?.id ?? null;
+      const displayName = userRow.cells.find(c => c.columnId === nameCol)?.displayValue || empID;
+      console.log("🙋 Display Name:", displayName);
+
+      sessionStorage.setItem('empID', empID);
+      sessionStorage.setItem('displayName', displayName);
+      console.log("🚀 Redirecting to dashboard...");
+      window.location.href = 'PowerUp_Dashboard.html';
+    } catch (err) {
+      errorMsg.textContent = err.message.includes("match") ? err.message : 'Authentication service failed.';
+      loginBtn.disabled = false;
+      loginBtn.textContent = 'Login';
+      console.error("❌ Login error:", err);
     }
-  </script>
+  }
+
+  function getColumnId(columns, title) {
+    return columns.find(c => c.title.trim().toLowerCase() === title.toLowerCase())?.id ?? null;
+  }
+</script>
+
 
 </body>
 </html>
