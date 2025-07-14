@@ -1,35 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF‑8"/>
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Power Hours | PowerUp Dashboard</title>
 
+  <!-- Fonts & Styles -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link rel="stylesheet" href="/styles/powerup.css"/>
 </head>
 <body>
+  <!-- Dynamic Header + Sidebar -->
   <div id="sidebar"></div>
   <div id="header"></div>
 
+  <!-- Main Content -->
   <main class="container">
-    <div class="dashboard-header">
-      <div class="header-left">
-        <strong>Welcome:</strong> <span id="userName">...</span> |
-        <strong>Level:</strong> <span id="userLevel">...</span> |
-        <strong>Month:</strong> <span id="currentMonth">...</span>
-      </div>
-    </div>
-
     <h2><i class="fas fa-clock"></i> Power Hours Log</h2>
-    <p id="hoursTally"></p>
+    <p id="hoursTally" style="margin: 10px 0; font-weight: 600; font-size: 16px; color: #38bdf8;"></p>
+
     <div class="dashboard-table-container">
       <table class="dashboard-table">
         <thead>
           <tr>
-            <th>Power Hour ID</th><th>Date</th><th>Start Time</th><th>End Time</th>
-            <th>Scheduled</th><th>Completed</th><th>Completed Hours</th><th>Activity Description</th>
+            <th>Power Hour ID</th>
+            <th>Date</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Scheduled</th>
+            <th>Completed</th>
+            <th>Completed Hours</th>
+            <th>Activity Description</th>
           </tr>
         </thead>
         <tbody id="powerHoursBody">
@@ -39,6 +41,7 @@
     </div>
   </main>
 
+  <!-- Page Logic -->
   <script type="module" src="/scripts/init-power-hours.js"></script>
 </body>
 </html>
