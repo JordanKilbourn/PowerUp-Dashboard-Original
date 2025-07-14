@@ -1,92 +1,48 @@
 // /scripts/init-power-hours.js
 import { SHEET_IDS, fetchSheet } from './api.js';
+import { renderTable } from './table.js';
+import './session.js';
 
-document.addEventListener("DOMContentLoaded", () => {
-  const empID = sessionStorage.getItem("empID");
-  if (!empID) {
-    alert("Please log in first.");
-    window.location.href = "index.html";
-    return;
-  }
+document.addEventListener('DOMContentLoaded', async () => {
+  const empID = sessionStorage.getItem('empID');
+  if (!empID) return;
 
-  // 🧠 Load session values into header
-  const displayName = sessionStorage.getItem("displayName") || empID;
-  const level = sessionStorage.getItem("currentLevel") || "N/A";
-  const month = sessionStorage.getItem("currentMonth") || "Unknown";
+  // ✅ Wait one tick to ensure header/sidebar is fully loaded
+  await new Promise(r => setTimeout(r, 0));
 
-  const userEl = document.getElementById("userName");
-  const levelEl = document.getElementById("userLevel");
-  const monthEl = document.getElementById("currentMonth");
+  try {
+    const sheet = await fetchSheet(SHEET_IDS.powerHours);
 
-  if (userEl) userEl.textContent = displayName;
-  if (levelEl) levelEl.textContent = level;
-  if (monthEl) monthEl.textContent = month;
+    // Filter for user’s rows
+    const userRows = sheet.rows.filter(r =>
+      r.cells.some(c => String(c.value).toUpperCase() === empID)
+    );
 
-  // 🌐 Highlight active nav link
-  const path = window.location.pathname.split("/").pop().toLowerCase();
-  document.querySelectorAll(".sidebar a[href]").forEach(link => {
-    if (link.getAttribute("href").toLowerCase() === path) {
-      link.classList.add("active");
+    // Optional: update header info (current month + level from sessionStorage)
+    const level = sessionStorage.getItem('currentLevel') ?? 'N/A';
+    const month = sessionStorage.getItem('currentMonth') ?? 'Unknown';
+
+    document.getElementById('userLevel').textContent = level;
+    document.getElementById('currentMonth').textContent = month;
+
+    // Update name if available
+    const displayName = sessionStorage.getItem('displayName');
+    if (displayName) {
+      document.getElementById('userGreeting').textContent = displayName;
     }
-  });
 
-  // 🧾 Load power hour table
-  const tbody = document.getElementById('powerHoursBody');
-  fetchSheet(SHEET_IDS.powerHours)
-    .then(sheet => {
-      const colMap = Object.fromEntries(
-        sheet.columns.map(col => [col.title.trim().toLowerCase(), col.id])
-      );
-
-      const getVal = (row, title) => {
-        const cell = row.cells.find(c => c.columnId === colMap[title.toLowerCase()]);
-        return cell ? (cell.displayValue ?? cell.value ?? '') : '';
-      };
-
-      const matchingRows = sheet.rows.filter(r =>
-        getVal(r, 'employee id').toString().toUpperCase() === empID
-      );
-
-      if (!matchingRows.length) {
-        tbody.innerHTML = '<tr><td colspan="8">No Power Hours records found.</td></tr>';
-        return;
-      }
-
-      let totalHours = 0;
-      tbody.innerHTML = ''; // Clear default loader row
-
-      matchingRows.forEach(r => {
-        const tr = document.createElement('tr');
-        const completedHours = parseFloat(getVal(r, 'completed hours')) || 0;
-        totalHours += completedHours;
-
-        const values = [
-          getVal(r, 'power hour id'),
-          getVal(r, 'date'),
-          getVal(r, 'start time'),
-          getVal(r, 'end time'),
-          getVal(r, 'scheduled') === true ? '✔️' : '❌',
-          getVal(r, 'completed') === true ? '✔️' : '❌',
-          completedHours,
-          getVal(r, 'activity description')
-        ];
-
-        values.forEach(val => {
-          const td = document.createElement('td');
-          td.textContent = val;
-          td.title = val;
-          tr.appendChild(td);
-        });
-
-        tbody.appendChild(tr);
-      });
-
-      const totalText = `Total Power Hours Logged: ${totalHours}`;
-      document.getElementById("hoursTally").textContent = totalText;
-      sessionStorage.setItem("totalPowerHoursLogged", totalHours);
-    })
-    .catch(err => {
-      console.error("Error loading Power Hours data:", err);
-      tbody.innerHTML = '<tr><td colspan="8">Failed to load Power Hours data.</td></tr>';
+    // Table display
+    renderTable({
+      sheet,
+      containerId: 'powerHoursContainer',
+      title: 'Power Hours Log',
+      columnOrder: ['Power Hour ID', 'Date', 'Start Time', 'End Time', 'Scheduled', 'Completed'],
+      filterFn: r => r.cells.some(c => String(c.value).toUpperCase() === empID)
     });
+
+  } catch (err) {
+    console.error('Error loading Power Hours:', err);
+    document.getElementById('powerHoursContainer').innerHTML =
+      '<p>Failed to load power hours.</p>';
+  }
 });
