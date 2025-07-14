@@ -1,18 +1,22 @@
-import { loadPageComponents } from './loadPageComponents.js';
+// /scripts/init-level-tracker.js
 import { SHEET_IDS, fetchSheet } from './api.js';
 import { renderTable } from './table.js';
+import './session.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await loadPageComponents();
-
   const empID = sessionStorage.getItem('empID');
   if (!empID) return;
+
+  // Wait until header/sidebar have been injected
+  await new Promise(r => setTimeout(r, 0));
 
   try {
     const sheet = await fetchSheet(SHEET_IDS.levelTracker);
 
-    const latest = [...sheet.rows]
-      .filter(r => r.cells.some(c => c.value?.toString().toUpperCase() === empID))
+    const latest = sheet.rows
+      .filter(r =>
+        r.cells.some(c => c.value?.toString().toUpperCase() === empID)
+      )
       .sort((a,b) => new Date(b.cells[0].value) - new Date(a.cells[0].value))[0];
 
     if (latest) {
@@ -20,7 +24,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const col = sheet.columns.find(c => c.title.trim().toLowerCase() === key.toLowerCase());
         return latest.cells.find(c => c.columnId === col?.id)?.displayValue || '';
       };
-
       const level = getCell('Level') || 'N/A';
       const monthKey = getCell('Month Key');
       const monthStr = monthKey
@@ -37,18 +40,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderTable({
       sheet,
       containerId: 'levelTableContainer',
-      title: 'Monthly Level Tracker',
       checkmarkCols: ['Meets L1', 'Meets L2', 'Meets L3'],
       columnOrder: [
-        'Month Key', 'CI Submissions', 'Safety Submissions', 'Quality Submissions',
-        'Total Submissions', 'Power Hours Logged',
-        'Meets L1', 'Meets L2', 'Meets L3', 'Level'
+        'Month Key','CI Submissions','Safety Submissions','Quality Submissions',
+        'Total Submissions','Power Hours Logged',
+        'Meets L1','Meets L2','Meets L3','Level'
       ]
     });
-
   } catch (err) {
-    console.error("Error loading Level Tracker:", err);
-    document.getElementById("levelTableContainer").innerHTML =
-      "<p>Failed to load level data.</p>";
+    console.error('Error loading Level Tracker:', err);
+    document.getElementById('levelTableContainer').innerHTML =
+      '<p>Failed to load level data.</p>';
   }
 });
