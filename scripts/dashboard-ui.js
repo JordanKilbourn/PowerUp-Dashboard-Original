@@ -1,6 +1,6 @@
 // /scripts/dashboard-ui.js
 
-document.addEventListener("DOMContentLoaded", () => {
+function initializeAccordions() {
   const headers = document.querySelectorAll(".accordion-header");
 
   headers.forEach(header => {
@@ -25,4 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   });
-});
+}
+
+// ✅ ACTIVATE after DOM injection
+initializeAccordions();
