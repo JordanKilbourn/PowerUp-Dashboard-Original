@@ -1,27 +1,25 @@
-<!-- PowerUp_Dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PowerUp Dashboard</title>
-  
+
   <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  
-  <!-- Styles -->
+
+  <!-- App Styles -->
   <link rel="stylesheet" href="/styles/powerup.css" />
 </head>
 <body>
 
-  <!-- Injected Components -->
+  <!-- Sidebar + Header injected via JS -->
   <div id="sidebar"></div>
   <div id="header"></div>
 
-  <!-- Main Content -->
-  <div class="container">
-    <div class="dashboard-header">
+  <main class="container">
+    <section class="dashboard-header">
       <div class="goal-pill-group" id="pillSummary"></div>
 
       <div class="progress-container">
@@ -33,10 +31,10 @@
       </div>
 
       <div class="token-tracker">Tokens Earned: <strong id="tokenTotal">0</strong></div>
-    </div>
+    </section>
 
-    <!-- Accordion Section - CI Submissions -->
-    <div class="accordion">
+    <!-- Accordion Tables -->
+    <section class="accordion">
       <div class="accordion-item">
         <h2 class="accordion-header" data-target="ciContent">
           <i class="fas fa-chevron-right rotate-icon"></i> CI Submissions
@@ -44,7 +42,6 @@
         <div class="accordion-content" id="ciContent"></div>
       </div>
 
-      <!-- Accordion Section - Safety Concerns -->
       <div class="accordion-item">
         <h2 class="accordion-header" data-target="safetyContent">
           <i class="fas fa-chevron-right rotate-icon"></i> Safety Concerns
@@ -52,19 +49,17 @@
         <div class="accordion-content" id="safetyContent"></div>
       </div>
 
-      <!-- Accordion Section - Quality Catches -->
       <div class="accordion-item">
         <h2 class="accordion-header" data-target="qcContent">
           <i class="fas fa-chevron-right rotate-icon"></i> Quality Catches
         </h2>
         <div class="accordion-content" id="qcContent"></div>
       </div>
-    </div>
-  </div>
+    </section>
+  </main>
 
-<!-- Modern entry point (no include.js needed anymore!) -->
-<script type="module" src="/scripts/init-dashboard.js"></script>
-
+  <!-- Main Entry Script -->
+  <script type="module" src="/scripts/init-dashboard.js"></script>
 
 </body>
 </html>
