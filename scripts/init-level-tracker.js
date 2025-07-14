@@ -1,22 +1,19 @@
 // /scripts/init-level-tracker.js
 import { SHEET_IDS, fetchSheet } from './api.js';
 import { renderTable } from './table.js';
-import './session.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Ensure header/sidebar are loaded first
+  await window.loadPageComponents?.();
+
   const empID = sessionStorage.getItem('empID');
   if (!empID) return;
-
-  // Wait until header/sidebar have been injected
-  await new Promise(r => setTimeout(r, 0));
 
   try {
     const sheet = await fetchSheet(SHEET_IDS.levelTracker);
 
     const latest = sheet.rows
-      .filter(r =>
-        r.cells.some(c => c.value?.toString().toUpperCase() === empID)
-      )
+      .filter(r => r.cells.some(c => String(c.value).toUpperCase() === empID))
       .sort((a,b) => new Date(b.cells[0].value) - new Date(a.cells[0].value))[0];
 
     if (latest) {
@@ -30,9 +27,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         ? new Date(monthKey).toLocaleString('default', { month: 'long', year: 'numeric' })
         : 'Unknown';
 
+      // Update UI + session
       document.getElementById('userLevel').textContent = level;
       document.getElementById('currentMonth').textContent = monthStr;
-
       sessionStorage.setItem('currentLevel', level);
       sessionStorage.setItem('currentMonth', monthStr);
     }
@@ -40,11 +37,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderTable({
       sheet,
       containerId: 'levelTableContainer',
-      checkmarkCols: ['Meets L1', 'Meets L2', 'Meets L3'],
+      title: 'Monthly Level Tracker',
+      checkmarkCols: ['Meets L1','Meets L2','Meets L3'],
       columnOrder: [
         'Month Key','CI Submissions','Safety Submissions','Quality Submissions',
-        'Total Submissions','Power Hours Logged',
-        'Meets L1','Meets L2','Meets L3','Level'
+        'Total Submissions','Power Hours Logged','Meets L1','Meets L2','Meets L3','Level'
       ]
     });
   } catch (err) {
