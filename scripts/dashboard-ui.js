@@ -27,5 +27,6 @@ function initializeAccordions() {
   });
 }
 
+
 // ✅ ACTIVATE after DOM injection
 initializeAccordions();
