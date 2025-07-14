@@ -34,17 +34,28 @@ function initAfterIncludes() {
   // Safely load each script in order:
   const scriptSequence = [
     "/scripts/session.js",
-    "/scripts/dashboard-ui.js",
-    "/scripts/load-dashboard.js"
+    "/scripts/load-dashboard.js",
+    "/scripts/dashboard-ui.js"
   ];
 
-  scriptSequence.forEach(src => {
+  scriptSequence.forEach((src, i) => {
     const s = document.createElement("script");
     s.src = src;
     s.defer = true;
+
+    if (i === scriptSequence.length - 1) {
+      // Final script (dashboard-ui) → call accordion init AFTER loading
+      s.onload = () => {
+        if (window.initializeAccordions) {
+          window.initializeAccordions();
+        }
+      };
+    }
+
     document.body.appendChild(s);
   });
 }
+
 
 // Kick off component loading when DOM is ready
 document.addEventListener("DOMContentLoaded", loadComponents);
