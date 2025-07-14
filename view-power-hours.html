@@ -11,9 +11,11 @@
   <link rel="stylesheet" href="/styles/powerup.css">
 </head>
 <body>
+  <!-- Modular Includes -->
   <div id="sidebar"></div>
   <div id="header"></div>
 
+  <!-- Main Content -->
   <div class="container">
     <div class="dashboard-header">
       <div class="header-left">
@@ -26,7 +28,8 @@
     </div>
 
     <h2><i class="fas fa-clock"></i> Power Hours Log</h2>
-    <p id="hoursTally" style="margin: 10px 0; font-weight: 600; font-size: 16px; color: #38bdf8;"></p>
+    <p id="hoursTally" class="highlight-info"></p>
+
     <table class="dashboard-table">
       <thead>
         <tr>
@@ -40,7 +43,7 @@
     </table>
   </div>
 
-  <!-- 📦 Entry point -->
+  <!-- JS Entry Point -->
   <script type="module" src="/scripts/init-power-hours.js"></script>
 </body>
 </html>
