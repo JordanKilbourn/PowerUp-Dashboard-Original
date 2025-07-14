@@ -1,15 +1,15 @@
 // /scripts/load-dashboard.js
+import { renderTable } from '/scripts/table.js';
 
 function loadDashboard() {
   const empID = sessionStorage.getItem("empID");
   if (!empID) return;
 
-  // Sheet and report IDs
   const levelSheet = '8346763116105604';        // Level Tracker (sheet)
   const hoursSheet = '1240392906264452';        // Power Hours (sheet)
-  const ciSheet = '7397205473185668';           // ✅ CI Submission Mirror (sheet)
-  const safetySheet = '4089265651666820';        // Safety Concerns (report)
-  const qcSheet = '1431258165890948';            // Quality Catches (report)
+  const ciSheet = '7397205473185668';           // CI Submission Mirror (sheet)
+  const safetySheet = '4089265651666820';       // Safety Concerns (report)
+  const qcSheet = '1431258165890948';           // Quality Catches (report)
 
   const proxy = 'https://powerup-proxy.onrender.com';
 
@@ -26,16 +26,38 @@ function loadDashboard() {
     .then(([level, hours, ci, safety, qc]) => {
       updateLevelInfo(level);
       updatePowerHours(hours);
-      renderTable(ci, "ciContent", "CI Submissions");
-      renderTable(safety, "safetyContent", "Safety Concerns");
-      renderTable(qc, "qcContent", "Quality Catches");
+
+      // ✅ Render CI Submissions
+      renderTable({
+        sheet: ci,
+        containerId: "ciContent",
+        title: "CI Submissions",
+        checkmarkCols: ["Resourced", "Paid", "Project Work Completed"],
+        excludeCols: ["Submitted By", "Valid Row", "Employee ID"]
+      });
+
+      // ✅ Render Safety Concerns
+      renderTable({
+        sheet: safety,
+        containerId: "safetyContent",
+        title: "Safety Concerns",
+        excludeCols: ["Employee ID"]
+      });
+
+      // ✅ Render Quality Catches
+      renderTable({
+        sheet: qc,
+        containerId: "qcContent",
+        title: "Quality Catches",
+        excludeCols: ["Employee ID"]
+      });
     })
     .catch(err => {
       console.error("Failed to load dashboard data:", err);
     });
 }
 
-// 🧠 Update header info + session from level data
+// 🧠 Update header info from level data
 function updateLevelInfo(sheet) {
   const empID = sessionStorage.getItem("empID");
   const rows = sheet.rows.filter(r => r.cells.some(c =>
@@ -69,7 +91,7 @@ function updateLevelInfo(sheet) {
   if (monthEl) monthEl.textContent = monthStr;
 }
 
-// 🧮 Calculate progress from Power Hours
+// 🧮 Calculate Power Hours Progress
 function updatePowerHours(sheet) {
   const empID = sessionStorage.getItem("empID");
   const rows = sheet.rows.filter(r => r.cells.some(c =>
@@ -96,72 +118,5 @@ function updatePowerHours(sheet) {
   sessionStorage.setItem("powerHours", totalHours.toFixed(1));
 }
 
-// 🧾 Basic table rendering logic (✅ FIXED)
-function renderTable(sheet, containerId, title) {
-  const empID = sessionStorage.getItem("empID");
-  const container = document.getElementById(containerId);
-  if (!container) return;
-
-  const colMap = {};
-  sheet.columns.forEach(c => colMap[c.title.trim().toLowerCase()] = c.id);
-
-  const get = (row, title) => {
-    const colId = colMap[title.toLowerCase()];
-    const cell = row.cells.find(c => c.columnId === colId);
-    return cell?.displayValue || cell?.value || '';
-  };
-
-  const rows = sheet.rows.filter(r => {
-    const idVal = get(r, "Employee ID");
-    return idVal && idVal.toString().toUpperCase() === empID;
-  });
-
-  if (rows.length === 0) {
-    container.innerHTML = `<h2>${title}</h2><p>No records found.</p>`;
-    return;
-  }
-
-  const checkboxCols = ["Resourced", "Paid", "Project Work Completed"];
-  const excludeCols = ["Submitted By", "Valid Row", "Employee ID"];
-  const visibleCols = sheet.columns.filter(c =>
-    !c.hidden && !excludeCols.includes(c.title.trim())
-  );
-
-  let html = `<div class="dashboard-table-container"><table class="dashboard-table">
-    <thead>
-      <tr>`;
-  visibleCols.forEach(c => {
-    html += `<th>${c.title}</th>`;
-  });
-  html += `</tr>
-    </thead>
-    <tbody class="dashboard-table-body">`;
-
-  rows.forEach(r => {
-    html += "<tr>";
-    visibleCols.forEach(c => {
-      const cell = r.cells.find(x => x.columnId === c.id);
-      const val = cell?.displayValue || cell?.value || "";
-
-      const colName = c.title.trim().toLowerCase();
-      const isCheckbox = checkboxCols.map(x => x.toLowerCase()).includes(colName);
-      const icon = isCheckbox
-        ? val === true
-          ? `<span class="checkmark">&#10003;</span>`
-          : val === false
-            ? `<span class="cross">&#10007;</span>`
-            : ""
-        : val;
-
-      html += `<td title="${val}">${icon}</td>`;
-    });
-    html += "</tr>";
-  });
-
-  html += `</tbody></table></div>`;
-  container.innerHTML = html;
-}
-
-// ✅ ACTIVATE:
-loadDashboard();
-
+// ✅ Export if needed
+export { loadDashboard };
