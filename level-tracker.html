@@ -1,23 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Level Tracker | PowerUp Dashboard</title>
+  <meta charset="UTF-8" />
+  <title>Level Tracker</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-  <link rel="stylesheet" href="/styles/powerup.css"/>
+  <link rel="stylesheet" href="styles/powerup.css" />
+  <script defer src="https://kit.fontawesome.com/xxxxxxxxxx.js" crossorigin="anonymous"></script>
 </head>
 <body>
   <div id="sidebar"></div>
   <div id="header"></div>
 
   <main class="container">
-    <h2><i class="fas fa-chart-line"></i> Monthly Level Tracker</h2>
-    <div id="levelTableContainer"></div>
+    <h2><i class="fas fa-chart-line"></i> Level History</h2>
+
+    <div class="dashboard-table-container">
+      <table class="dashboard-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Level</th>
+            <th>Hours This Month</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody id="levelBody"></tbody>
+      </table>
+    </div>
   </main>
 
-  <script type="module" src="/scripts/init-level-tracker.js"></script>
+  <script type="module" src="scripts/init-level-tracker.js"></script>
 </body>
 </html>
