@@ -148,3 +148,19 @@ header h1 {
   .sidebar.open { width: 100%; position: relative; height: auto; }
   table, th, td { font-size: 13px; }
 }
+
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+.accordion-item.open .accordion-content {
+  max-height: 1000px; /* or a large enough value */
+}
+.rotate-icon {
+  transition: transform 0.3s ease;
+}
+.rotate-icon.open {
+  transform: rotate(90deg);
+}
+
