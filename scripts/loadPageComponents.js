@@ -1,15 +1,17 @@
 // scripts/loadPageComponents.js
 import { initializeSession, setupSidebarBehavior } from './session.js';
 
-// Loads header + sidebar HTML fragments, then preps session UI
+/**
+ * Inject header + sidebar fragments, then wire up
+ * session display and sidebar behaviour.
+ * Uses purely relative paths so the code works no matter
+ * where the site is hosted (root or sub-folder).
+ */
 export async function loadPageComponents() {
-  // Compute base path to /components/ regardless of nesting depth
-  const base = location.pathname.replace(/\/[^/]*$/, '/components/');
-
   try {
     const [headerHTML, sidebarHTML] = await Promise.all([
-      fetch(`${base}header.html`).then(r => r.text()),
-      fetch(`${base}sidebar.html`).then(r => r.text())
+      fetch('components/header.html').then(r => r.text()),
+      fetch('components/sidebar.html').then(r => r.text())
     ]);
 
     document.getElementById('header').innerHTML  = headerHTML;
@@ -20,6 +22,6 @@ export async function loadPageComponents() {
   } catch (err) {
     console.error('Component load failed', err);
     document.getElementById('header').textContent =
-      '⚠️ Error loading layout – see console';
+      '⚠️ Error loading layout (see console)';
   }
 }
