@@ -1,10 +1,9 @@
-// /scripts/init-level-tracker.js
+import { loadPageComponents } from './loadPageComponents.js';
 import { SHEET_IDS, fetchSheet } from './api.js';
 import { renderTable } from './table.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // Ensure header/sidebar are loaded first
-  await window.loadPageComponents?.();
+  await loadPageComponents();
 
   const empID = sessionStorage.getItem('empID');
   if (!empID) return;
@@ -13,40 +12,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sheet = await fetchSheet(SHEET_IDS.levelTracker);
 
     const latest = sheet.rows
-      .filter(r => r.cells.some(c => String(c.value).toUpperCase() === empID))
-      .sort((a,b) => new Date(b.cells[0].value) - new Date(a.cells[0].value))[0];
+      .filter(r => r.cells.some(c => c.value?.toString().toUpperCase() === empID))
+      .sort((a, b) => new Date(b.cells[0].value) - new Date(a.cells[0].value))[0];
 
     if (latest) {
-      const getCell = key => {
+      const get = key => {
         const col = sheet.columns.find(c => c.title.trim().toLowerCase() === key.toLowerCase());
         return latest.cells.find(c => c.columnId === col?.id)?.displayValue || '';
       };
-      const level = getCell('Level') || 'N/A';
-      const monthKey = getCell('Month Key');
+      const level = get('Level') || 'N/A';
+      const monthKey = get('Month Key');
       const monthStr = monthKey
         ? new Date(monthKey).toLocaleString('default', { month: 'long', year: 'numeric' })
         : 'Unknown';
 
-      // Update UI + session
-      document.getElementById('userLevel').textContent = level;
-      document.getElementById('currentMonth').textContent = monthStr;
       sessionStorage.setItem('currentLevel', level);
       sessionStorage.setItem('currentMonth', monthStr);
+
+      // Update session elements just in case
+      window.initializeSession?.();
     }
 
     renderTable({
       sheet,
       containerId: 'levelTableContainer',
       title: 'Monthly Level Tracker',
-      checkmarkCols: ['Meets L1','Meets L2','Meets L3'],
+      checkmarkCols: ['Meets L1', 'Meets L2', 'Meets L3'],
       columnOrder: [
-        'Month Key','CI Submissions','Safety Submissions','Quality Submissions',
-        'Total Submissions','Power Hours Logged','Meets L1','Meets L2','Meets L3','Level'
+        'Month Key', 'CI Submissions', 'Safety Submissions', 'Quality Submissions',
+        'Total Submissions', 'Power Hours Logged',
+        'Meets L1', 'Meets L2', 'Meets L3', 'Level'
       ]
     });
-  } catch (err) {
-    console.error('Error loading Level Tracker:', err);
-    document.getElementById('levelTableContainer').innerHTML =
-      '<p>Failed to load level data.</p>';
+  } catch (e) {
+    console.error(e);
+    document.getElementById('levelTableContainer').innerHTML = '<p>Failed to load level data.</p>';
   }
 });
