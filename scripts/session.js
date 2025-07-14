@@ -6,7 +6,7 @@ export const setSession = (k, v) => sessionStorage.setItem(k, v);
 export const getSession = k => sessionStorage.getItem(k);
 
 export function initializeSession() {
-  const name  = getSession('displayName')  ?? 'Unknown User';
+  const name  = getSession('displayName')  ?? getSession('empID') ?? 'User';
   const level = getSession('currentLevel') ?? '—';
   const month = getSession('currentMonth') ??
         new Date().toLocaleString('default', { month: 'long' });
