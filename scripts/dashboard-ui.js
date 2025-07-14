@@ -2,7 +2,6 @@
 
 function initializeAccordions() {
   const headers = document.querySelectorAll(".accordion-header");
-  console.log("Initializing accordions...", headers.length);
 
   headers.forEach(header => {
     header.addEventListener("click", () => {
@@ -29,6 +28,4 @@ function initializeAccordions() {
   });
 }
 
-// Export to global so include.js can call it
-window.initializeAccordions = initializeAccordions;
-
+export { initializeAccordions };
