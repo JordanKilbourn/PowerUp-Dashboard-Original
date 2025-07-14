@@ -4,8 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Level Tracker | PowerUp Dashboard</title>
+
+  <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Styles -->
   <link rel="stylesheet" href="/styles/powerup.css">
 </head>
 <body>
@@ -18,32 +22,34 @@
   <div class="container">
     <h2><i class="fas fa-chart-line"></i> Monthly Level Tracker</h2>
 
-    <table class="level-table">
-      <thead>
-        <tr>
-          <th>Month Key</th>
-          <th>CI Submissions</th>
-          <th>Safety Submissions</th>
-          <th>Quality Submissions</th>
-          <th>Total Submissions</th>
-          <th>Power Hours Logged</th>
-          <th>Meets L1</th>
-          <th>Meets L2</th>
-          <th>Meets L3</th>
-          <th>Level</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td colspan="10">Loading...</td></tr>
-      </tbody>
-    </table>
+    <div class="dashboard-table-container">
+      <table class="dashboard-table">
+        <thead>
+          <tr>
+            <th>Month Key</th>
+            <th>CI Submissions</th>
+            <th>Safety Submissions</th>
+            <th>Quality Submissions</th>
+            <th>Total Submissions</th>
+            <th>Power Hours Logged</th>
+            <th>Meets L1</th>
+            <th>Meets L2</th>
+            <th>Meets L3</th>
+            <th>Level</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="10">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
-  <!-- Include Loader -->
+  <!-- Component Injection -->
   <script src="/scripts/include.js"></script>
 
+  <!-- Level Tracker Logic -->
   <script>
-    // Load components then run tracker logic
     loadComponents().then(() => {
       const empID = sessionStorage.getItem('empID');
       const displayName = sessionStorage.getItem('displayName') || 'User';
@@ -55,7 +61,7 @@
 
       const sheetId = '8346763116105604';
       const proxyUrl = `https://powerup-proxy.onrender.com/sheet/${sheetId}`;
-      const tbody = document.querySelector('.level-table tbody');
+      const tbody = document.querySelector('.dashboard-table tbody');
 
       fetch(proxyUrl)
         .then(res => {
@@ -84,7 +90,7 @@
             return;
           }
 
-          // Set header info (if elements exist)
+          // Set header info if available
           const userEl = document.getElementById('userGreeting');
           const levelEl = document.getElementById('userLevel');
           const monthEl = document.getElementById('currentMonth');
@@ -99,7 +105,7 @@
               : 'Unknown';
           }
 
-          // Render table rows
+          // Render table
           tbody.innerHTML = '';
           rows.forEach(r => {
             const tr = document.createElement('tr');
