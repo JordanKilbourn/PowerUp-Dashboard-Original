@@ -1,27 +1,28 @@
-// scripts/loadPageComponents.js
-import { initializeSession, setupSidebarBehavior } from './session.js';
+import './session.js';
 
-/**
- * Inject header + sidebar fragments, then wire up
- * session display and sidebar behaviour.
- * Uses purely relative paths so the code works no matter
- * where the site is hosted (root or sub-folder).
- */
 export async function loadPageComponents() {
+  const sidebarEl = document.getElementById('sidebar');
+  const headerEl = document.getElementById('header');
+
+  if (!sidebarEl || !headerEl) {
+    console.error("Missing #sidebar or #header elements.");
+    return;
+  }
+
   try {
-    const [headerHTML, sidebarHTML] = await Promise.all([
-      fetch('components/header.html').then(r => r.text()),
-      fetch('components/sidebar.html').then(r => r.text())
+    const [sidebarHTML, headerHTML] = await Promise.all([
+      fetch('/components/sidebar.html').then(r => r.text()),
+      fetch('/components/header.html').then(r => r.text())
     ]);
 
-    document.getElementById('header').innerHTML  = headerHTML;
-    document.getElementById('sidebar').innerHTML = sidebarHTML;
+    sidebarEl.innerHTML = sidebarHTML;
+    headerEl.innerHTML = headerHTML;
 
-    initializeSession();
-    setupSidebarBehavior();
+    // Activate UI behavior and session rendering
+    window.initializeSession?.();
+    window.setupSidebarBehavior?.();
+
   } catch (err) {
-    console.error('Component load failed', err);
-    document.getElementById('header').textContent =
-      '⚠️ Error loading layout (see console)';
+    console.error("Failed loading components:", err);
   }
 }
