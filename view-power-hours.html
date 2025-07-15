@@ -1,39 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Power Hours Log</title>
+  <meta charset="UTF‑8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Power Hours | PowerUp Dashboard</title>
 
-  <link rel="stylesheet" href="styles/powerup.css" />
-  <script defer src="https://kit.fontawesome.com/xxxxxxxxxx.js" crossorigin="anonymous"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="/styles/powerup.css"/>
 </head>
 <body>
   <div id="sidebar"></div>
   <div id="header"></div>
 
   <main class="container">
-    <h2><i class="fas fa-clock"></i> Power Hours Log</h2>
-    <p id="hoursTally" class="tally-bar"></p>
+    <div class="dashboard-header">
+      <div class="header-left">
+        <strong>Welcome:</strong> <span id="userName">...</span> |
+        <strong>Level:</strong> <span id="userLevel">...</span> |
+        <strong>Month:</strong> <span id="currentMonth">...</span>
+      </div>
+    </div>
 
+    <h2><i class="fas fa-clock"></i> Power Hours Log</h2>
+    <p id="hoursTally"></p>
     <div class="dashboard-table-container">
       <table class="dashboard-table">
         <thead>
           <tr>
-            <th>Power Hour ID</th>
-            <th>Date</th>
-            <th>Start</th>
-            <th>End</th>
-            <th>Scheduled</th>
-            <th>Completed</th>
-            <th>Completed Hours</th>
-            <th>Activity Description</th>
+            <th>Power Hour ID</th><th>Date</th><th>Start Time</th><th>End Time</th>
+            <th>Scheduled</th><th>Completed</th><th>Completed Hours</th><th>Activity Description</th>
           </tr>
         </thead>
-        <tbody id="powerHoursBody"></tbody>
+        <tbody id="powerHoursBody">
+          <tr><td colspan="8">Loading...</td></tr>
+        </tbody>
       </table>
     </div>
   </main>
 
-  <script type="module" src="scripts/init-power-hours.js"></script>
+  <script type="module" src="/scripts/init-power-hours.js"></script>
 </body>
 </html>
