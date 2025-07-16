@@ -16,14 +16,11 @@ export function renderAccordion(containerId, rows, empID) {
     return;
   }
 
+  // Render each row as a simple paragraph block
   container.innerHTML = filtered.map((row, index) => `
-    <div class="accordion-card">
-      <div class="accordion-header" onclick="this.nextElementSibling.classList.toggle('open')">
-        <strong>${row['Title'] || row['Topic'] || `Record ${index + 1}`}</strong>
-      </div>
-      <div class="accordion-body">
-        ${Object.entries(row).map(([k, v]) => `<p><strong>${k}:</strong> ${v}</p>`).join('')}
-      </div>
+    <div class="data-row">
+      ${Object.entries(row).map(([k, v]) => `<p><strong>${k}:</strong> ${v}</p>`).join('')}
+      <hr />
     </div>
   `).join('');
 }
