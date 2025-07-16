@@ -2,59 +2,39 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PowerUp Dashboard</title>
 
-  <!-- Styles -->
   <link rel="stylesheet" href="styles/powerup.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-
-  <!-- Scripts: Load components first -->
-  <script type="module" src="scripts/loadPageComponents.js"></script>
+  <!-- Font Awesome (icons) – replace with your kit or self-host -->
+  <script defer src="https://kit.fontawesome.com/xxxxxxxxxx.js" crossorigin="anonymous"></script>
 </head>
 <body>
-
-  <!-- These will be injected by JS -->
+  <!-- Dynamic layout placeholders -->
   <div id="sidebar"></div>
-  <header id="header" class="main-header"></header>
+  <div id="header"></div>
 
-  <!-- Main content area -->
-  <div class="container">
-    <div class="dashboard-header">
-      <h1>PowerUp Dashboard</h1>
-      <div class="goal-pill-group">
-        <span class="pill green" id="goalStatus">Loading goal status...</span>
-        <span class="pill" id="daysLeft"></span>
-        <span class="pill" id="hoursRemaining"></span>
+  <!-- Main content -->
+  <main class="container">
+    <h2><i class="fas fa-tachometer-alt"></i> Overview</h2>
+
+    <section class="accordion">
+      <div class="accordion-item">
+        <button class="accordion-header">CI Submissions</button>
+        <div id="ciContent" class="accordion-content"></div>
       </div>
-      <div class="progress-container">
-        <div class="progress-label">Monthly Progress</div>
-        <div class="progress-bar">
-          <div class="progress-bar-fill" id="progressFill"></div>
-        </div>
-        <div class="token-tracker" id="tokenTracker"></div>
+
+      <div class="accordion-item">
+        <button class="accordion-header">Safety Concerns</button>
+        <div id="safetyContent" class="accordion-content"></div>
       </div>
-    </div>
 
-    <!-- Accordion sections -->
-    <div class="section">
-      <h2>CI Submissions</h2>
-      <div id="ciContent"></div>
-    </div>
+      <div class="accordion-item">
+        <button class="accordion-header">Quality Catches</button>
+        <div id="qcContent" class="accordion-content"></div>
+      </div>
+    </section>
+  </main>
 
-    <div class="section">
-      <h2>Safety Concerns</h2>
-      <div id="safetyContent"></div>
-    </div>
-
-    <div class="section">
-      <h2>Quality Catches</h2>
-      <div id="qcContent"></div>
-    </div>
-  </div>
-
-  <!-- Logic scripts (run after layout) -->
   <script type="module" src="scripts/init-dashboard.js"></script>
-  <script type="module" src="scripts/session.js"></script>
 </body>
 </html>
