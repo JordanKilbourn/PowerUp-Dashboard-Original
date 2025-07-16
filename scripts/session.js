@@ -1,36 +1,74 @@
-// scripts/session.js
-// Thin, shared session + sidebar helpers
+// /scripts/session.js
 
-/* ---------- session helpers ---------- */
-export const setSession = (k, v) => sessionStorage.setItem(k, v);
-export const getSession = k => sessionStorage.getItem(k);
+function initializeSession() {
+  const empID = sessionStorage.getItem("empID");
+  const displayName = sessionStorage.getItem("displayName") || "User";
+  const level = sessionStorage.getItem("currentLevel") || "N/A";
+  const month = sessionStorage.getItem("currentMonth") || "Unknown";
 
-export function initializeSession() {
-  const name  = getSession('displayName')  ?? getSession('empID') ?? 'User';
-  const level = getSession('currentLevel') ?? '—';
-  const month = getSession('currentMonth') ??
-        new Date().toLocaleString('default', { month: 'long' });
+  // Update UI if elements exist
+  updateTextById("userGreeting", displayName);
+  updateTextById("userLevel", level);
+  updateTextById("currentMonth", month);
 
-  document.getElementById('userGreeting').textContent = `Welcome, ${name}`;
-  document.getElementById('userLevel').textContent    = level;
-  document.getElementById('currentMonth').textContent = month;
+  // Redirect if not authenticated
+  if (!empID && !window.location.pathname.includes("index.html")) {
+    alert("Please log in first.");
+    window.location.href = "index.html";
+  }
 }
 
-/* ---------- sidebar behaviour ---------- */
-export function setupSidebarBehavior() {
-  const sidebar = document.getElementById('sidebar');
-  document.getElementById('sidebarToggle')
-          ?.addEventListener('click', () => sidebar.classList.toggle('open'));
+/**
+ * Update element textContent by ID if it exists
+ * @param {string} id 
+ * @param {string} text 
+ */
+function updateTextById(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
 
-  document.getElementById('logoutLink')
-          ?.addEventListener('click', () => {
-            sessionStorage.clear();
-            window.location.href = 'index.html';
-          });
+/**
+ * Toggle sidebar open/close class
+ */
+function toggleSidebar() {
+  const sidebar = document.querySelector(".sidebar");
+  if (sidebar) {
+    sidebar.classList.toggle("open");
+  }
+}
 
-  // Highlight current page link
-  const path = location.pathname.split('/').pop();
-  sidebar.querySelectorAll('.nav-link').forEach(a => {
-    if (a.getAttribute('href') === path) a.classList.add('active');
+/**
+ * Log out and redirect
+ */
+function logout() {
+  if (confirm("Are you sure you want to log out?")) {
+    sessionStorage.clear();
+    window.location.href = "index.html";
+  }
+}
+
+/**
+ * Highlight active page link in sidebar
+ */
+function highlightSidebar() {
+  const path = window.location.pathname.split("/").pop().toLowerCase();
+  document.querySelectorAll(".sidebar a[href]").forEach(link => {
+    if (link.getAttribute("href").toLowerCase() === path) {
+      link.classList.add("active");
+    }
   });
 }
+
+/**
+ * Setup sidebar-related features and window-accessible handlers
+ */
+function setupSidebarBehavior() {
+  highlightSidebar();
+  window.toggleSidebar = toggleSidebar;
+  window.logout = logout;
+}
+
+// 🔁 INIT SESSION + SIDEBAR LOGIC
+initializeSession();
+setupSidebarBehavior();
