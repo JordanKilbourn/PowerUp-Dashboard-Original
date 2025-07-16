@@ -1,28 +1,29 @@
-import './session.js';
+// scripts/loadPageComponents.js
 
 export async function loadPageComponents() {
-  const sidebarEl = document.getElementById('sidebar');
-  const headerEl = document.getElementById('header');
-
-  if (!sidebarEl || !headerEl) {
-    console.error("Missing #sidebar or #header elements.");
-    return;
-  }
-
   try {
+    const sidebar = document.getElementById('sidebar');
+    const header = document.getElementById('header');
+
+    if (!sidebar || !header) {
+      console.warn('Sidebar or header container not found.');
+      return;
+    }
+
     const [sidebarHTML, headerHTML] = await Promise.all([
-      fetch('/components/sidebar.html').then(r => r.text()),
-      fetch('/components/header.html').then(r => r.text())
+      fetch('./components/sidebar.html').then(res => res.text()),
+      fetch('./components/header.html').then(res => res.text()),
     ]);
 
-    sidebarEl.innerHTML = sidebarHTML;
-    headerEl.innerHTML = headerHTML;
+    sidebar.innerHTML = sidebarHTML;
+    header.innerHTML = headerHTML;
 
-    // Activate UI behavior and session rendering
-    window.initializeSession?.();
-    window.setupSidebarBehavior?.();
+    // Dynamically import session logic
+    const { initializeSession, setupSidebarBehavior } = await import('./session.js');
+    initializeSession();
+    setupSidebarBehavior();
 
   } catch (err) {
-    console.error("Failed loading components:", err);
+    console.error('Failed to load sidebar or header:', err);
   }
 }
