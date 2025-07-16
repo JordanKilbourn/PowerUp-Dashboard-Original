@@ -217,3 +217,36 @@ header h1 {
     width: 60px;
   }
 }
+
+/* --- Sidebar class used in real layout --- */
+@media (max-width: 768px) {
+  .sidebar.collapsed:not(.open) {
+    width: 60px;
+  }
+}
+
+/* --- Topbar/Header Styling --- */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: #1c1c2e;
+  border-bottom: 1px solid #334155;
+  color: white;
+  margin-left: 60px;
+}
+
+/* --- Icon Button --- */
+.icon-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.icon-btn.danger {
+  color: #f87171;
+}
+
