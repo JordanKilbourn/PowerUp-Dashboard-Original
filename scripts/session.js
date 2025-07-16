@@ -1,51 +1,55 @@
-/* scripts/session.js
-   — central session helpers + auto-refreshing header badges */
+// scripts/session.js
 
-export function setSession(key, value) {
-  sessionStorage.setItem(key, value);
-
-  // Auto-refresh header if one of the badge fields changed
-  if (['displayName', 'currentLevel', 'currentMonth', 'empID'].includes(key)) {
-    refreshHeaderBadges();        // safe even if header isn’t on the page yet
-  }
-}
-
-export const getSession = key => sessionStorage.getItem(key);
-
-/* Called once, immediately after header/sidebar injection */
 export function initializeSession() {
+  const empID = sessionStorage.getItem('empID');
+  const name = sessionStorage.getItem('displayName');
+  if (!empID || !name) return;
+
+  const welcome = document.getElementById('welcomeName');
+  if (welcome) welcome.textContent = name;
+
   refreshHeaderBadges();
 }
 
-/* ---------- private ---------- */
-function refreshHeaderBadges() {
-  const nameEl  = document.getElementById('userGreeting');
-  const lvlEl   = document.getElementById('userLevel');
-  const moEl    = document.getElementById('currentMonth');
-  if (!nameEl || !lvlEl || !moEl) return;   // header not injected yet
-
-  const name  = getSession('displayName')  ?? getSession('empID') ?? 'User';
-  const level = getSession('currentLevel') ?? '—';
-  const month = getSession('currentMonth') ?? 'Unknown';
-
-  nameEl.textContent = `Welcome, ${name}`;
-  lvlEl.textContent  = level;
-  moEl.textContent   = month;
+export function setSession(key, value) {
+  sessionStorage.setItem(key, value);
+  if (['currentLevel', 'currentMonth'].includes(key)) {
+    refreshHeaderBadges();
+  }
 }
 
-/* ---------- sidebar behaviour (unchanged) ---------- */
 export function setupSidebarBehavior() {
-  const sidebar = document.getElementById('sidebar');
-  document.getElementById('sidebarToggle')
-          ?.addEventListener('click', () => sidebar.classList.toggle('open'));
-  document.getElementById('logoutLink')
-          ?.addEventListener('click', () => {
-            sessionStorage.clear();
-            window.location.href = 'index.html';
-          });
+  const toggle = document.getElementById('sidebarToggle');
+  const logout = document.getElementById('logoutBtn');
 
-  const path = location.pathname.split('/').pop();
-  sidebar.querySelectorAll('.nav-link').forEach(a => {
-    if (a.getAttribute('href') === path) a.classList.add('active');
+  if (toggle) {
+    toggle.addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    });
+  }
+
+  if (logout) {
+    logout.addEventListener('click', () => {
+      sessionStorage.clear();
+      window.location.href = 'index.html';
+    });
+  }
+
+  const links = document.querySelectorAll('.nav-link');
+  links.forEach(link => {
+    if (link.href.endsWith(location.pathname)) {
+      link.classList.add('active');
+    }
   });
+}
+
+function refreshHeaderBadges() {
+  const level = sessionStorage.getItem('currentLevel');
+  const month = sessionStorage.getItem('currentMonth');
+
+  const badgeLevel = document.getElementById('badgeLevel');
+  const badgeMonth = document.getElementById('badgeMonth');
+
+  if (badgeLevel) badgeLevel.textContent = level || '';
+  if (badgeMonth) badgeMonth.textContent = month || '';
 }
