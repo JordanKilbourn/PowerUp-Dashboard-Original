@@ -148,3 +148,43 @@ header h1 {
   .sidebar.open { width: 100%; position: relative; height: auto; }
   table, th, td { font-size: 13px; }
 }
+
+/* ========== ACCORDION STYLES ========== */
+.accordion-header {
+  cursor: pointer;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #f8fafc;
+  background: #1c2237;
+  border-top: 1px solid #334155;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.accordion-item:last-child .accordion-header {
+  border-bottom: 1px solid #334155;
+}
+
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  background: #0f172a;
+  padding: 0 20px;
+}
+
+.accordion-item.open .accordion-content {
+  max-height: 1000px; /* Big enough for table to expand */
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.rotate-icon {
+  transition: transform 0.3s ease;
+}
+
+.rotate-icon.open {
+  transform: rotate(90deg);
+}
