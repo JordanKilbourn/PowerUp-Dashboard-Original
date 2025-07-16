@@ -46,6 +46,18 @@ header.main-header {
   margin-left: 60px;
   flex-wrap: wrap;
   gap: 10px;
+
+  /* NEW: make header fixed for all pages */
+  position: fixed;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: 900;
+  padding-left: 60px;
+  height: 80px;
+}
+.sidebar.open ~ .main-header {
+  padding-left: 220px; /* NEW: shift header when sidebar is open */
 }
 
 .header-left {
@@ -82,7 +94,16 @@ header h1 {
 }
 
 /* ========== MAIN LAYOUT ========== */
-.container { margin-left: 60px; padding: 20px; transition: margin-left 0.3s; }
+.container {
+  margin-left: 60px;
+  padding: 20px;
+  transition: margin-left 0.3s;
+  margin-top: 100px; /* NEW: spacing below fixed header */
+}
+.sidebar.open + .container {
+  margin-left: 220px; /* NEW: shift container with sidebar open */
+}
+
 .dashboard-header {
   background: #0f172a; border: 1px solid #1e293b; padding: 20px;
   border-radius: 12px; box-shadow: 0 0 12px rgba(0,0,0,0.2);
@@ -118,7 +139,7 @@ header h1 {
   margin-top: 30px;
 }
 
-/* ========== TABLES (Sticky Headers & Scroll Body) ========== */
+/* ========== TABLES ========== */
 .dashboard-table-container {
   max-height: 240px;
   overflow-y: auto;
@@ -245,8 +266,6 @@ header h1 {
   font-size: 20px;
   cursor: pointer;
 }
-
 .icon-btn.danger {
   color: #f87171;
 }
-
