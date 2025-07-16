@@ -25,3 +25,8 @@ export function fetchSheet(id) {
 export function fetchReport(id) {
   return fetch(`${API_PROXY}/report/${id}`).then(handleResponse);
 }
+
+export async function getSheetRows(id) {
+  return fetchSheet(id); // since you're only using sheets now
+}
+
