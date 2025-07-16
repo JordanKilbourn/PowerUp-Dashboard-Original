@@ -1,27 +1,36 @@
-// scripts/loadPageComponents.js
-import { initializeSession, setupSidebarBehavior } from './session.js';
+// scripts/session.js
+// Thin, shared session + sidebar helpers
 
-/**
- * Inject header + sidebar fragments, then wire up
- * session display and sidebar behaviour.
- * Uses purely relative paths so the code works no matter
- * where the site is hosted (root or sub-folder).
- */
-export async function loadPageComponents() {
-  try {
-    const [headerHTML, sidebarHTML] = await Promise.all([
-      fetch('components/header.html').then(r => r.text()),
-      fetch('components/sidebar.html').then(r => r.text())
-    ]);
+/* ---------- session helpers ---------- */
+export const setSession = (k, v) => sessionStorage.setItem(k, v);
+export const getSession = k => sessionStorage.getItem(k);
 
-    document.getElementById('header').innerHTML  = headerHTML;
-    document.getElementById('sidebar').innerHTML = sidebarHTML;
+export function initializeSession() {
+  const name  = getSession('displayName')  ?? getSession('empID') ?? 'User';
+  const level = getSession('currentLevel') ?? '—';
+  const month = getSession('currentMonth') ??
+        new Date().toLocaleString('default', { month: 'long' });
 
-    initializeSession();
-    setupSidebarBehavior();
-  } catch (err) {
-    console.error('Component load failed', err);
-    document.getElementById('header').textContent =
-      '⚠️ Error loading layout (see console)';
-  }
+  document.getElementById('userGreeting').textContent = `Welcome, ${name}`;
+  document.getElementById('userLevel').textContent    = level;
+  document.getElementById('currentMonth').textContent = month;
+}
+
+/* ---------- sidebar behaviour ---------- */
+export function setupSidebarBehavior() {
+  const sidebar = document.getElementById('sidebar');
+  document.getElementById('sidebarToggle')
+          ?.addEventListener('click', () => sidebar.classList.toggle('open'));
+
+  document.getElementById('logoutLink')
+          ?.addEventListener('click', () => {
+            sessionStorage.clear();
+            window.location.href = 'index.html';
+          });
+
+  // Highlight current page link
+  const path = location.pathname.split('/').pop();
+  sidebar.querySelectorAll('.nav-link').forEach(a => {
+    if (a.getAttribute('href') === path) a.classList.add('active');
+  });
 }
