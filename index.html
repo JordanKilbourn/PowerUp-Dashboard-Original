@@ -24,7 +24,7 @@
       max-width: 400px;
       width: 100%;
     }
-    h1 { margin-bottom: 24px; text-align: center; }
+    h1 { margin-bottom: 24px; }
     label { display: block; margin-bottom: 6px; font-weight: 600; }
     input {
       width: 100%;
@@ -47,7 +47,7 @@
       cursor: pointer;
     }
     button:disabled { background: #555; cursor: not-allowed; }
-    .error { color: #f87171; margin-bottom: 12px; text-align: center; }
+    .error { color: #f87171; margin-bottom: 12px; }
   </style>
 </head>
 <body>
@@ -63,25 +63,23 @@
     <button id="loginBtn" disabled>Login</button>
   </div>
 
-<script type="module">
-  import { setSession } from './scripts/session.js';
+<script>
+  const sheetUrl = 'https://powerup-proxy.onrender.com/sheet/2195459817820036';
 
-  const SHEET_ID  = '2195459817820036';
-  const PROXY_URL = 'https://powerup-proxy.onrender.com';
-  const SHEET_URL = `${PROXY_URL}/sheet/${SHEET_ID}`;
+  const empInput = document.getElementById('empID');
+  const loginBtn = document.getElementById('loginBtn');
+  const errorMsg = document.getElementById('errorMsg');
 
-  const empInput  = document.getElementById('empID');
-  const loginBtn  = document.getElementById('loginBtn');
-  const errorMsg  = document.getElementById('errorMsg');
-
-  empInput.focus();
+  window.onload = () => {
+    empInput.focus();
+  };
 
   empInput.addEventListener('input', () => {
     loginBtn.disabled = empInput.value.trim().length < 2;
   });
 
-  empInput.addEventListener('keypress', e => {
-    if (e.key === 'Enter' && !loginBtn.disabled) handleLogin();
+  empInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !loginBtn.disabled) tryLogin();
   });
 
   empInput.addEventListener('paste', () => {
@@ -91,52 +89,52 @@
     }, 50);
   });
 
-  loginBtn.addEventListener('click', handleLogin);
+  loginBtn.addEventListener('click', tryLogin);
 
-  async function handleLogin() {
+  async function tryLogin() {
     const empID = empInput.value.trim().toUpperCase();
-    loginBtn.disabled = true;
-    loginBtn.textContent = 'Logging in…';
     errorMsg.textContent = '';
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'Logging in...';
 
     try {
-      const res  = await fetch(SHEET_URL, { cache: 'no-store' });
+      const res = await fetch(sheetUrl, { cache: 'no-store' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
 
-      const data     = await res.json();
-      const pidCol   = getColumnId(data.columns, 'Position ID');
-      const nameCol  = getColumnId(data.columns, 'Display Name');
+      const pidCol = getColumnId(data.columns, 'Position ID');
+      const nameCol = getColumnId(data.columns, 'Display Name');
 
-      const userRow  = data.rows.find(r =>
-        r.cells.some(c => c.columnId === pidCol &&
-                          String(c.value).toUpperCase() === empID)
+      const match = data.rows.find(r =>
+        r.cells.some(c => c.columnId === pidCol && String(c.value).toUpperCase() === empID)
       );
-      if (!userRow) throw new Error(`No match found for Employee ID “${empID}”.`);
 
-      const displayName =
-        userRow.cells.find(c => c.columnId === nameCol)?.displayValue || empID;
+      if (!match) {
+        errorMsg.textContent = `No match found for Employee ID "${empID}".`;
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Login';
+        return;
+      }
 
-      /* 🔄 store via helper so header auto-updates later */
-      setSession('empID',       empID);        // ⬅️  changed
-      setSession('displayName', displayName);  // ⬅️  changed
+      const dispName = match.cells.find(c => c.columnId === nameCol);
+      const displayName = dispName?.displayValue || dispName?.value || empID;
 
+      sessionStorage.setItem('empID', empID);
+      sessionStorage.setItem('displayName', displayName);
       window.location.href = 'PowerUp_Dashboard.html';
     } catch (err) {
-      errorMsg.textContent = err.message.includes('match')
-        ? err.message
-        : 'Authentication service failed.';
+      console.error(err);
+      errorMsg.textContent = 'Error connecting to authentication service.';
       loginBtn.disabled = false;
       loginBtn.textContent = 'Login';
-      console.error(err);
     }
   }
 
   function getColumnId(columns, title) {
-    return columns.find(c =>
-      c.title.trim().toLowerCase() === title.toLowerCase())?.id ?? null;
+    const col = columns.find(c => c.title.trim().toLowerCase() === title.toLowerCase());
+    return col ? col.id : null;
   }
 </script>
-
 
 </body>
 </html>
