@@ -1,53 +1,48 @@
-import { loadPageComponents }  from './loadPageComponents.js';
-import { SHEET_IDS, fetchSheet } from './api.js';
-import { renderTable }          from './table.js';
-import { setSession }           from './session.js';
+/* scripts/init-level-tracker.js
+   – shows full level history table */
+
+import { loadPageComponents } from './loadPageComponents.js';
+import { getSheetRows }       from './api.js';
+import { renderTable }        from './table.js';
+import { setSession }         from './session.js';
+
+const SHEET_ID = '8346763116105604'; // Level Tracker sheet
 
 document.addEventListener('DOMContentLoaded', async () => {
   await loadPageComponents();
+  if (!sessionStorage.getItem('empID')) {
+    window.location.href = 'index.html';
+    return;
+  }
 
-  const empID = sessionStorage.getItem('empID');
-  if (!empID) { window.location.href = 'index.html'; return; }
+  const empID = sessionStorage.getItem('empID').toUpperCase();
 
-  try {
-    const sheet = await fetchSheet(SHEET_IDS.levelTracker);
+  /* fetch sheet + filter to this employee */
+  const sheet = await getSheetRows(SHEET_ID);
+  const rows  = sheet.rows.filter(r =>
+      (r.cells.find(c => c.columnId === sheet.columnsByTitle['Employee ID'].id)
+               ?.displayValue ?? '').toUpperCase() === empID);
 
-    // find latest record for this employee
-    const rows = sheet.rows.filter(r =>
-      r.cells.some(c => c.value?.toString().toUpperCase() === empID));
+  /* render table */
+  renderTable({
+    sheet,
+    containerId: 'levelBody',
+    rowFilter: rows,
+    columnOrder: ['Date','Level','Hours This Month','Comment']
+  });
 
-    rows.sort((a, b) =>
-      new Date(b.cells[0].value) - new Date(a.cells[0].value));
+  /* badge update (in case user lands here first) */
+  if (rows.length) {
+    const latest = rows.sort((a,b)=>new Date(a.modifiedAt)-new Date(b.modifiedAt)).at(-1);
+    const lvl = latest.cells.find(c => c.columnId === sheet.columnsByTitle.Level.id)
+                    ?.displayValue ?? '—';
+    const month = new Date(latest.modifiedAt)
+                    .toLocaleString('default', { month: 'long', year: 'numeric' });
 
-    const latest = rows[0];
-    if (latest) {
-      const colBy = t => sheet.columns.find(c => c.title.trim().toLowerCase() === t);
-      const get   = t => latest.cells.find(c => c.columnId === colBy(t)?.id)?.displayValue;
+    setSession('currentLevel', lvl);
+    setSession('currentMonth', month);
 
-      const level     = get('level')     || 'N/A';
-      const monthKey  = get('month key');
-      const monthStr  = monthKey
-        ? new Date(monthKey).toLocaleString('default', { month:'long', year:'numeric' })
-        : new Date().toLocaleString('default', { month:'long', year:'numeric' });
-
-      setSession('currentLevel',  level);
-      setSession('currentMonth',  monthStr);
-    }
-
-    renderTable({
-      sheet,
-      containerId: 'levelTableContainer',
-      title: 'Monthly Level Tracker',
-      checkmarkCols: ['Meets L1','Meets L2','Meets L3'],
-      columnOrder: [
-        'Month Key','CI Submissions','Safety Submissions','Quality Submissions',
-        'Total Submissions','Power Hours Logged',
-        'Meets L1','Meets L2','Meets L3','Level'
-      ]
-    });
-  } catch (err) {
-    console.error(err);
-    document.getElementById('levelTableContainer').innerHTML =
-      '<p>Failed to load level data.</p>';
+    document.getElementById('userLevel').textContent    = lvl;
+    document.getElementById('currentMonth').textContent = month;
   }
 });
