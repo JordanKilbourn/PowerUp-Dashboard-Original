@@ -1,13 +1,13 @@
 // scripts/init-dashboard.js
 
-import { loadPageComponents } from './include.js';
+import { loadPageComponents } from './loadPageComponents.js';
 import { getSheetRows } from './api.js';
 import { renderAccordion } from './dashboard-ui.js';
 
 const SHEET_IDS = {
-  ci: '6584024920182660',
-  safety: '4089265651666820',
-  qc: '1431258165890948',
+  ci: '6584024920182660', // actual CI Sheet
+  safety: '4089265651666820', // will support later
+  qc: '1431258165890948',     // will support later
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
