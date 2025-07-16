@@ -1,33 +1,27 @@
 // scripts/loadPageComponents.js
+import { initializeSession, setupSidebarBehavior } from './session.js';
+
+/**
+ * Inject header + sidebar fragments, then wire up
+ * session display and sidebar behaviour.
+ * Uses purely relative paths so the code works no matter
+ * where the site is hosted (root or sub-folder).
+ */
 export async function loadPageComponents() {
-  // Load sidebar
-  const sidebarRes = await fetch('components/sidebar.html');
-  const sidebarHtml = await sidebarRes.text();
-  document.getElementById('sidebar').innerHTML = sidebarHtml;
+  try {
+    const [headerHTML, sidebarHTML] = await Promise.all([
+      fetch('components/header.html').then(r => r.text()),
+      fetch('components/sidebar.html').then(r => r.text())
+    ]);
 
-  // Load header
-  const headerRes = await fetch('components/header.html');
-  const headerHtml = await headerRes.text();
-  document.getElementById('header').innerHTML = headerHtml;
+    document.getElementById('header').innerHTML  = headerHTML;
+    document.getElementById('sidebar').innerHTML = sidebarHTML;
 
-  // Activate sidebar toggle
-  const toggleBtn = document.getElementById('sidebarToggle');
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => {
-      document.getElementById('sidebar').classList.toggle('open');
-    });
+    initializeSession();
+    setupSidebarBehavior();
+  } catch (err) {
+    console.error('Component load failed', err);
+    document.getElementById('header').textContent =
+      '⚠️ Error loading layout (see console)';
   }
-
-  // Populate user info from sessionStorage
-  const name = sessionStorage.getItem('userName') || 'User';
-  const level = sessionStorage.getItem('userLevel') || 'Level ?';
-  const month = sessionStorage.getItem('currentMonth') || 'Month ?';
-
-  const greeting = document.getElementById('userGreeting');
-  const levelEl = document.getElementById('userLevel');
-  const monthEl = document.getElementById('currentMonth');
-
-  if (greeting) greeting.textContent = `Welcome, ${name}`;
-  if (levelEl) levelEl.textContent = `Level ${level}`;
-  if (monthEl) monthEl.textContent = month;
 }
