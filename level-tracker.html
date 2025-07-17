@@ -27,53 +27,9 @@
   <!-- Load Header/Sidebar -->
   <script src="/scripts/include.js"></script>
 
-  <!-- Load Table + Logic -->
-  <script type="module">
-    import { renderTable } from '/scripts/table.js';
+  <!-- Load Page-Specific JS -->
+<script type="module" src="/scripts/init-level-tracker.js"></script>
 
-    loadComponents().then(() => {
-      const empID = sessionStorage.getItem("empID");
-      const displayName = sessionStorage.getItem("displayName") || "User";
-      if (!empID) {
-        alert("Please log in first.");
-        window.location.href = "index.html";
-        return;
-      }
 
-      fetch("https://powerup-proxy.onrender.com/sheet/8346763116105604")
-        .then(res => res.json())
-        .then(sheet => {
-          // Optional: update header info if header DOM is present
-          const row = sheet.rows.find(r =>
-            r.cells.some(c => c.value?.toString().toUpperCase() === empID)
-          );
-
-          if (row) {
-            const level = row.cells.find(c => c.columnId && sheet.columns.find(col => col.title === "Level")?.id === c.columnId)?.value || "N/A";
-            const monthKey = row.cells.find(c => c.columnId && sheet.columns.find(col => col.title === "Month Key")?.id === c.columnId)?.value;
-
-            const levelEl = document.getElementById("userLevel");
-            const monthEl = document.getElementById("currentMonth");
-            if (levelEl) levelEl.textContent = level;
-            if (monthEl && monthKey) {
-              monthEl.textContent = new Date(monthKey).toLocaleString("default", { month: "long", year: "numeric" });
-            }
-          }
-
-          // ✅ Render the table
-          renderTable({
-            sheet,
-            containerId: "levelTableContainer",
-            title: "Monthly Level Tracker",
-            checkmarkCols: ["Meets L1", "Meets L2", "Meets L3"],
-            columnOrder: [
-              "Month Key", "CI Submissions", "Safety Submissions", "Quality Submissions",
-              "Total Submissions", "Power Hours Logged",
-              "Meets L1", "Meets L2", "Meets L3", "Level"
-            ]
-          });
-        });
-    });
-  </script>
 </body>
 </html>
