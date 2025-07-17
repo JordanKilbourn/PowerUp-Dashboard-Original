@@ -1,14 +1,11 @@
-// /scripts/init-level-tracker.js
-import { renderTable } from '/scripts/table.js';
+import { initializePage } from './layout.js';
+import { renderTable } from './table.js';
 import './session.js';
-import { loadComponents } from './include.js';
 
 document.addEventListener("DOMContentLoaded", async () => {
-  await loadComponents();
+  await initializePage();  // Loads sidebar + header
 
   const empID = sessionStorage.getItem("empID");
-  const displayName = sessionStorage.getItem("displayName") || "User";
-
   if (!empID) {
     alert("Please log in first.");
     window.location.href = "index.html";
