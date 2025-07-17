@@ -91,12 +91,14 @@ function updateLevelInfo(sheet) {
   if (monthEl) monthEl.textContent = monthStr;
 }
 
-// 🧮 Calculate Power Hours Progress
-function updatePowerHours(sheet) {
+// 🧮 Calculate Power Hours Progress using dynamic goal ranges
+async function updatePowerHours(sheet) {
   const empID = sessionStorage.getItem("empID");
-  const rows = sheet.rows.filter(r => r.cells.some(c =>
-    c.value?.toString().toUpperCase() === empID
-  ));
+  const currentLevel = sessionStorage.getItem("currentLevel") || "N/A";
+
+  const rows = sheet.rows.filter(r =>
+    r.cells.some(c => c.value?.toString().toUpperCase() === empID)
+  );
 
   let totalHours = 0;
   for (const row of rows) {
@@ -104,16 +106,60 @@ function updatePowerHours(sheet) {
     if (cell?.value) totalHours += cell.value;
   }
 
-  const phEl = document.getElementById("phProgress");
+  // ⏳ Fetch goal ranges from Power Hour Targets sheet
+  let minTarget = 8;
+  let maxTarget = 12;
+
+  try {
+    const targetsRes = await fetch("https://powerup-proxy.onrender.com/sheet/3542697273937796");
+    const targetsData = await targetsRes.json();
+
+    const levelRow = targetsData.rows.find(r =>
+      r.cells.some(c => c.displayValue?.toString().toLowerCase() === currentLevel.toLowerCase())
+    );
+
+    if (levelRow) {
+      const get = (title) => {
+        const col = targetsData.columns.find(c => c.title.trim().toLowerCase() === title.toLowerCase());
+        const cell = levelRow.cells.find(x => x.columnId === col?.id);
+        return parseFloat(cell?.displayValue || cell?.value || '');
+      };
+
+      minTarget = get("Min Hours") || minTarget;
+      maxTarget = get("Max Hours") || maxTarget;
+    }
+  } catch (err) {
+    console.warn("Power Hour Targets not loaded, using default range.");
+  }
+
+  // 🧠 Calculate display logic
+  const percent = Math.min((totalHours / minTarget) * 100, 100);
   const barEl = document.getElementById("progressBar");
+  const phEl = document.getElementById("phProgress");
   const tipsEl = document.getElementById("powerTips");
 
-  phEl.textContent = `${totalHours.toFixed(1)} / 8`;
-  barEl.style.width = `${Math.min((totalHours / 8) * 100, 100)}%`;
+  barEl.style.width = `${percent}%`;
+  phEl.textContent = `${totalHours.toFixed(1)} / ${minTarget}`;
 
-  tipsEl.textContent = totalHours >= 8
-    ? "Target met! Great job!"
-    : `You're ${(8 - totalHours).toFixed(1)} hour(s) away from your monthly goal.`;
+  // 🎨 Bar color logic
+  barEl.style.backgroundColor =
+    totalHours >= minTarget && totalHours <= maxTarget
+      ? "#4ade80" // green
+      : totalHours > maxTarget
+        ? "#facc15" // yellow (overachiever)
+        : "#60a5fa"; // blue (in progress)
+
+  // 💡 Tips logic
+  if (totalHours >= minTarget && totalHours <= maxTarget) {
+    tipsEl.textContent = "✅ Target met! Great job!";
+  } else if (totalHours > maxTarget) {
+    tipsEl.textContent = "🎉 You've gone above and beyond!";
+  } else {
+    const now = new Date();
+    const daysLeft = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() - now.getDate();
+    const remaining = (minTarget - totalHours).toFixed(1);
+    tipsEl.textContent = `You're ${remaining} hour(s) away from your goal. ${daysLeft} day(s) left this month.`;
+  }
 
   sessionStorage.setItem("powerHours", totalHours.toFixed(1));
 }
