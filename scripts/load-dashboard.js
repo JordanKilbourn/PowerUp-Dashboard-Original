@@ -100,11 +100,19 @@ async function updatePowerHours(sheet) {
     r.cells.some(c => c.value?.toString().toUpperCase() === empID)
   );
 
-  let totalHours = 0;
-  for (const row of rows) {
-    const cell = row.cells.find(c => c.value && typeof c.value === 'number');
-    if (cell?.value) totalHours += cell.value;
+let totalHours = 0;
+
+for (const row of rows) {
+  const completedCol = sheet.columns.find(c => c.title.trim().toLowerCase() === "completed");
+  const hoursCol = sheet.columns.find(c => c.title.trim().toLowerCase() === "completed hours");
+
+  const isCompleted = row.cells.find(c => c.columnId === completedCol?.id)?.value === true;
+  const completedVal = row.cells.find(c => c.columnId === hoursCol?.id)?.value;
+
+  if (isCompleted && typeof completedVal === "number") {
+    totalHours += completedVal;
   }
+}
 
   // ⏳ Fetch goal ranges from Power Hour Targets sheet
   let minTarget = 8;
