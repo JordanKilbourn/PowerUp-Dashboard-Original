@@ -1,13 +1,4 @@
 // /scripts/init-level-tracker.js
-import { initializePage } from './layout.js';
-import './session.js';
-
-document.addEventListener("DOMContentLoaded", async () => {
-  await initializePage();
-  // You can add page-specific logic here later if needed
-});
-
-// /scripts/init-level-tracker.js
 import { renderTable } from '/scripts/table.js';
 import './session.js';
 import { loadComponents } from './include.js';
@@ -67,4 +58,3 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Failed to load level tracker data:", err);
   }
 });
-
