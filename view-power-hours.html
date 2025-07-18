@@ -8,25 +8,25 @@
   <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Styles -->
   <link rel="stylesheet" href="/styles/powerup.css">
 </head>
 <body>
 
-  <!-- Modular Includes -->
+  <!-- Shared Layout -->
   <div id="sidebar"></div>
   <div id="header"></div>
 
   <!-- Page Content -->
   <div class="container">
     <h2><i class="fas fa-clock"></i> Power Hours Log</h2>
-    <p id="hoursTally" style="margin: 10px 0; font-weight: 600; font-size: 16px; color: #38bdf8;"></p>
+    <p style="color: #38bdf8;" id="hoursTally">Total Power Hours Logged: 0</p>
     <div id="powerHoursTableContainer"></div>
   </div>
 
-  <!-- Layout Loader -->
-  <script src="/scripts/include.js"></script>
-
-  <!-- Page-Specific Script -->
+  <!-- Load Shared Layout & Script -->
   <script type="module" src="/scripts/init-power-hours.js"></script>
+
 </body>
 </html>
