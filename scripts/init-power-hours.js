@@ -1,6 +1,5 @@
-// /scripts/init-power-hours.js
 import { initializePage } from './layout.js';
-import { SHEET_IDS, fetchSheet } from './api.js';
+import { renderTable } from './table.js';
 import './session.js';
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -13,69 +12,53 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  // Load header values
-  document.getElementById("userName").textContent = sessionStorage.getItem("displayName") || empID;
-  document.getElementById("userLevel").textContent = sessionStorage.getItem("currentLevel") || "N/A";
-  document.getElementById("currentMonth").textContent = sessionStorage.getItem("currentMonth") || "Unknown";
-
-  const tbody = document.getElementById('powerHoursBody');
-
   try {
-    const sheet = await fetchSheet(SHEET_IDS.powerHours);
+    const res = await fetch("https://powerup-proxy.onrender.com/sheet/1240392906264452");
+    const sheet = await res.json();
 
-    const colMap = {};
-    sheet.columns.forEach(col => {
-      colMap[col.title.trim().toLowerCase()] = col.id;
-    });
-
-    const getVal = (row, colTitle) => {
-      const id = colMap[colTitle.trim().toLowerCase()];
-      const cell = row.cells.find(c => c.columnId === id);
-      return cell ? (cell.displayValue ?? cell.value ?? '') : '';
-    };
-
-    const matchingRows = sheet.rows.filter(r => {
-      const rawID = getVal(r, 'employee id');
-      return rawID?.toString().toUpperCase() === empID;
-    });
-
-    tbody.innerHTML = matchingRows.length === 0
-      ? '<tr><td colspan="8">No Power Hours records found.</td></tr>'
-      : '';
+    const matchingRows = sheet.rows.filter(r =>
+      r.cells.some(c => c.value?.toString().toUpperCase() === empID)
+    );
 
     let totalHours = 0;
+    const transformedRows = matchingRows.map(row => {
+      const get = (title) => {
+        const col = sheet.columns.find(c => c.title.trim().toLowerCase() === title.toLowerCase());
+        const cell = row.cells.find(x => x.columnId === col?.id);
+        return cell?.displayValue ?? cell?.value ?? '';
+      };
 
-    matchingRows.forEach(r => {
-      const tr = document.createElement('tr');
-      const completedHours = parseFloat(getVal(r, 'completed hours')) || 0;
+      const completedHours = parseFloat(get("Completed Hours")) || 0;
       totalHours += completedHours;
 
-      const values = [
-        getVal(r, 'power hour id'),
-        getVal(r, 'date'),
-        getVal(r, 'start time'),
-        getVal(r, 'end time'),
-        getVal(r, 'scheduled') === true ? '✔️' : '❌',
-        getVal(r, 'completed') === true ? '✔️' : '❌',
-        completedHours,
-        getVal(r, 'activity description')
-      ];
-
-      values.forEach(val => {
-        const td = document.createElement('td');
-        td.textContent = val;
-        td.title = val;
-        tr.appendChild(td);
-      });
-
-      tbody.appendChild(tr);
+      return {
+        "Power Hour ID": get("Power Hour ID"),
+        "Date": get("Date"),
+        "Start Time": get("Start Time"),
+        "End Time": get("End Time"),
+        "Scheduled": get("Scheduled") === true ? "✔️" : "❌",
+        "Completed": get("Completed") === true ? "✔️" : "❌",
+        "Completed Hours": completedHours,
+        "Activity Description": get("Activity Description")
+      };
     });
 
+    // Update header tally
     document.getElementById("hoursTally").textContent = `Total Power Hours Logged: ${totalHours}`;
     sessionStorage.setItem("totalPowerHoursLogged", totalHours);
 
+    // Render table
+    renderTable({
+      rows: transformedRows,
+      containerId: "powerHoursTableContainer",
+      columnOrder: [
+        "Power Hour ID", "Date", "Start Time", "End Time",
+        "Scheduled", "Completed", "Completed Hours", "Activity Description"
+      ]
+    });
+
   } catch (err) {
-    console.error("Error loading Power Hours data:", err);
-    tbody.innerHTML = '<tr><td colspan="8">Failed to load Power Hours data.</td></tr>';
+    console.error("Failed to load Power Hours data:", err);
+    document.getElementById("powerHoursTableContainer").innerHTML = '<p style="color:red;">Failed to load Power Hours data.</p>';
   }
 });
