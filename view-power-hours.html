@@ -1,48 +1,87 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>View Power Hours | PowerUp Dashboard</title>
+// /scripts/init-power-hours.js
+import { initializePage } from './layout.js';
+import { SHEET_IDS, fetchSheet } from './api.js';
+import './session.js';
 
-  <!-- Fonts + Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="/styles/powerup.css">
-</head>
-<body>
-  <div id="sidebar"></div>
-  <div id="header"></div>
+document.addEventListener("DOMContentLoaded", async () => {
+  await initializePage();
 
-  <!-- 🧱 Consistent Layout Wrapper -->
-  <div class="main-content">
-    <div class="container">
-      <h2><i class="fas fa-clock"></i> Power Hours Log</h2>
-      <p id="hoursTally" style="margin: 10px 0; font-weight: 600; font-size: 16px; color: #38bdf8;"></p>
+  // === ✅ Robust Session Check ===
+  const empID = sessionStorage.getItem("empID");
+  const displayName = sessionStorage.getItem("displayName");
+  const currentLevel = sessionStorage.getItem("currentLevel");
+  const currentMonth = sessionStorage.getItem("currentMonth");
 
-      <div class="dashboard-table-container">
-        <table class="dashboard-table">
-          <thead>
-            <tr>
-              <th>Power Hour ID</th>
-              <th>Date</th>
-              <th>Start Time</th>
-              <th>End Time</th>
-              <th>Scheduled</th>
-              <th>Completed</th>
-              <th>Completed Hours</th>
-              <th>Activity Description</th>
-            </tr>
-          </thead>
-          <tbody id="powerHoursBody">
-            <tr><td colspan="8">Loading...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
+  if (!empID || !displayName || !currentLevel || !currentMonth) {
+    alert("Your session has expired or is incomplete. Please log in again.");
+    window.location.href = "index.html";
+    return;
+  }
 
-  <!-- 📦 Script Entry Point -->
-  <script type="module" src="/scripts/init-power-hours.js"></script>
-</body>
-</html>
+  // === ✅ Populate Header Tags ===
+  document.getElementById("userName").textContent = displayName;
+  document.getElementById("userLevel").textContent = currentLevel;
+  document.getElementById("currentMonth").textContent = currentMonth;
+
+  // === ✅ Begin Data Load ===
+  const tbody = document.getElementById('powerHoursBody');
+
+  try {
+    const sheet = await fetchSheet(SHEET_IDS.powerHours);
+
+    const colMap = {};
+    sheet.columns.forEach(col => {
+      colMap[col.title.trim().toLowerCase()] = col.id;
+    });
+
+    const getVal = (row, colTitle) => {
+      const id = colMap[colTitle.trim().toLowerCase()];
+      const cell = row.cells.find(c => c.columnId === id);
+      return cell ? (cell.displayValue ?? cell.value ?? '') : '';
+    };
+
+    const matchingRows = sheet.rows.filter(r => {
+      const rawID = getVal(r, 'employee id');
+      return rawID?.toString().toUpperCase() === empID;
+    });
+
+    tbody.innerHTML = matchingRows.length === 0
+      ? '<tr><td colspan="8">No Power Hours records found.</td></tr>'
+      : '';
+
+    let totalHours = 0;
+
+    matchingRows.forEach(r => {
+      const tr = document.createElement('tr');
+      const completedHours = parseFloat(getVal(r, 'completed hours')) || 0;
+      totalHours += completedHours;
+
+      const values = [
+        getVal(r, 'power hour id'),
+        getVal(r, 'date'),
+        getVal(r, 'start time'),
+        getVal(r, 'end time'),
+        getVal(r, 'scheduled') === true ? '✔️' : '❌',
+        getVal(r, 'completed') === true ? '✔️' : '❌',
+        completedHours,
+        getVal(r, 'activity description')
+      ];
+
+      values.forEach(val => {
+        const td = document.createElement('td');
+        td.textContent = val;
+        td.title = val;
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById("hoursTally").textContent = `Total Power Hours Logged: ${totalHours}`;
+    sessionStorage.setItem("totalPowerHoursLogged", totalHours);
+
+  } catch (err) {
+    console.error("Error loading Power Hours data:", err);
+    tbody.innerHTML = '<tr><td colspan="8">Failed to load Power Hours data.</td></tr>';
+  }
+});
