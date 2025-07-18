@@ -1,64 +1,94 @@
 import { initializePage } from './layout.js';
-import { renderTable } from './table.js';
+import { SHEET_IDS, fetchSheet } from './api.js';
 import './session.js';
 
 document.addEventListener("DOMContentLoaded", async () => {
-  await initializePage();
+  await initializePage();  // Load sidebar + header
 
   const empID = sessionStorage.getItem("empID");
   if (!empID) {
-    alert("Please log in first.");
+    alert("Session expired. Please log in again.");
     window.location.href = "index.html";
     return;
   }
 
+  const container = document.getElementById("powerHoursTableContainer");
+  const tally = document.getElementById("hoursTally");
+
   try {
-    const res = await fetch("https://powerup-proxy.onrender.com/sheet/1240392906264452");
-    const sheet = await res.json();
+    const sheet = await fetchSheet(SHEET_IDS.powerHours);
+    const colMap = {};
+    sheet.columns.forEach(col => {
+      colMap[col.title.trim().toLowerCase()] = col.id;
+    });
+
+    const getVal = (row, colTitle) => {
+      const id = colMap[colTitle.toLowerCase()];
+      const cell = row.cells.find(c => c.columnId === id);
+      return cell?.displayValue ?? cell?.value ?? '';
+    };
 
     const matchingRows = sheet.rows.filter(r =>
-      r.cells.some(c => c.value?.toString().toUpperCase() === empID)
+      getVal(r, 'employee id').toString().toUpperCase() === empID
     );
 
+    if (matchingRows.length === 0) {
+      container.innerHTML = "<p>No Power Hours records found.</p>";
+      return;
+    }
+
+    // Build Table
+    const table = document.createElement("table");
+    table.classList.add("powerup-table");
+
+    const thead = document.createElement("thead");
+    thead.innerHTML = `
+      <tr>
+        <th>PH ID</th>
+        <th>Date</th>
+        <th>Start Time</th>
+        <th>End Time</th>
+        <th>Scheduled?</th>
+        <th>Completed?</th>
+        <th>Activity</th>
+        <th>Hours</th>
+      </tr>
+    `;
+    table.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
     let totalHours = 0;
-    const transformedRows = matchingRows.map(row => {
-      const get = (title) => {
-        const col = sheet.columns.find(c => c.title.trim().toLowerCase() === title.toLowerCase());
-        const cell = row.cells.find(x => x.columnId === col?.id);
-        return cell?.displayValue ?? cell?.value ?? '';
-      };
 
-      const completedHours = parseFloat(get("Completed Hours")) || 0;
-      totalHours += completedHours;
+    matchingRows.forEach(r => {
+      const row = document.createElement("tr");
 
-      return {
-        "Power Hour ID": get("Power Hour ID"),
-        "Date": get("Date"),
-        "Start Time": get("Start Time"),
-        "End Time": get("End Time"),
-        "Scheduled": get("Scheduled") === true ? "✔️" : "❌",
-        "Completed": get("Completed") === true ? "✔️" : "❌",
-        "Completed Hours": completedHours,
-        "Activity Description": get("Activity Description")
-      };
+      const id = getVal(r, "power hour id");
+      const date = getVal(r, "date");
+      const start = getVal(r, "start time");
+      const end = getVal(r, "end time");
+      const scheduled = getVal(r, "scheduled").toString().toLowerCase() === 'true' ? '✔️' : '❌';
+      const completed = getVal(r, "completed").toString().toLowerCase() === 'true' ? '✔️' : '❌';
+      const desc = getVal(r, "activity description");
+      const hours = parseFloat(getVal(r, "completed hours") || 0);
+
+      totalHours += hours;
+
+      [id, date, start, end, scheduled, completed, desc, hours].forEach(val => {
+        const td = document.createElement("td");
+        td.textContent = val;
+        row.appendChild(td);
+      });
+
+      tbody.appendChild(row);
     });
 
-    // Update header tally
-    document.getElementById("hoursTally").textContent = `Total Power Hours Logged: ${totalHours}`;
-    sessionStorage.setItem("totalPowerHoursLogged", totalHours);
+    table.appendChild(tbody);
+    container.appendChild(table);
 
-    // Render table
-    renderTable({
-      rows: transformedRows,
-      containerId: "powerHoursTableContainer",
-      columnOrder: [
-        "Power Hour ID", "Date", "Start Time", "End Time",
-        "Scheduled", "Completed", "Completed Hours", "Activity Description"
-      ]
-    });
+    tally.textContent = `Total Power Hours Logged: ${totalHours}`;
 
   } catch (err) {
     console.error("Failed to load Power Hours data:", err);
-    document.getElementById("powerHoursTableContainer").innerHTML = '<p style="color:red;">Failed to load Power Hours data.</p>';
+    container.innerHTML = "<p>Error loading data. Please try again later.</p>";
   }
 });
