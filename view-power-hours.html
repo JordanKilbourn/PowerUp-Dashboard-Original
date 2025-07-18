@@ -3,47 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>View Power Hours | PowerUp Dashboard</title>
+  <title>Power Hours Log | PowerUp Dashboard</title>
 
-  <!-- Fonts + Icons -->
+  <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="/styles/powerup.css">
 </head>
 <body>
-  <!-- Injected Components -->
+
+  <!-- Modular Includes -->
   <div id="sidebar"></div>
   <div id="header"></div>
 
-  <!-- Required wrapper for consistency -->
-  <main class="main-content">
-    <div class="container">
-      <h2><i class="fas fa-clock"></i> Power Hours Log</h2>
-      <p id="hoursTally" style="margin: 10px 0; font-weight: 600; font-size: 16px; color: #38bdf8;"></p>
+  <!-- Page Content -->
+  <div class="container">
+    <h2><i class="fas fa-clock"></i> Power Hours Log</h2>
+    <p id="hoursTally" style="margin: 10px 0; font-weight: 600; font-size: 16px; color: #38bdf8;"></p>
+    <div id="powerHoursTableContainer"></div>
+  </div>
 
-      <div class="dashboard-table-container">
-        <table class="dashboard-table">
-          <thead>
-            <tr>
-              <th>Power Hour ID</th>
-              <th>Date</th>
-              <th>Start Time</th>
-              <th>End Time</th>
-              <th>Scheduled</th>
-              <th>Completed</th>
-              <th>Completed Hours</th>
-              <th>Activity Description</th>
-            </tr>
-          </thead>
-          <tbody id="powerHoursBody">
-            <tr><td colspan="8">Loading...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </main>
+  <!-- Layout Loader -->
+  <script src="/scripts/include.js"></script>
 
-  <!-- Entry Point (no include.js needed!) -->
+  <!-- Page-Specific Script -->
   <script type="module" src="/scripts/init-power-hours.js"></script>
 </body>
 </html>
