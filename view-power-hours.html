@@ -11,10 +11,11 @@
   <link rel="stylesheet" href="/styles/powerup.css">
 </head>
 <body>
+  <!-- Injected Components -->
   <div id="sidebar"></div>
   <div id="header"></div>
 
-  <!-- Standardized Layout Wrapper -->
+  <!-- Required wrapper for consistency -->
   <main class="main-content">
     <div class="container">
       <h2><i class="fas fa-clock"></i> Power Hours Log</h2>
@@ -42,7 +43,7 @@
     </div>
   </main>
 
-  <!-- Entry Point -->
-  <script type="module" src="/scripts/init-power-hours.mjs"></script>
+  <!-- Entry Point (no include.js needed!) -->
+  <script type="module" src="/scripts/init-power-hours.js"></script>
 </body>
 </html>
