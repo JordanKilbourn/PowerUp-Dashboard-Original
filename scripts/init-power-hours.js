@@ -5,20 +5,20 @@ import './session.js';
 document.addEventListener("DOMContentLoaded", async () => {
   await initializePage(); // Loads sidebar + header
 
-  // After layout is injected, safely update header fields
-document.getElementById("userGreeting").textContent = sessionStorage.getItem("displayName") || "User";
+  // ✅ Safely update header fields after layout injection
+  document.getElementById("userGreeting").textContent = sessionStorage.getItem("displayName") || "User";
 
-const currentMonth = sessionStorage.getItem("currentMonth");
-if (currentMonth) {
-  document.getElementById("currentMonth").textContent = currentMonth;
-}
+  const currentMonth = sessionStorage.getItem("currentMonth");
+  if (currentMonth) {
+    document.getElementById("currentMonth").textContent = currentMonth;
+  }
 
-const currentLevel = sessionStorage.getItem("currentLevel");
-if (currentLevel) {
-  document.getElementById("userLevel").textContent = currentLevel;
-}
+  const currentLevel = sessionStorage.getItem("currentLevel");
+  if (currentLevel) {
+    document.getElementById("userLevel").textContent = currentLevel;
+  }
 
-
+  // ✅ Get logged-in employee ID
   const empID = sessionStorage.getItem("empID");
   if (!empID) {
     alert("Please log in first.");
@@ -27,61 +27,49 @@ if (currentLevel) {
   }
 
   try {
+    // ✅ Fetch the full Power Hours sheet
     const res = await fetch("https://powerup-proxy.onrender.com/sheet/1240392906264452");
     const sheet = await res.json();
 
-    const matchingRows = sheet.rows.filter(r =>
-      r.cells.some(c => c.value?.toString().toUpperCase() === empID)
+    // ✅ Filter rows for current user
+    const matchingRows = sheet.rows.filter(row =>
+      row.cells.some(cell => String(cell.value).trim().toUpperCase() === empID)
     );
 
-    let totalHours = 0;
-
-    const getCellValue = (row, colTitle) => {
-      const col = sheet.columns.find(c => c.title.trim().toLowerCase() === colTitle.toLowerCase());
+    // ✅ Optional: calculate total completed hours
+    const getVal = (row, title) => {
+      const col = sheet.columns.find(c => c.title.trim().toLowerCase() === title.toLowerCase());
       const cell = row.cells.find(x => x.columnId === col?.id);
       return cell?.displayValue || cell?.value || '';
     };
 
-    const tableRows = matchingRows.map(row => {
-      const phID = getCellValue(row, "Power Hour ID");
-      const startTime = getCellValue(row, "Start Time");
-      const endTime = getCellValue(row, "End Time");
-      const scheduled = getCellValue(row, "Scheduled?");
-      const completed = getCellValue(row, "Completed?");
-      const activity = getCellValue(row, "Activity Description");
-      const date = getCellValue(row, "Date");
-      const hours = parseFloat(getCellValue(row, "Completed Hours") || 0);
-
-      totalHours += hours;
-
-      return {
-        "Power Hour ID": phID,
-        "Date": date,
-        "Start Time": startTime,
-        "End Time": endTime,
-        "Scheduled": scheduled,
-        "Completed": completed,
-        "Completed Hours": hours,
-        "Activity Description": activity
-      };
+    let totalHours = 0;
+    matchingRows.forEach(row => {
+      const raw = getVal(row, "Completed Hours");
+      const hours = parseFloat(raw || 0);
+      if (!isNaN(hours)) totalHours += hours;
     });
 
-    // Update summary line
-    document.getElementById("powerHoursTotal").textContent = `Total Power Hours Logged: ${totalHours}`;
+    // ✅ Update summary total line
+    document.getElementById("powerHoursTotal").textContent = `Total Power Hours Logged: ${totalHours.toFixed(2)}`;
 
-    // Render table
+    // ✅ Render dynamic table using new system
+    const filteredSheet = {
+      columns: sheet.columns,
+      rows: matchingRows
+    };
+
     renderTable({
-      rows: tableRows,
+      sheet: filteredSheet,
       containerId: "powerHoursTableContainer",
       title: "Power Hours Log",
-      checkmarkCols: ["Scheduled", "Completed"],
-      columnOrder: [
-        "Power Hour ID", "Date", "Start Time", "End Time",
-        "Scheduled", "Completed", "Completed Hours", "Activity Description"
-      ]
+      excludeCols: ["Employee ID"],
+      checkmarkCols: ["Scheduled?", "Completed?"],
+      filterByEmpID: false
     });
 
   } catch (err) {
     console.error("Failed to load Power Hours data:", err);
+    document.getElementById("powerHoursTableContainer").innerHTML = `<p style="color: red;">Error loading table. Please try again later.</p>`;
   }
 });
