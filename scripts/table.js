@@ -1,73 +1,54 @@
-// /scripts/table.js
-
 export function renderTable({
   sheet,
   containerId,
-  title = '',
-  filterByEmpID = true,
-  checkmarkCols = [],
+  title = "",
   excludeCols = [],
-  columnOrder = null
+  checkmarkCols = [],
+  filterByEmpID = true
 }) {
-  const empID = sessionStorage.getItem("empID");
+  if (!sheet || !sheet.columns || !sheet.rows) return;
+
+  const empId = sessionStorage.getItem("employeeId");
+  const rows = filterByEmpID
+    ? sheet.rows.filter(row =>
+        row.cells.some(cell => String(cell.value).trim() === empId)
+      )
+    : sheet.rows;
+
   const container = document.getElementById(containerId);
-  if (!sheet || !container) return;
+  if (!container) return;
 
-  const colMap = {};
-  sheet.columns.forEach(c => {
-    colMap[c.title.trim().toLowerCase()] = c.id;
+  const colTitles = sheet.columns
+    .map(col => col.title.trim())
+    .filter(title => !excludeCols.includes(title));
+
+  const colIdMap = {};
+  colTitles.forEach(title => {
+    const col = sheet.columns.find(c => c.title.trim() === title);
+    if (col) colIdMap[title] = col.id;
   });
 
-  const get = (row, title) => {
-    const colId = colMap[title.toLowerCase()];
-    const cell = row.cells.find(c => c.columnId === colId);
-    return cell?.displayValue ?? cell?.value ?? '';
-  };
-
-  let rows = sheet.rows;
-  if (filterByEmpID) {
-    rows = rows.filter(r => {
-      const idVal = get(r, "Employee ID");
-      return idVal && idVal.toString().toUpperCase() === empID;
-    });
-  }
-
-  if (rows.length === 0) {
-    container.innerHTML = `<h2>${title}</h2><p>No records found.</p>`;
-    return;
-  }
-
-  // Columns to show
-  const visibleCols = columnOrder
-    ? columnOrder.filter(c => !excludeCols.includes(c))
-    : sheet.columns.filter(c =>
-        !c.hidden && !excludeCols.includes(c.title.trim())
-      ).map(c => c.title);
-
-  let html = `<div class="dashboard-table-container"><table class="dashboard-table">
-    <thead>
-      <tr>`;
-  visibleCols.forEach(c => {
-    html += `<th>${c}</th>`;
+  // Create table
+  let html = `<div class="table-wrapper"><h3>${title}</h3><table><thead><tr>`;
+  colTitles.forEach(title => {
+    html += `<th>${title}</th>`;
   });
-  html += `</tr></thead><tbody class="dashboard-table-body">`;
+  html += `</tr></thead><tbody>`;
 
-  rows.forEach(r => {
+  rows.forEach(row => {
     html += `<tr>`;
-    visibleCols.forEach(title => {
-      const val = get(r, title);
-      const isCheck = checkmarkCols.map(c => c.toLowerCase()).includes(title.toLowerCase());
+    colTitles.forEach(title => {
+      const cell = row.cells.find(c => c.columnId === colIdMap[title]);
+      let val = cell?.displayValue ?? cell?.value ?? "";
 
-      let content = val;
-      if (isCheck) {
-        if (val === true || val === '✓') {
-          content = `<span class="checkmark">&#10003;</span>`;
-        } else if (val === false || val === '✗' || val === 'X') {
-          content = `<span class="cross">&#10007;</span>`;
-        }
+      if (checkmarkCols.includes(title)) {
+        const lower = String(val).toLowerCase();
+        val = lower === "true" || lower === "yes" || val === true
+          ? '<span class="checkmark">✓</span>'
+          : '<span class="cross">✗</span>';
       }
 
-      html += `<td title="${val}">${content}</td>`;
+      html += `<td>${val}</td>`;
     });
     html += `</tr>`;
   });
