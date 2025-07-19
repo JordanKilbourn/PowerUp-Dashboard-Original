@@ -5,6 +5,20 @@ import './session.js';
 document.addEventListener("DOMContentLoaded", async () => {
   await initializePage(); // Loads sidebar + header
 
+  // After layout is injected, safely update header fields
+document.getElementById("userGreeting").textContent = sessionStorage.getItem("displayName") || "User";
+
+const currentMonth = sessionStorage.getItem("currentMonth");
+if (currentMonth) {
+  document.getElementById("currentMonth").textContent = currentMonth;
+}
+
+const currentLevel = sessionStorage.getItem("currentLevel");
+if (currentLevel) {
+  document.getElementById("userLevel").textContent = currentLevel;
+}
+
+
   const empID = sessionStorage.getItem("empID");
   if (!empID) {
     alert("Please log in first.");
