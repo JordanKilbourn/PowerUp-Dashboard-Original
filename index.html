@@ -19,22 +19,22 @@
   <script type="module">
     document.addEventListener("DOMContentLoaded", async () => {
       try {
-        const { fetchSheet } = await import('./scripts/api.js'); // Explicit await for module
-        console.log('API module loaded:', { fetchSheet }); // Debug
+        const { fetchSheet } = await import('./scripts/api.js');
+        console.log('API module loaded, fetchSheet:', fetchSheet);
 
         const empInput = document.getElementById('empID');
         const loginBtn = document.getElementById('loginBtn');
         const errorMsg = document.getElementById('errorMsg');
 
-        console.log('DOM loaded, elements:', { empInput, loginBtn, errorMsg });
-        if (!empInput) console.error('empInput not found');
+        console.log('DOM elements:', { empInput, loginBtn, errorMsg });
+        if (!empInput || !loginBtn) console.error('Missing element:', { empInput, loginBtn });
 
-        window.onload = () => empInput.focus();
+        empInput.focus();
 
         empInput.addEventListener('input', () => {
-          console.log('Input changed:', empInput.value);
-          const trimmedValue = empInput.value.trim();
-          loginBtn.disabled = trimmedValue.length < 2;
+          const value = empInput.value.trim();
+          console.log('Input value:', value);
+          loginBtn.disabled = value.length < 2;
           console.log('Button disabled:', loginBtn.disabled);
         });
 
@@ -59,7 +59,7 @@
 
           try {
             const data = await fetchSheet('2195459817820036');
-            console.log('Fetched login data:', data);
+            console.log('Login data:', data);
 
             const pidCol = getColumnId(data.columns, 'Position ID');
             const nameCol = getColumnId(data.columns, 'Display Name');
@@ -69,7 +69,7 @@
             );
 
             if (!match) {
-              errorMsg.textContent = `No match found for Employee ID "${empID}".`;
+              errorMsg.textContent = `No match for "${empID}".`;
               loginBtn.disabled = false;
               loginBtn.textContent = 'Login';
               return;
@@ -83,7 +83,7 @@
             window.location.href = 'PowerUp_Dashboard.html';
           } catch (err) {
             console.error('Login error:', err);
-            errorMsg.textContent = 'Error connecting to authentication service.';
+            errorMsg.textContent = 'Error connecting to service.';
             loginBtn.disabled = false;
             loginBtn.textContent = 'Login';
           }
@@ -94,7 +94,7 @@
           return col ? col.id : null;
         }
       } catch (err) {
-        console.error('Module load error:', err);
+        console.error('Script error:', err);
       }
     });
   </script>
