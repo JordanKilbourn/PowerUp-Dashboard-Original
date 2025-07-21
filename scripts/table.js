@@ -1,52 +1,47 @@
-function renderTable(containerId, data, columns) {
-  const container = document.getElementById(containerId);
-  container.innerHTML = '';
+export async function renderTable({ sheetId, containerId }) {
+  try {
+    const response = await fetch(`/smartsheet/${sheetId}`);
+    const { columns, rows } = await response.json();
 
-  if (!data || data.length === 0) {
-    container.innerHTML = '<p>No data available.</p>';
-    return;
-  }
+    const table = document.createElement('table');
+    table.classList.add('dashboard-table'); // match your CSS class
 
-  const tableWrapper = document.createElement('div');
-  tableWrapper.classList.add('table-wrapper');
+    const thead = document.createElement('thead');
+    const headRow = document.createElement('tr');
 
-  const table = document.createElement('table');
-  table.classList.add('data-table');
-
-  // Create thead
-  const thead = document.createElement('thead');
-  const headerRow = document.createElement('tr');
-  columns.forEach(col => {
-    const th = document.createElement('th');
-    th.textContent = col;
-    headerRow.appendChild(th);
-  });
-  thead.appendChild(headerRow);
-  table.appendChild(thead);
-
-  // Create tbody
-  const tbody = document.createElement('tbody');
-  data.forEach(row => {
-    const tr = document.createElement('tr');
     columns.forEach(col => {
-      const td = document.createElement('td');
-      let value = row[col];
-
-      // Show checkbox icon for boolean fields
-      if (typeof value === 'boolean') {
-        td.innerHTML = value
-          ? '<span class="check-icon">✔️</span>'
-          : '<span class="cross-icon">—</span>';
-      } else {
-        td.textContent = value ?? '';
-      }
-
-      tr.appendChild(td);
+      const th = document.createElement('th');
+      th.textContent = col.title;
+      headRow.appendChild(th);
     });
-    tbody.appendChild(tr);
-  });
+    thead.appendChild(headRow);
+    table.appendChild(thead);
 
-  table.appendChild(tbody);
-  tableWrapper.appendChild(table);
-  container.appendChild(tableWrapper);
+    const tbody = document.createElement('tbody');
+    rows.forEach(row => {
+      const tr = document.createElement('tr');
+      columns.forEach(col => {
+        const td = document.createElement('td');
+        const cell = row.cells.find(c => c.columnId === col.id);
+        const val = cell?.displayValue ?? '';
+
+        // Optional checkbox styling
+        if (typeof val === 'boolean') {
+          td.innerHTML = val ? '<span class="checkmark">✔</span>' : '<span class="cross">✖</span>';
+        } else {
+          td.textContent = val;
+        }
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+
+    const container = document.getElementById(containerId);
+    container.innerHTML = ''; // clear previous
+    container.appendChild(table);
+  } catch (error) {
+    console.error(`Failed to load table for sheet ${sheetId}:`, error);
+  }
 }
