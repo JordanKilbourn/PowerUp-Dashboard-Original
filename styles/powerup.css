@@ -69,7 +69,7 @@ header h1 {
   margin-left: 60px;
   padding: 20px;
   transition: margin-left 0.3s;
-  min-height: calc(100vh - 60px); /* Adjust for header height */
+  min-height: calc(100vh - 60px);
 }
 .dashboard-header {
   background: #0f172a; border: 1px solid #1e293b; padding: 20px;
@@ -183,14 +183,13 @@ header h1 {
 .accordion-content {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.3s ease;
+  transition: max-height 0.3s ease-out; /* Smoother transition */
   background: #0f172a;
   padding: 0 20px;
 }
 .accordion-item.open .accordion-content {
-  max-height: 1000px;
-  padding-top: 10px;
-  padding-bottom: 10px;
+  max-height: 1000px; /* Increased for better expansion */
+  padding: 10px 0;
 }
 .rotate-icon {
   transition: transform 0.3s ease;
