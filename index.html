@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/styles/powerup.css" />
 </head>
-<body>
+<body class="login-page"> <!-- Added class="login-page" -->
   <div class="card login-card">
     <h1>PowerUp Login</h1>
     <div id="errorMsg" class="error"></div>
@@ -18,7 +18,7 @@
   </div>
   <script type="module">
     document.addEventListener("DOMContentLoaded", async () => {
-      import { fetchSheet } from './scripts/api.js'; // Corrected to api.js
+      import { fetchSheet } from './scripts/api.js';
 
       const empInput = document.getElementById('empID');
       const loginBtn = document.getElementById('loginBtn');
@@ -28,9 +28,9 @@
       window.onload = () => empInput.focus();
 
       empInput.addEventListener('input', () => {
-        console.log('Input changed:', empInput.value); // Debug log
+        console.log('Input changed:', empInput.value);
         loginBtn.disabled = empInput.value.trim().length < 2;
-        console.log('Button disabled:', loginBtn.disabled); // Debug log
+        console.log('Button disabled:', loginBtn.disabled);
       });
 
       empInput.addEventListener('keypress', (e) => {
