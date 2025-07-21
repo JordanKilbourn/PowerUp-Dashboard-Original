@@ -23,6 +23,7 @@ function loadDashboard() {
     fetchReport(SHEET_IDS.qualityCatches)
   ])
     .then(([level, hours, ci, safety, qc]) => {
+      console.log('Fetched data:', { level, hours, ci, safety, qc }); // Debug
       updateLevelInfo(level);
       updatePowerHours(hours);
 
@@ -50,6 +51,16 @@ function loadDashboard() {
         excludeCols: ['Employee ID'],
         filterByEmpID: true
       });
+
+      // Initialize accordions
+      document.querySelectorAll('.accordion-header').forEach(header => {
+        header.addEventListener('click', () => {
+          const content = document.getElementById(header.dataset.target);
+          const icon = header.querySelector('.rotate-icon');
+          const isOpen = content.classList.toggle('open');
+          icon.classList.toggle('open', isOpen);
+        });
+      });
     })
     .catch(err => {
       console.error('Failed to load dashboard data:', err);
@@ -60,6 +71,7 @@ function loadDashboard() {
 function updateLevelInfo(sheet) {
   const empID = sessionStorage.getItem('empID');
   const rows = sheet.rows.filter(r => r.cells.some(c => String(c.value).toUpperCase() === empID));
+  console.log('Level rows for empID:', empID, rows); // Debug
 
   if (rows.length === 0) {
     console.warn('No level data for empID:', empID);
@@ -79,6 +91,7 @@ function updateLevelInfo(sheet) {
     ? new Date(monthKey).toLocaleString('default', { month: 'long', year: 'numeric' })
     : 'Unknown';
 
+  console.log('Level data:', { level, monthStr }); // Debug
   sessionStorage.setItem('currentLevel', level);
   sessionStorage.setItem('currentMonth', monthStr);
 
