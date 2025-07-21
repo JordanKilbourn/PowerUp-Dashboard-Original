@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/styles/powerup.css" />
 </head>
-<body class="login-page"> <!-- Added class="login-page" -->
+<body class="login-page">
   <div class="card login-card">
     <h1>PowerUp Login</h1>
     <div id="errorMsg" class="error"></div>
@@ -24,13 +24,16 @@
       const loginBtn = document.getElementById('loginBtn');
       const errorMsg = document.getElementById('errorMsg');
 
+      console.log('DOM loaded, elements:', { empInput, loginBtn, errorMsg }); // Debug
       if (!empInput) console.error('empInput not found');
+
       window.onload = () => empInput.focus();
 
       empInput.addEventListener('input', () => {
-        console.log('Input changed:', empInput.value);
-        loginBtn.disabled = empInput.value.trim().length < 2;
-        console.log('Button disabled:', loginBtn.disabled);
+        console.log('Input changed:', empInput.value); // Debug
+        const trimmedValue = empInput.value.trim();
+        loginBtn.disabled = trimmedValue.length < 2;
+        console.log('Button disabled:', loginBtn.disabled); // Debug
       });
 
       empInput.addEventListener('keypress', (e) => {
@@ -54,6 +57,7 @@
 
         try {
           const data = await fetchSheet('2195459817820036');
+          console.log('Fetched login data:', data); // Debug
 
           const pidCol = getColumnId(data.columns, 'Position ID');
           const nameCol = getColumnId(data.columns, 'Display Name');
@@ -76,7 +80,7 @@
           sessionStorage.setItem('displayName', displayName);
           window.location.href = 'PowerUp_Dashboard.html';
         } catch (err) {
-          console.error(err);
+          console.error('Login error:', err);
           errorMsg.textContent = 'Error connecting to authentication service.';
           loginBtn.disabled = false;
           loginBtn.textContent = 'Login';
