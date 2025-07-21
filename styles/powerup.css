@@ -1,3 +1,4 @@
+
 /* ========== BASE STYLES ========== */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -162,11 +163,9 @@ header h1 {
   align-items: center;
   gap: 10px;
 }
-
 .accordion-item:last-child .accordion-header {
   border-bottom: 1px solid #334155;
 }
-
 .accordion-content {
   max-height: 0;
   overflow: hidden;
@@ -174,55 +173,14 @@ header h1 {
   background: #0f172a;
   padding: 0 20px;
 }
-
 .accordion-item.open .accordion-content {
-  max-height: 1000px; /* Big enough for table to expand */
+  max-height: 1000px;
   padding-top: 10px;
   padding-bottom: 10px;
 }
-
 .rotate-icon {
   transition: transform 0.3s ease;
 }
-
 .rotate-icon.open {
   transform: rotate(90deg);
 }
-
-.table-wrapper {
-  overflow-x: auto;
-  margin-top: 1rem;
-  color: white;
-}
-
-.table-wrapper table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-}
-
-.table-wrapper th,
-.table-wrapper td {
-  padding: 0.5rem 0.75rem;
-  text-align: left;
-  border-bottom: 1px solid #444;
-}
-
-.table-wrapper thead {
-  background-color: #2c2c3a;
-}
-
-.table-wrapper tbody tr:nth-child(even) {
-  background-color: #1f1f2e;
-}
-
-.checkmark {
-  color: #4ade80;
-  font-weight: bold;
-}
-
-.cross {
-  color: #f87171;
-  font-weight: bold;
-}
-
