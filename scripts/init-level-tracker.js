@@ -3,55 +3,26 @@ import { renderTable } from './table.js';
 import './session.js';
 
 document.addEventListener("DOMContentLoaded", async () => {
-  await initializePage();  // Loads sidebar + header
+  await initializePage();
 
-  const empID = sessionStorage.getItem("empID");
-  if (!empID) {
-    alert("Please log in first.");
-    window.location.href = "index.html";
-    return;
-  }
+  document.getElementById("userGreeting").textContent = sessionStorage.getItem("displayName") || "User";
+  document.getElementById("currentMonth").textContent = sessionStorage.getItem("currentMonth") || "";
+  document.getElementById("userLevel").textContent = sessionStorage.getItem("currentLevel") || "";
 
   try {
     const res = await fetch("https://powerup-proxy.onrender.com/sheet/8346763116105604");
     const sheet = await res.json();
 
-    const row = sheet.rows.find(r =>
-      r.cells.some(c => c.value?.toString().toUpperCase() === empID)
-    );
-
-    if (row) {
-      const get = (title) => {
-        const col = sheet.columns.find(c => c.title.trim().toLowerCase() === title.toLowerCase());
-        const cell = row.cells.find(x => x.columnId === col?.id);
-        return cell?.displayValue || cell?.value || '';
-      };
-
-      const level = get("Level");
-      const monthKey = get("Month Key");
-
-      const levelEl = document.getElementById("userLevel");
-      const monthEl = document.getElementById("currentMonth");
-
-      if (levelEl) levelEl.textContent = level;
-      if (monthEl && monthKey) {
-        monthEl.textContent = new Date(monthKey).toLocaleString("default", { month: "long", year: "numeric" });
-      }
-    }
-
     renderTable({
       sheet,
-      containerId: "levelTableContainer",
+      containerId: "levelTrackerTableContainer",
       title: "Monthly Level Tracker",
-      checkmarkCols: ["Meets L1", "Meets L2", "Meets L3"],
-      columnOrder: [
-        "Month Key", "CI Submissions", "Safety Submissions", "Quality Submissions",
-        "Total Submissions", "Power Hours Logged",
-        "Meets L1", "Meets L2", "Meets L3", "Level"
-      ]
+      excludeCols: [],
+      checkmarkCols: ["Tuesday Tutorial Attended?", "On Team?", "Leads Team?", "Meets L1", "Meets L2", "Meets L3"],
+      filterByEmpID: true
     });
 
   } catch (err) {
-    console.error("Failed to load level tracker data:", err);
+    console.error("Failed to load Level Tracker data:", err);
   }
 });
