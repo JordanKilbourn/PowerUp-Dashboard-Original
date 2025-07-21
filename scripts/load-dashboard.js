@@ -96,8 +96,7 @@ function updateLevelInfo(sheet) {
   console.log('Level data:', { level, monthStr });
   sessionStorage.setItem('currentLevel', level);
   sessionStorage.setItem('currentMonth', monthStr);
-  // Trigger session update
-  initializeSession(); // Call from session.js
+  initializeSession(); // From session.js
 }
 
 async function updatePowerHours(sheet) {
@@ -140,13 +139,13 @@ async function updatePowerHours(sheet) {
   const tipsEl = document.getElementById('powerTips');
 
   if (barEl) barEl.style.width = `${percent}%`;
-  if (phEl) phEl.textContent = `${totalHours.toFixed(1)} / ${minTarget}`;
+  if (phEl) phEl.textContent = `Power Hours Logged: ${totalHours.toFixed(1)} / ${minTarget}`; // Restored format
   if (tipsEl) {
     tipsEl.textContent = totalHours >= minTarget && totalHours <= maxTarget
       ? '✅ Target met! Great job!'
       : totalHours > maxTarget
         ? '🎉 You\'ve gone above and beyond!'
-        : `You\'re ${(minTarget - totalHours).toFixed(1)} hour(s) away. ${new Date().getDate() - new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()} days left.`;
+        : `You need ${(minTarget - totalHours).toFixed(1)} more hour(s). ${new Date().getDate() - new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()} days left.`; // Restored help text style
   }
 }
 
