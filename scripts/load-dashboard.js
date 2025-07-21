@@ -1,33 +1,22 @@
-// /scripts/load-dashboard.js
-import { renderTable } from '/scripts/table.js';
+import { renderTable } from './table.js';
+import { fetchSheet, fetchReport, SHEET_IDS } from './apis.js';
+import './session.js';
 
 function loadDashboard() {
   const empID = sessionStorage.getItem("empID");
   if (!empID) return;
 
-  const levelSheet = '8346763116105604';        // Level Tracker (sheet)
-  const hoursSheet = '1240392906264452';        // Power Hours (sheet)
-  const ciSheet = '7397205473185668';           // CI Submission Mirror (sheet)
-  const safetySheet = '4089265651666820';       // Safety Concerns (report)
-  const qcSheet = '1431258165890948';           // Quality Catches (report)
-
-  const proxy = 'https://powerup-proxy.onrender.com';
-
-  const loadSheet = (id, type = 'sheet') =>
-    fetch(`${proxy}/${type}/${id}`).then(res => res.json());
-
   Promise.all([
-    loadSheet(levelSheet),
-    loadSheet(hoursSheet),
-    loadSheet(ciSheet, 'sheet'),
-    loadSheet(safetySheet, 'report'),
-    loadSheet(qcSheet, 'report')
+    fetchSheet(SHEET_IDS.levelTracker),
+    fetchSheet(SHEET_IDS.powerHours),
+    fetchSheet(SHEET_IDS.ciSubmissions),
+    fetchReport(SHEET_IDS.safetyConcerns),
+    fetchReport(SHEET_IDS.qualityCatches)
   ])
     .then(([level, hours, ci, safety, qc]) => {
       updateLevelInfo(level);
       updatePowerHours(hours);
 
-      // ✅ Render CI Submissions
       renderTable({
         sheet: ci,
         containerId: "ciContent",
@@ -36,7 +25,6 @@ function loadDashboard() {
         excludeCols: ["Submitted By", "Valid Row", "Employee ID"]
       });
 
-      // ✅ Render Safety Concerns
       renderTable({
         sheet: safety,
         containerId: "safetyContent",
@@ -44,7 +32,6 @@ function loadDashboard() {
         excludeCols: ["Employee ID"]
       });
 
-      // ✅ Render Quality Catches
       renderTable({
         sheet: qc,
         containerId: "qcContent",
@@ -52,23 +39,16 @@ function loadDashboard() {
         excludeCols: ["Employee ID"]
       });
     })
-    .catch(err => {
-      console.error("Failed to load dashboard data:", err);
-    });
+    .catch(err => console.error("Failed to load dashboard data:", err));
 }
 
-// 🧠 Update header info from level data
 function updateLevelInfo(sheet) {
   const empID = sessionStorage.getItem("empID");
-  const rows = sheet.rows.filter(r => r.cells.some(c =>
-    c.value?.toString().toUpperCase() === empID
-  ));
+  const rows = sheet.rows.filter(r => r.cells.some(c => String(c.value).toUpperCase() === empID));
 
   if (rows.length === 0) return;
 
-  const latest = rows.sort((a, b) =>
-    new Date(b.cells[0].value) - new Date(a.cells[0].value)
-  )[0];
+  const latest = rows.sort((a, b) => new Date(b.cells[0].value) - new Date(a.cells[0].value))[0];
 
   const get = (title) => {
     const col = sheet.columns.find(c => c.title.trim().toLowerCase() === title.toLowerCase());
@@ -91,39 +71,32 @@ function updateLevelInfo(sheet) {
   if (monthEl) monthEl.textContent = monthStr;
 }
 
-// 🧮 Calculate Power Hours Progress using dynamic goal ranges
 async function updatePowerHours(sheet) {
   const empID = sessionStorage.getItem("empID");
   const currentLevel = sessionStorage.getItem("currentLevel") || "N/A";
 
-  const rows = sheet.rows.filter(r =>
-    r.cells.some(c => c.value?.toString().toUpperCase() === empID)
-  );
+  const rows = sheet.rows.filter(r => r.cells.some(c => String(c.value).toUpperCase() === empID));
 
-let totalHours = 0;
+  let totalHours = 0;
+  rows.forEach(row => {
+    const completedCol = sheet.columns.find(c => c.title.trim().toLowerCase() === "completed");
+    const hoursCol = sheet.columns.find(c => c.title.trim().toLowerCase() === "completed hours");
 
-for (const row of rows) {
-  const completedCol = sheet.columns.find(c => c.title.trim().toLowerCase() === "completed");
-  const hoursCol = sheet.columns.find(c => c.title.trim().toLowerCase() === "completed hours");
+    const isCompleted = row.cells.find(c => c.columnId === completedCol?.id)?.value === true;
+    const completedVal = row.cells.find(c => c.columnId === hoursCol?.id)?.value;
 
-  const isCompleted = row.cells.find(c => c.columnId === completedCol?.id)?.value === true;
-  const completedVal = row.cells.find(c => c.columnId === hoursCol?.id)?.value;
+    if (isCompleted && typeof completedVal === "number") totalHours += completedVal;
+  });
 
-  if (isCompleted && typeof completedVal === "number") {
-    totalHours += completedVal;
-  }
-}
-
-  // ⏳ Fetch goal ranges from Power Hour Targets sheet
   let minTarget = 8;
   let maxTarget = 12;
 
   try {
-    const targetsRes = await fetch("https://powerup-proxy.onrender.com/sheet/3542697273937796");
-    const targetsData = await targetsRes.json();
+    const targetsRes = await fetchSheet('3542697273937796');
+    const targetsData = targetsRes;
 
     const levelRow = targetsData.rows.find(r =>
-      r.cells.some(c => c.displayValue?.toString().toLowerCase() === currentLevel.toLowerCase())
+      r.cells.some(c => String(c.displayValue).toLowerCase() === currentLevel.toLowerCase())
     );
 
     if (levelRow) {
@@ -140,7 +113,6 @@ for (const row of rows) {
     console.warn("Power Hour Targets not loaded, using default range.");
   }
 
-  // 🧠 Calculate display logic
   const percent = Math.min((totalHours / minTarget) * 100, 100);
   const barEl = document.getElementById("progressBar");
   const phEl = document.getElementById("phProgress");
@@ -149,15 +121,13 @@ for (const row of rows) {
   barEl.style.width = `${percent}%`;
   phEl.textContent = `${totalHours.toFixed(1)} / ${minTarget}`;
 
-  // 🎨 Bar color logic
   barEl.style.backgroundColor =
     totalHours >= minTarget && totalHours <= maxTarget
-      ? "#4ade80" // green
+      ? "#4ade80"
       : totalHours > maxTarget
-        ? "#facc15" // yellow (overachiever)
-        : "#60a5fa"; // blue (in progress)
+        ? "#facc15"
+        : "#60a5fa";
 
-  // 💡 Tips logic
   if (totalHours >= minTarget && totalHours <= maxTarget) {
     tipsEl.textContent = "✅ Target met! Great job!";
   } else if (totalHours > maxTarget) {
@@ -172,5 +142,4 @@ for (const row of rows) {
   sessionStorage.setItem("powerHours", totalHours.toFixed(1));
 }
 
-// ✅ Export if needed
 export { loadDashboard };
