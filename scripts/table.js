@@ -28,7 +28,6 @@ export function renderTable({
     if (col) colIdMap[title] = col.id;
   });
 
-  // Create table
   let html = `<div class="table-wrapper"><h3>${title}</h3><table><thead><tr>`;
   colTitles.forEach(title => {
     html += `<th>${title}</th>`;
