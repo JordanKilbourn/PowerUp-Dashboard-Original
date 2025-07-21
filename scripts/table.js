@@ -1,57 +1,52 @@
-export function renderTable({
-  sheet,
-  containerId,
-  title = "",
-  excludeCols = [],
-  checkmarkCols = [],
-  filterByEmpID = true
-}) {
-  if (!sheet || !sheet.columns || !sheet.rows) return;
-
-  const empId = sessionStorage.getItem("employeeId");
-  const rows = filterByEmpID
-    ? sheet.rows.filter(row =>
-        row.cells.some(cell => String(cell.value).trim() === empId)
-      )
-    : sheet.rows;
-
+function renderTable(containerId, data, columns) {
   const container = document.getElementById(containerId);
-  if (!container) return;
+  container.innerHTML = '';
 
-  const colTitles = sheet.columns
-    .map(col => col.title.trim())
-    .filter(title => !excludeCols.includes(title));
+  if (!data || data.length === 0) {
+    container.innerHTML = '<p>No data available.</p>';
+    return;
+  }
 
-  const colIdMap = {};
-  colTitles.forEach(title => {
-    const col = sheet.columns.find(c => c.title.trim() === title);
-    if (col) colIdMap[title] = col.id;
+  const tableWrapper = document.createElement('div');
+  tableWrapper.classList.add('table-wrapper');
+
+  const table = document.createElement('table');
+  table.classList.add('data-table');
+
+  // Create thead
+  const thead = document.createElement('thead');
+  const headerRow = document.createElement('tr');
+  columns.forEach(col => {
+    const th = document.createElement('th');
+    th.textContent = col;
+    headerRow.appendChild(th);
   });
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
 
-  let html = `<div class="table-wrapper"><h3>${title}</h3><table><thead><tr>`;
-  colTitles.forEach(title => {
-    html += `<th>${title}</th>`;
-  });
-  html += `</tr></thead><tbody>`;
+  // Create tbody
+  const tbody = document.createElement('tbody');
+  data.forEach(row => {
+    const tr = document.createElement('tr');
+    columns.forEach(col => {
+      const td = document.createElement('td');
+      let value = row[col];
 
-  rows.forEach(row => {
-    html += `<tr>`;
-    colTitles.forEach(title => {
-      const cell = row.cells.find(c => c.columnId === colIdMap[title]);
-      let val = cell?.displayValue ?? cell?.value ?? "";
-
-      if (checkmarkCols.includes(title)) {
-        const lower = String(val).toLowerCase();
-        val = lower === "true" || lower === "yes" || val === true
-          ? '<span class="checkmark">✓</span>'
-          : '<span class="cross">✗</span>';
+      // Show checkbox icon for boolean fields
+      if (typeof value === 'boolean') {
+        td.innerHTML = value
+          ? '<span class="check-icon">✔️</span>'
+          : '<span class="cross-icon">—</span>';
+      } else {
+        td.textContent = value ?? '';
       }
 
-      html += `<td>${val}</td>`;
+      tr.appendChild(td);
     });
-    html += `</tr>`;
+    tbody.appendChild(tr);
   });
 
-  html += `</tbody></table></div>`;
-  container.innerHTML = html;
+  table.appendChild(tbody);
+  tableWrapper.appendChild(table);
+  container.appendChild(tableWrapper);
 }
