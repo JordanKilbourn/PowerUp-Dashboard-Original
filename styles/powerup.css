@@ -49,7 +49,7 @@ header {
   display: flex; justify-content: space-between; align-items: center;
   background: linear-gradient(to right, #1a1a40, #000);
   padding: 20px 30px; color: #fff; margin-left: 60px; position: relative;
-  z-index: 900;
+  z-index: 900; height: 60px; /* Fixed height to prevent overflow */
 }
 header h1 {
   font-size: 28px; font-weight: 700; color: #ffb400;
@@ -58,6 +58,7 @@ header h1 {
 }
 .header-left {
   display: flex; gap: 20px; font-size: 14px; color: #f8fafc; z-index: 1;
+  white-space: nowrap; /* Prevent wrapping */
 }
 .level-tag {
   background: #8b5cf6; color: #fff; padding: 4px 12px; border-radius: 12px;
@@ -69,12 +70,13 @@ header h1 {
   margin-left: 60px;
   padding: 20px;
   transition: margin-left 0.3s;
-  min-height: calc(100vh - 60px);
+  min-height: calc(100vh - 60px); /* Adjusted for header height */
 }
 .dashboard-header {
   background: #0f172a; border: 1px solid #1e293b; padding: 20px;
   border-radius: 12px; box-shadow: 0 0 12px rgba(0,0,0,0.2);
   display: flex; flex-direction: column; gap: 16px;
+  margin-top: 60px; /* Push down to avoid header overlap */
 }
 .goal-pill-group { display: flex; flex-wrap: wrap; gap: 10px; }
 .pill {
@@ -183,12 +185,12 @@ header h1 {
 .accordion-content {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.3s ease-out; /* Smoother transition */
+  transition: max-height 0.3s ease-out;
   background: #0f172a;
   padding: 0 20px;
 }
 .accordion-item.open .accordion-content {
-  max-height: 1000px; /* Increased for better expansion */
+  max-height: 1000px;
   padding: 10px 0;
 }
 .rotate-icon {
