@@ -23,7 +23,7 @@ function loadDashboard() {
     fetchReport(SHEET_IDS.qualityCatches)
   ])
     .then(([level, hours, ci, safety, qc]) => {
-      console.log('Fetched data:', { level, hours, ci, safety, qc }); // Debug
+      console.log('Fetched data:', { level, hours, ci, safety, qc }); // Debug all data
       updateLevelInfo(level);
       updatePowerHours(hours);
 
@@ -35,6 +35,7 @@ function loadDashboard() {
         excludeCols: ['Submitted By', 'Valid Row', 'Employee ID'],
         filterByEmpID: true
       });
+      console.log('Rendered CI table, content:', document.getElementById('ciContent').innerHTML);
 
       renderTable({
         sheet: safety,
@@ -43,6 +44,7 @@ function loadDashboard() {
         excludeCols: ['Employee ID'],
         filterByEmpID: true
       });
+      console.log('Rendered Safety table, content:', document.getElementById('safetyContent').innerHTML);
 
       renderTable({
         sheet: qc,
@@ -51,6 +53,7 @@ function loadDashboard() {
         excludeCols: ['Employee ID'],
         filterByEmpID: true
       });
+      console.log('Rendered QC table, content:', document.getElementById('qcContent').innerHTML);
 
       // Initialize accordions
       document.querySelectorAll('.accordion-header').forEach(header => {
@@ -59,6 +62,7 @@ function loadDashboard() {
           const icon = header.querySelector('.rotate-icon');
           const isOpen = content.classList.toggle('open');
           icon.classList.toggle('open', isOpen);
+          console.log(`Accordion ${header.dataset.target} toggled, open: ${isOpen}, content:`, content.innerHTML);
         });
       });
     })
@@ -71,7 +75,7 @@ function loadDashboard() {
 function updateLevelInfo(sheet) {
   const empID = sessionStorage.getItem('empID');
   const rows = sheet.rows.filter(r => r.cells.some(c => String(c.value).toUpperCase() === empID));
-  console.log('Level rows for empID:', empID, rows); // Debug
+  console.log('Level rows for empID:', empID, rows); // Debug rows
 
   if (rows.length === 0) {
     console.warn('No level data for empID:', empID);
@@ -81,6 +85,7 @@ function updateLevelInfo(sheet) {
   const latest = rows.sort((a, b) => new Date(b.cells[0].value) - new Date(a.cells[0].value))[0];
   const get = (title) => {
     const col = sheet.columns.find(c => c.title.trim().toLowerCase() === title.toLowerCase());
+    console.log(`Searching for column: ${title}, found:`, col); // Debug column
     const cell = latest.cells.find(x => x.columnId === col?.id);
     return cell?.displayValue || cell?.value || '';
   };
@@ -91,7 +96,7 @@ function updateLevelInfo(sheet) {
     ? new Date(monthKey).toLocaleString('default', { month: 'long', year: 'numeric' })
     : 'Unknown';
 
-  console.log('Level data:', { level, monthStr }); // Debug
+  console.log('Level data:', { level, monthStr }); // Debug values
   sessionStorage.setItem('currentLevel', level);
   sessionStorage.setItem('currentMonth', monthStr);
 
@@ -146,25 +151,14 @@ async function updatePowerHours(sheet) {
   const phEl = document.getElementById('phProgress');
   const tipsEl = document.getElementById('powerTips');
 
-  barEl.style.width = `${percent}%`;
-  phEl.textContent = `${totalHours.toFixed(1)} / ${minTarget}`;
-
-  barEl.style.backgroundColor =
-    totalHours >= minTarget && totalHours <= maxTarget
-      ? '#4ade80'
+  if (barEl) barEl.style.width = `${percent}%`;
+  if (phEl) phEl.textContent = `${totalHours.toFixed(1)} / ${minTarget}`;
+  if (tipsEl) {
+    tipsEl.textContent = totalHours >= minTarget && totalHours <= maxTarget
+      ? '✅ Target met! Great job!'
       : totalHours > maxTarget
-        ? '#facc15'
-        : '#60a5fa';
-
-  if (totalHours >= minTarget && totalHours <= maxTarget) {
-    tipsEl.textContent = '✅ Target met! Great job!';
-  } else if (totalHours > maxTarget) {
-    tipsEl.textContent = '🎉 You\'ve gone above and beyond!';
-  } else {
-    const now = new Date();
-    const daysLeft = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() - now.getDate();
-    const remaining = (minTarget - totalHours).toFixed(1);
-    tipsEl.textContent = `You\'re ${remaining} hour(s) away from your goal. ${daysLeft} day(s) left this month.`;
+        ? '🎉 You\'ve gone above and beyond!'
+        : `You\'re ${(minTarget - totalHours).toFixed(1)} hour(s) away from your goal. ${new Date().getDate() - new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()} day(s) left this month.`;
   }
 
   sessionStorage.setItem('powerHours', totalHours.toFixed(1));
@@ -172,5 +166,4 @@ async function updatePowerHours(sheet) {
 
 export { loadDashboard };
 
-// Call loadDashboard on DOM load
 document.addEventListener('DOMContentLoaded', loadDashboard);
