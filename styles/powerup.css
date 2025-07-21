@@ -190,9 +190,41 @@ header h1 {
   transform: rotate(90deg);
 }
 
-/* Existing styles remain unchanged */
-
 /* Login-specific styles */
+
+/* Remove body flex from global scope, add to login-specific class */
+.login-page {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(180deg, #0f172a, #111827);
+  color: #f1f5f9;
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(180deg, #0f172a, #111827);
+  color: #f1f5f9;
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Ensure container shifts for sidebar */
+.container {
+  margin-left: 60px;
+  padding: 20px;
+  transition: margin-left 0.3s;
+}
+
+/* [Keep all other existing styles unchanged] */
 .login-card {
   background: #1e293b;
   padding: 40px;
