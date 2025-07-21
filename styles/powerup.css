@@ -188,3 +188,41 @@ header h1 {
 .rotate-icon.open {
   transform: rotate(90deg);
 }
+
+.table-wrapper {
+  overflow-x: auto;
+  margin-top: 1rem;
+  color: white;
+}
+
+.table-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.table-wrapper th,
+.table-wrapper td {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #444;
+}
+
+.table-wrapper thead {
+  background-color: #2c2c3a;
+}
+
+.table-wrapper tbody tr:nth-child(even) {
+  background-color: #1f1f2e;
+}
+
+.checkmark {
+  color: #4ade80;
+  font-weight: bold;
+}
+
+.cross {
+  color: #f87171;
+  font-weight: bold;
+}
+
