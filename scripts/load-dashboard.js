@@ -1,10 +1,19 @@
 import { renderTable } from './table.js';
-import { fetchSheet, fetchReport, SHEET_IDS } from './apis.js';
+import { fetchSheet, fetchReport, SHEET_IDS } from './scripts/api.js';
 import './session.js';
 
 function loadDashboard() {
-  const empID = sessionStorage.getItem("empID");
-  if (!empID) return;
+  const empID = sessionStorage.getItem('empID');
+  if (!empID) {
+    console.warn('No empID in session, redirecting to login');
+    window.location.href = 'index.html';
+    return;
+  }
+
+  const globalError = document.createElement('div');
+  globalError.id = 'globalError';
+  globalError.style.color = '#f87171';
+  document.body.prepend(globalError);
 
   Promise.all([
     fetchSheet(SHEET_IDS.levelTracker),
@@ -19,73 +28,79 @@ function loadDashboard() {
 
       renderTable({
         sheet: ci,
-        containerId: "ciContent",
-        title: "CI Submissions",
-        checkmarkCols: ["Resourced", "Paid", "Project Work Completed"],
-        excludeCols: ["Submitted By", "Valid Row", "Employee ID"]
+        containerId: 'ciContent',
+        title: 'CI Submissions',
+        checkmarkCols: ['Resourced', 'Paid', 'Project Work Completed'],
+        excludeCols: ['Submitted By', 'Valid Row', 'Employee ID'],
+        filterByEmpID: true
       });
 
       renderTable({
         sheet: safety,
-        containerId: "safetyContent",
-        title: "Safety Concerns",
-        excludeCols: ["Employee ID"]
+        containerId: 'safetyContent',
+        title: 'Safety Concerns',
+        excludeCols: ['Employee ID'],
+        filterByEmpID: true
       });
 
       renderTable({
         sheet: qc,
-        containerId: "qcContent",
-        title: "Quality Catches",
-        excludeCols: ["Employee ID"]
+        containerId: 'qcContent',
+        title: 'Quality Catches',
+        excludeCols: ['Employee ID'],
+        filterByEmpID: true
       });
     })
-    .catch(err => console.error("Failed to load dashboard data:", err));
+    .catch(err => {
+      console.error('Failed to load dashboard data:', err);
+      globalError.textContent = 'Error loading data. Check console for details.';
+    });
 }
 
 function updateLevelInfo(sheet) {
-  const empID = sessionStorage.getItem("empID");
+  const empID = sessionStorage.getItem('empID');
   const rows = sheet.rows.filter(r => r.cells.some(c => String(c.value).toUpperCase() === empID));
 
-  if (rows.length === 0) return;
+  if (rows.length === 0) {
+    console.warn('No level data for empID:', empID);
+    return;
+  }
 
   const latest = rows.sort((a, b) => new Date(b.cells[0].value) - new Date(a.cells[0].value))[0];
-
   const get = (title) => {
     const col = sheet.columns.find(c => c.title.trim().toLowerCase() === title.toLowerCase());
     const cell = latest.cells.find(x => x.columnId === col?.id);
     return cell?.displayValue || cell?.value || '';
   };
 
-  const level = get("Level") || "N/A";
-  const monthKey = get("Month Key");
+  const level = get('Level') || 'N/A';
+  const monthKey = get('Month Key');
   const monthStr = monthKey
-    ? new Date(monthKey).toLocaleString("default", { month: "long", year: "numeric" })
-    : "Unknown";
+    ? new Date(monthKey).toLocaleString('default', { month: 'long', year: 'numeric' })
+    : 'Unknown';
 
-  sessionStorage.setItem("currentLevel", level);
-  sessionStorage.setItem("currentMonth", monthStr);
+  sessionStorage.setItem('currentLevel', level);
+  sessionStorage.setItem('currentMonth', monthStr);
 
-  const levelEl = document.getElementById("userLevel");
-  const monthEl = document.getElementById("currentMonth");
+  const levelEl = document.getElementById('userLevel');
+  const monthEl = document.getElementById('currentMonth');
   if (levelEl) levelEl.textContent = level;
   if (monthEl) monthEl.textContent = monthStr;
 }
 
 async function updatePowerHours(sheet) {
-  const empID = sessionStorage.getItem("empID");
-  const currentLevel = sessionStorage.getItem("currentLevel") || "N/A";
+  const empID = sessionStorage.getItem('empID');
+  const currentLevel = sessionStorage.getItem('currentLevel') || 'N/A';
 
   const rows = sheet.rows.filter(r => r.cells.some(c => String(c.value).toUpperCase() === empID));
-
   let totalHours = 0;
   rows.forEach(row => {
-    const completedCol = sheet.columns.find(c => c.title.trim().toLowerCase() === "completed");
-    const hoursCol = sheet.columns.find(c => c.title.trim().toLowerCase() === "completed hours");
-
+    const completedCol = sheet.columns.find(c => c.title.trim().toLowerCase() === 'completed');
+    const hoursCol = sheet.columns.find(c => c.title.trim().toLowerCase() === 'completed hours');
     const isCompleted = row.cells.find(c => c.columnId === completedCol?.id)?.value === true;
     const completedVal = row.cells.find(c => c.columnId === hoursCol?.id)?.value;
 
-    if (isCompleted && typeof completedVal === "number") totalHours += completedVal;
+    if (isCompleted && typeof completedVal === 'number') totalHours += completedVal;
   });
 
   let minTarget = 8;
@@ -106,40 +121,43 @@ async function updatePowerHours(sheet) {
         return parseFloat(cell?.displayValue || cell?.value || '');
       };
 
-      minTarget = get("Min Hours") || minTarget;
-      maxTarget = get("Max Hours") || maxTarget;
+      minTarget = get('Min Hours') || minTarget;
+      maxTarget = get('Max Hours') || maxTarget;
     }
   } catch (err) {
-    console.warn("Power Hour Targets not loaded, using default range.");
+    console.warn('Power Hour Targets not loaded, using default range:', err);
   }
 
   const percent = Math.min((totalHours / minTarget) * 100, 100);
-  const barEl = document.getElementById("progressBar");
-  const phEl = document.getElementById("phProgress");
-  const tipsEl = document.getElementById("powerTips");
+  const barEl = document.getElementById('progressBar');
+  const phEl = document.getElementById('phProgress');
+  const tipsEl = document.getElementById('powerTips');
 
   barEl.style.width = `${percent}%`;
   phEl.textContent = `${totalHours.toFixed(1)} / ${minTarget}`;
 
   barEl.style.backgroundColor =
     totalHours >= minTarget && totalHours <= maxTarget
-      ? "#4ade80"
+      ? '#4ade80'
       : totalHours > maxTarget
-        ? "#facc15"
-        : "#60a5fa";
+        ? '#facc15'
+        : '#60a5fa';
 
   if (totalHours >= minTarget && totalHours <= maxTarget) {
-    tipsEl.textContent = "✅ Target met! Great job!";
+    tipsEl.textContent = '✅ Target met! Great job!';
   } else if (totalHours > maxTarget) {
-    tipsEl.textContent = "🎉 You've gone above and beyond!";
+    tipsEl.textContent = '🎉 You\'ve gone above and beyond!';
   } else {
     const now = new Date();
     const daysLeft = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() - now.getDate();
     const remaining = (minTarget - totalHours).toFixed(1);
-    tipsEl.textContent = `You're ${remaining} hour(s) away from your goal. ${daysLeft} day(s) left this month.`;
+    tipsEl.textContent = `You\'re ${remaining} hour(s) away from your goal. ${daysLeft} day(s) left this month.`;
   }
 
-  sessionStorage.setItem("powerHours", totalHours.toFixed(1));
+  sessionStorage.setItem('powerHours', totalHours.toFixed(1));
 }
 
 export { loadDashboard };
+
+// Call loadDashboard on DOM load
+document.addEventListener('DOMContentLoaded', loadDashboard);
