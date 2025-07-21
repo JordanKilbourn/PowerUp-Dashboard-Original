@@ -23,7 +23,7 @@ function loadDashboard() {
     fetchReport(SHEET_IDS.qualityCatches)
   ])
     .then(([level, hours, ci, safety, qc]) => {
-      console.log('Fetched data:', { level, hours, ci, safety, qc }); // Debug all data
+      console.log('Fetched data:', { level, hours, ci, safety, qc });
       updateLevelInfo(level);
       updatePowerHours(hours);
 
@@ -35,7 +35,7 @@ function loadDashboard() {
         excludeCols: ['Submitted By', 'Valid Row', 'Employee ID'],
         filterByEmpID: true
       });
-      console.log('Rendered CI table, content:', document.getElementById('ciContent').innerHTML);
+      console.log('CI Content:', document.getElementById('ciContent').innerHTML);
 
       renderTable({
         sheet: safety,
@@ -44,7 +44,7 @@ function loadDashboard() {
         excludeCols: ['Employee ID'],
         filterByEmpID: true
       });
-      console.log('Rendered Safety table, content:', document.getElementById('safetyContent').innerHTML);
+      console.log('Safety Content:', document.getElementById('safetyContent').innerHTML);
 
       renderTable({
         sheet: qc,
@@ -53,29 +53,28 @@ function loadDashboard() {
         excludeCols: ['Employee ID'],
         filterByEmpID: true
       });
-      console.log('Rendered QC table, content:', document.getElementById('qcContent').innerHTML);
+      console.log('QC Content:', document.getElementById('qcContent').innerHTML);
 
-      // Initialize accordions
       document.querySelectorAll('.accordion-header').forEach(header => {
         header.addEventListener('click', () => {
           const content = document.getElementById(header.dataset.target);
           const icon = header.querySelector('.rotate-icon');
           const isOpen = content.classList.toggle('open');
           icon.classList.toggle('open', isOpen);
-          console.log(`Accordion ${header.dataset.target} toggled, open: ${isOpen}, content:`, content.innerHTML);
+          console.log(`Accordion ${header.dataset.target} toggled, open: ${isOpen}`);
         });
       });
     })
     .catch(err => {
       console.error('Failed to load dashboard data:', err);
-      globalError.textContent = 'Error loading data. Check console for details.';
+      globalError.textContent = 'Error loading data. Check console.';
     });
 }
 
 function updateLevelInfo(sheet) {
   const empID = sessionStorage.getItem('empID');
   const rows = sheet.rows.filter(r => r.cells.some(c => String(c.value).toUpperCase() === empID));
-  console.log('Level rows for empID:', empID, rows); // Debug rows
+  console.log('Level rows for empID:', empID, rows);
 
   if (rows.length === 0) {
     console.warn('No level data for empID:', empID);
@@ -84,26 +83,20 @@ function updateLevelInfo(sheet) {
 
   const latest = rows.sort((a, b) => new Date(b.cells[0].value) - new Date(a.cells[0].value))[0];
   const get = (title) => {
-    const col = sheet.columns.find(c => c.title.trim().toLowerCase() === title.toLowerCase());
-    console.log(`Searching for column: ${title}, found:`, col); // Debug column
+    const col = sheet.columns.find(c => c.title.toLowerCase().includes(title.toLowerCase()));
+    console.log(`Searching for ${title} column, found:`, col);
     const cell = latest.cells.find(x => x.columnId === col?.id);
     return cell?.displayValue || cell?.value || '';
   };
 
   const level = get('Level') || 'N/A';
   const monthKey = get('Month Key');
-  const monthStr = monthKey
-    ? new Date(monthKey).toLocaleString('default', { month: 'long', year: 'numeric' })
-    : 'Unknown';
+  const monthStr = monthKey ? new Date(monthKey).toLocaleString('default', { month: 'long', year: 'numeric' }) : 'Unknown';
 
-  console.log('Level data:', { level, monthStr }); // Debug values
+  console.log('Level data:', { level, monthStr });
+  // Removed direct DOM update; rely on session.js to update header
   sessionStorage.setItem('currentLevel', level);
   sessionStorage.setItem('currentMonth', monthStr);
-
-  const levelEl = document.getElementById('userLevel');
-  const monthEl = document.getElementById('currentMonth');
-  if (levelEl) levelEl.textContent = level;
-  if (monthEl) monthEl.textContent = monthStr;
 }
 
 async function updatePowerHours(sheet) {
@@ -113,8 +106,8 @@ async function updatePowerHours(sheet) {
   const rows = sheet.rows.filter(r => r.cells.some(c => String(c.value).toUpperCase() === empID));
   let totalHours = 0;
   rows.forEach(row => {
-    const completedCol = sheet.columns.find(c => c.title.trim().toLowerCase() === 'completed');
-    const hoursCol = sheet.columns.find(c => c.title.trim().toLowerCase() === 'completed hours');
+    const completedCol = sheet.columns.find(c => c.title.toLowerCase().includes('completed'));
+    const hoursCol = sheet.columns.find(c => c.title.toLowerCase().includes('completed hours'));
     const isCompleted = row.cells.find(c => c.columnId === completedCol?.id)?.value === true;
     const completedVal = row.cells.find(c => c.columnId === hoursCol?.id)?.value;
 
@@ -126,24 +119,18 @@ async function updatePowerHours(sheet) {
 
   try {
     const targetsRes = await fetchSheet('3542697273937796');
-    const targetsData = targetsRes;
-
-    const levelRow = targetsData.rows.find(r =>
-      r.cells.some(c => String(c.displayValue).toLowerCase() === currentLevel.toLowerCase())
-    );
-
+    const levelRow = targetsRes.rows.find(r => r.cells.some(c => String(c.displayValue).toLowerCase() === currentLevel.toLowerCase()));
     if (levelRow) {
       const get = (title) => {
-        const col = targetsData.columns.find(c => c.title.trim().toLowerCase() === title.toLowerCase());
+        const col = targetsRes.columns.find(c => c.title.toLowerCase().includes(title.toLowerCase()));
         const cell = levelRow.cells.find(x => x.columnId === col?.id);
         return parseFloat(cell?.displayValue || cell?.value || '');
       };
-
       minTarget = get('Min Hours') || minTarget;
       maxTarget = get('Max Hours') || maxTarget;
     }
   } catch (err) {
-    console.warn('Power Hour Targets not loaded, using default range:', err);
+    console.warn('Power Hour Targets not loaded, using default:', err);
   }
 
   const percent = Math.min((totalHours / minTarget) * 100, 100);
@@ -158,10 +145,8 @@ async function updatePowerHours(sheet) {
       ? '✅ Target met! Great job!'
       : totalHours > maxTarget
         ? '🎉 You\'ve gone above and beyond!'
-        : `You\'re ${(minTarget - totalHours).toFixed(1)} hour(s) away from your goal. ${new Date().getDate() - new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()} day(s) left this month.`;
+        : `You\'re ${(minTarget - totalHours).toFixed(1)} hour(s) away. ${new Date().getDate() - new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()} days left.`;
   }
-
-  sessionStorage.setItem('powerHours', totalHours.toFixed(1));
 }
 
 export { loadDashboard };
