@@ -94,9 +94,10 @@ function updateLevelInfo(sheet) {
   const monthStr = monthKey ? new Date(monthKey).toLocaleString('default', { month: 'long', year: 'numeric' }) : 'Unknown';
 
   console.log('Level data:', { level, monthStr });
-  // Removed direct DOM update; rely on session.js to update header
   sessionStorage.setItem('currentLevel', level);
   sessionStorage.setItem('currentMonth', monthStr);
+  // Trigger session update
+  initializeSession(); // Call from session.js
 }
 
 async function updatePowerHours(sheet) {
