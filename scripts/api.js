@@ -1,5 +1,3 @@
-// /scripts/api.js
-
 const SHEET_IDS = Object.freeze({
   powerHours: '1240392906264452',
   levelTracker: '8346763116105604',
@@ -9,30 +7,24 @@ const SHEET_IDS = Object.freeze({
 });
 
 const API_PROXY = 'https://powerup-proxy.onrender.com';
+const cache = new Map();
 
-/**
- * Fetch a full Smartsheet sheet by ID
- * @param {string} sheetId - Smartsheet Sheet ID
- * @returns {Promise<Object>}
- */
-function fetchSheet(sheetId) {
-  return fetch(`${API_PROXY}/sheet/${sheetId}`).then(handleResponse);
+async function fetchSheet(sheetId) {
+  if (cache.has(sheetId)) return cache.get(sheetId);
+  const res = await fetch(`${API_PROXY}/sheet/${sheetId}`).then(handleResponse);
+  cache.set(sheetId, res);
+  setTimeout(() => cache.delete(sheetId), 300000); // 5-minute cache
+  return res;
 }
 
-/**
- * Fetch a Smartsheet report by ID
- * @param {string} reportId - Smartsheet Report ID
- * @returns {Promise<Object>}
- */
-function fetchReport(reportId) {
-  return fetch(`${API_PROXY}/report/${reportId}`).then(handleResponse);
+async function fetchReport(reportId) {
+  if (cache.has(reportId)) return cache.get(reportId);
+  const res = await fetch(`${API_PROXY}/report/${reportId}`).then(handleResponse);
+  cache.set(reportId, res);
+  setTimeout(() => cache.delete(reportId), 300000); // 5-minute cache
+  return res;
 }
 
-/**
- * Gracefully handle fetch responses
- * @param {Response} res
- * @returns {Promise<Object>}
- */
 async function handleResponse(res) {
   if (!res.ok) {
     const errorText = await res.text();
