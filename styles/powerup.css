@@ -184,3 +184,45 @@ header h1 {
 .rotate-icon.open {
   transform: rotate(90deg);
 }
+
+/* Existing styles remain unchanged */
+
+/* Add login-specific styles */
+.login-card {
+  background: #1e293b;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.5);
+  max-width: 400px;
+  width: 100%;
+}
+
+.login-card h1 { margin-bottom: 24px; }
+.login-card label { display: block; margin-bottom: 6px; font-weight: 600; }
+.login-card input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  border: none;
+  font-size: 16px;
+}
+.login-card small { color: #94a3b8; display: block; margin-bottom: 20px; }
+.login-card button {
+  width: 100%;
+  padding: 12px;
+  background: #38bdf8;
+  color: #0f172a;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.login-card button:disabled { background: #555; cursor: not-allowed; }
+.login-card .error { color: #f87171; margin-bottom: 12px; }
+
+.power-hours-total {
+  color: #38bdf8;
+  font-weight: 600;
+}
