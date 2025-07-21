@@ -17,81 +17,77 @@
     <button id="loginBtn" disabled>Login</button>
   </div>
   <script type="module">
-    import { fetchSheet } from './scripts/api.js';
+    document.addEventListener("DOMContentLoaded", async () => {
+      import { fetchSheet } from './scripts/api.js'; // Corrected to api.js
 
-    const sheetUrl = 'https://powerup-proxy.onrender.com/sheet/2195459817820036';
+      const empInput = document.getElementById('empID');
+      const loginBtn = document.getElementById('loginBtn');
+      const errorMsg = document.getElementById('errorMsg');
 
-    const empInput = document.getElementById('empID');
-    const loginBtn = document.getElementById('loginBtn');
-    const errorMsg = document.getElementById('errorMsg');
+      if (!empInput) console.error('empInput not found');
+      window.onload = () => empInput.focus();
 
-    window.onload = () => empInput.focus();
+      empInput.addEventListener('input', () => {
+        console.log('Input changed:', empInput.value); // Debug log
+        loginBtn.disabled = empInput.value.trim().length < 2;
+        console.log('Button disabled:', loginBtn.disabled); // Debug log
+      });
 
-    empInput.addEventListener('input', () => {
-      loginBtn.disabled = empInput.value.trim().length < 2;
-    });
+      empInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !loginBtn.disabled) tryLogin();
+      });
 
-    empInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter' && !loginBtn.disabled) tryLogin();
-    });
+      empInput.addEventListener('paste', () => {
+        setTimeout(() => {
+          empInput.value = empInput.value.trim().replace(/\s+/g, '');
+          loginBtn.disabled = empInput.value.length < 2;
+        }, 50);
+      });
 
-    empInput.addEventListener('paste', () => {
-      setTimeout(() => {
-        empInput.value = empInput.value.trim().replace(/\s+/g, '');
-        loginBtn.disabled = empInput.value.length < 2;
-      }, 50);
-    });
+      loginBtn.addEventListener('click', tryLogin);
 
-    loginBtn.addEventListener('click', tryLogin);
+      async function tryLogin() {
+        const empID = empInput.value.trim().toUpperCase();
+        errorMsg.textContent = '';
+        loginBtn.disabled = true;
+        loginBtn.textContent = 'Logging in...';
 
-    async function tryLogin() {
-      const empID = empInput.value.trim().toUpperCase();
-      if (!/^[A-Z]{2}\d+$/.test(empID)) {
-        errorMsg.textContent = 'Invalid Employee ID format (e.g., IX7992).';
-        loginBtn.disabled = false;
-        loginBtn.textContent = 'Login';
-        return;
-      }
+        try {
+          const data = await fetchSheet('2195459817820036');
 
-      errorMsg.textContent = '';
-      loginBtn.disabled = true;
-      loginBtn.textContent = 'Logging in...';
+          const pidCol = getColumnId(data.columns, 'Position ID');
+          const nameCol = getColumnId(data.columns, 'Display Name');
 
-      try {
-        const data = await fetchSheet(sheetUrl.replace('https://powerup-proxy.onrender.com/sheet/', ''));
+          const match = data.rows.find(r =>
+            r.cells.some(c => c.columnId === pidCol && String(c.value).toUpperCase() === empID)
+          );
 
-        const pidCol = getColumnId(data.columns, 'Position ID');
-        const nameCol = getColumnId(data.columns, 'Display Name');
+          if (!match) {
+            errorMsg.textContent = `No match found for Employee ID "${empID}".`;
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'Login';
+            return;
+          }
 
-        const match = data.rows.find(r =>
-          r.cells.some(c => c.columnId === pidCol && String(c.value).toUpperCase() === empID)
-        );
+          const dispName = match.cells.find(c => c.columnId === nameCol);
+          const displayName = dispName?.displayValue || dispName?.value || empID;
 
-        if (!match) {
-          errorMsg.textContent = `No match found for Employee ID "${empID}".`;
+          sessionStorage.setItem('empID', empID);
+          sessionStorage.setItem('displayName', displayName);
+          window.location.href = 'PowerUp_Dashboard.html';
+        } catch (err) {
+          console.error(err);
+          errorMsg.textContent = 'Error connecting to authentication service.';
           loginBtn.disabled = false;
           loginBtn.textContent = 'Login';
-          return;
         }
-
-        const dispName = match.cells.find(c => c.columnId === nameCol);
-        const displayName = dispName?.displayValue || dispName?.value || empID;
-
-        sessionStorage.setItem('empID', empID);
-        sessionStorage.setItem('displayName', displayName);
-        window.location.href = 'PowerUp_Dashboard.html';
-      } catch (err) {
-        console.error(err);
-        errorMsg.textContent = 'Error connecting to authentication service.';
-        loginBtn.disabled = false;
-        loginBtn.textContent = 'Login';
       }
-    }
 
-    function getColumnId(columns, title) {
-      const col = columns.find(c => c.title.trim().toLowerCase() === title.toLowerCase());
-      return col ? col.id : null;
-    }
+      function getColumnId(columns, title) {
+        const col = columns.find(c => c.title.trim().toLowerCase() === title.toLowerCase());
+        return col ? col.id : null;
+      }
+    });
   </script>
 </body>
 </html>
