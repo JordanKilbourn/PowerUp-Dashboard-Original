@@ -1,13 +1,10 @@
 import { initializePage } from './layout.js';
 import { renderTable } from './table.js';
+import { fetchSheet, SHEET_IDS } from './apis.js';
 import './session.js';
 
 document.addEventListener("DOMContentLoaded", async () => {
   await initializePage();
-
-  document.getElementById("userGreeting").textContent = sessionStorage.getItem("displayName") || "User";
-  document.getElementById("currentMonth").textContent = sessionStorage.getItem("currentMonth") || "";
-  document.getElementById("userLevel").textContent = sessionStorage.getItem("currentLevel") || "";
 
   const empID = sessionStorage.getItem("empID");
   if (!empID) {
@@ -17,8 +14,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
-    const res = await fetch("https://powerup-proxy.onrender.com/sheet/1240392906264452");
-    const sheet = await res.json();
+    const sheet = await fetchSheet(SHEET_IDS.powerHours);
 
     const matchingRows = sheet.rows.filter(row =>
       row.cells.some(cell => String(cell.value).trim().toUpperCase() === empID)
