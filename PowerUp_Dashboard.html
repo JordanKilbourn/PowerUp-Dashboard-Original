@@ -2,69 +2,49 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PowerUp Dashboard</title>
-  
-  <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  
-  <!-- Styles -->
   <link rel="stylesheet" href="/styles/powerup.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 </head>
 <body>
-
-  <!-- Injected Components -->
   <div id="sidebar"></div>
   <div id="header"></div>
-
-  <!-- Main Content -->
   <div class="container">
     <div class="dashboard-header">
-      <div class="goal-pill-group" id="pillSummary"></div>
-
-      <div class="progress-container">
-        <div class="progress-label">Power Hours Logged: <strong id="phProgress">0 / 8</strong></div>
-        <div class="progress-bar">
-          <div class="progress-bar-fill" id="progressBar"></div>
-        </div>
-        <p id="powerTips" style="font-size: 14px; color: #93c5fd; margin-top: 8px;"></p>
+      <div id="userGreeting" class="header-left"></div>
+      <div id="progressContainer" class="progress-container">
+        <div class="progress-label">Power Hours Progress</div>
+        <div class="progress-bar"><div id="progressBar" class="progress-bar-fill"></div></div>
+        <div id="phProgress" class="token-tracker"></div>
+        <div id="powerTips"></div>
       </div>
-
-      <div class="token-tracker">Tokens Earned: <strong id="tokenTotal">0</strong></div>
+      <div class="goal-pill-group" id="goalPillGroup"></div>
     </div>
-
-    <!-- Accordion Section - CI Submissions -->
-    <div class="accordion">
-      <div class="accordion-item">
-        <h2 class="accordion-header" data-target="ciContent">
-          <i class="fas fa-chevron-right rotate-icon"></i> CI Submissions
-        </h2>
-        <div class="accordion-content" id="ciContent"></div>
+    <div class="section">
+      <div class="accordion-header" data-target="ciContent">
+        <span>CI Submissions</span>
+        <i class="fas fa-chevron-right rotate-icon"></i>
       </div>
-
-      <!-- Accordion Section - Safety Concerns -->
-      <div class="accordion-item">
-        <h2 class="accordion-header" data-target="safetyContent">
-          <i class="fas fa-chevron-right rotate-icon"></i> Safety Concerns
-        </h2>
-        <div class="accordion-content" id="safetyContent"></div>
+      <div id="ciContent" class="accordion-content"></div>
+    </div>
+    <div class="section">
+      <div class="accordion-header" data-target="safetyContent">
+        <span>Safety Concerns</span>
+        <i class="fas fa-chevron-right rotate-icon"></i>
       </div>
-
-      <!-- Accordion Section - Quality Catches -->
-      <div class="accordion-item">
-        <h2 class="accordion-header" data-target="qcContent">
-          <i class="fas fa-chevron-right rotate-icon"></i> Quality Catches
-        </h2>
-        <div class="accordion-content" id="qcContent"></div>
+      <div id="safetyContent" class="accordion-content"></div>
+    </div>
+    <div class="section">
+      <div class="accordion-header" data-target="qcContent">
+        <span>Quality Catches</span>
+        <i class="fas fa-chevron-right rotate-icon"></i>
       </div>
+      <div id="qcContent" class="accordion-content"></div>
     </div>
   </div>
-
-<!-- Modern entry point (no include.js needed anymore!) -->
-<script type="module" src="/scripts/layout.js"></script>
-<script type="module" src="/scripts/load-dashboard.js"></script>
-
-
+  <script type="module" src="/scripts/layout.js"></script>
+  <script type="module" src="/scripts/load-dashboard.js"></script>
 </body>
 </html>
