@@ -1,154 +1,176 @@
-import { renderTable } from './table.js';
-import { fetchSheet, fetchReport, SHEET_IDS } from './scripts/api.js';
-import './session.js';
+// /scripts/load-dashboard.js
+import { renderTable } from '/scripts/table.js';
 
 function loadDashboard() {
-  const empID = sessionStorage.getItem('empID');
-  if (!empID) {
-    console.warn('No empID in session, redirecting to login');
-    window.location.href = 'index.html';
-    return;
-  }
+  const empID = sessionStorage.getItem("empID");
+  if (!empID) return;
 
-  const globalError = document.createElement('div');
-  globalError.id = 'globalError';
-  globalError.style.color = '#f87171';
-  document.body.prepend(globalError);
+  const levelSheet = '8346763116105604';        // Level Tracker (sheet)
+  const hoursSheet = '1240392906264452';        // Power Hours (sheet)
+  const ciSheet = '7397205473185668';           // CI Submission Mirror (sheet)
+  const safetySheet = '4089265651666820';       // Safety Concerns (report)
+  const qcSheet = '1431258165890948';           // Quality Catches (report)
+
+  const proxy = 'https://powerup-proxy.onrender.com';
+
+  const loadSheet = (id, type = 'sheet') =>
+    fetch(`${proxy}/${type}/${id}`).then(res => res.json());
 
   Promise.all([
-    fetchSheet(SHEET_IDS.levelTracker),
-    fetchSheet(SHEET_IDS.powerHours),
-    fetchSheet(SHEET_IDS.ciSubmissions),
-    fetchReport(SHEET_IDS.safetyConcerns),
-    fetchReport(SHEET_IDS.qualityCatches)
+    loadSheet(levelSheet),
+    loadSheet(hoursSheet),
+    loadSheet(ciSheet, 'sheet'),
+    loadSheet(safetySheet, 'report'),
+    loadSheet(qcSheet, 'report')
   ])
     .then(([level, hours, ci, safety, qc]) => {
-      console.log('Fetched data:', { level, hours, ci, safety, qc });
       updateLevelInfo(level);
       updatePowerHours(hours);
 
+      // ✅ Render CI Submissions
       renderTable({
         sheet: ci,
-        containerId: 'ciContent',
-        title: 'CI Submissions',
-        checkmarkCols: ['Resourced', 'Paid', 'Project Work Completed'],
-        excludeCols: ['Submitted By', 'Valid Row', 'Employee ID'],
-        filterByEmpID: true
+        containerId: "ciContent",
+        title: "CI Submissions",
+        checkmarkCols: ["Resourced", "Paid", "Project Work Completed"],
+        excludeCols: ["Submitted By", "Valid Row", "Employee ID"]
       });
-      console.log('CI Content:', document.getElementById('ciContent').innerHTML);
 
+      // ✅ Render Safety Concerns
       renderTable({
         sheet: safety,
-        containerId: 'safetyContent',
-        title: 'Safety Concerns',
-        excludeCols: ['Employee ID'],
-        filterByEmpID: true
+        containerId: "safetyContent",
+        title: "Safety Concerns",
+        excludeCols: ["Employee ID"]
       });
-      console.log('Safety Content:', document.getElementById('safetyContent').innerHTML);
 
+      // ✅ Render Quality Catches
       renderTable({
         sheet: qc,
-        containerId: 'qcContent',
-        title: 'Quality Catches',
-        excludeCols: ['Employee ID'],
-        filterByEmpID: true
-      });
-      console.log('QC Content:', document.getElementById('qcContent').innerHTML);
-
-      document.querySelectorAll('.accordion-header').forEach(header => {
-        header.addEventListener('click', () => {
-          const content = document.getElementById(header.dataset.target);
-          const icon = header.querySelector('.rotate-icon');
-          const isOpen = content.classList.toggle('open');
-          icon.classList.toggle('open', isOpen);
-          console.log(`Accordion ${header.dataset.target} toggled, open: ${isOpen}`);
-        });
+        containerId: "qcContent",
+        title: "Quality Catches",
+        excludeCols: ["Employee ID"]
       });
     })
     .catch(err => {
-      console.error('Failed to load dashboard data:', err);
-      globalError.textContent = 'Error loading data. Check console.';
+      console.error("Failed to load dashboard data:", err);
     });
 }
 
+// 🧠 Update header info from level data
 function updateLevelInfo(sheet) {
-  const empID = sessionStorage.getItem('empID');
-  const rows = sheet.rows.filter(r => r.cells.some(c => String(c.value).toUpperCase() === empID));
-  console.log('Level rows for empID:', empID, rows);
+  const empID = sessionStorage.getItem("empID");
+  const rows = sheet.rows.filter(r => r.cells.some(c =>
+    c.value?.toString().toUpperCase() === empID
+  ));
 
-  if (rows.length === 0) {
-    console.warn('No level data for empID:', empID);
-    return;
-  }
+  if (rows.length === 0) return;
 
-  const latest = rows.sort((a, b) => new Date(b.cells[0].value) - new Date(a.cells[0].value))[0];
+  const latest = rows.sort((a, b) =>
+    new Date(b.cells[0].value) - new Date(a.cells[0].value)
+  )[0];
+
   const get = (title) => {
-    const col = sheet.columns.find(c => c.title.toLowerCase().includes(title.toLowerCase()));
-    console.log(`Searching for ${title} column, found:`, col);
+    const col = sheet.columns.find(c => c.title.trim().toLowerCase() === title.toLowerCase());
     const cell = latest.cells.find(x => x.columnId === col?.id);
     return cell?.displayValue || cell?.value || '';
   };
 
-  const level = get('Level') || 'N/A';
-  const monthKey = get('Month Key');
-  const monthStr = monthKey ? new Date(monthKey).toLocaleString('default', { month: 'long', year: 'numeric' }) : 'Unknown';
+  const level = get("Level") || "N/A";
+  const monthKey = get("Month Key");
+  const monthStr = monthKey
+    ? new Date(monthKey).toLocaleString("default", { month: "long", year: "numeric" })
+    : "Unknown";
 
-  console.log('Level data:', { level, monthStr });
-  sessionStorage.setItem('currentLevel', level);
-  sessionStorage.setItem('currentMonth', monthStr);
-  initializeSession(); // From session.js
+  sessionStorage.setItem("currentLevel", level);
+  sessionStorage.setItem("currentMonth", monthStr);
+
+  const levelEl = document.getElementById("userLevel");
+  const monthEl = document.getElementById("currentMonth");
+  if (levelEl) levelEl.textContent = level;
+  if (monthEl) monthEl.textContent = monthStr;
 }
 
+// 🧮 Calculate Power Hours Progress using dynamic goal ranges
 async function updatePowerHours(sheet) {
-  const empID = sessionStorage.getItem('empID');
-  const currentLevel = sessionStorage.getItem('currentLevel') || 'N/A';
+  const empID = sessionStorage.getItem("empID");
+  const currentLevel = sessionStorage.getItem("currentLevel") || "N/A";
 
-  const rows = sheet.rows.filter(r => r.cells.some(c => String(c.value).toUpperCase() === empID));
-  let totalHours = 0;
-  rows.forEach(row => {
-    const completedCol = sheet.columns.find(c => c.title.toLowerCase().includes('completed'));
-    const hoursCol = sheet.columns.find(c => c.title.toLowerCase().includes('completed hours'));
-    const isCompleted = row.cells.find(c => c.columnId === completedCol?.id)?.value === true;
-    const completedVal = row.cells.find(c => c.columnId === hoursCol?.id)?.value;
+  const rows = sheet.rows.filter(r =>
+    r.cells.some(c => c.value?.toString().toUpperCase() === empID)
+  );
 
-    if (isCompleted && typeof completedVal === 'number') totalHours += completedVal;
-  });
+let totalHours = 0;
 
+for (const row of rows) {
+  const completedCol = sheet.columns.find(c => c.title.trim().toLowerCase() === "completed");
+  const hoursCol = sheet.columns.find(c => c.title.trim().toLowerCase() === "completed hours");
+
+  const isCompleted = row.cells.find(c => c.columnId === completedCol?.id)?.value === true;
+  const completedVal = row.cells.find(c => c.columnId === hoursCol?.id)?.value;
+
+  if (isCompleted && typeof completedVal === "number") {
+    totalHours += completedVal;
+  }
+}
+
+  // ⏳ Fetch goal ranges from Power Hour Targets sheet
   let minTarget = 8;
   let maxTarget = 12;
 
   try {
-    const targetsRes = await fetchSheet('3542697273937796');
-    const levelRow = targetsRes.rows.find(r => r.cells.some(c => String(c.displayValue).toLowerCase() === currentLevel.toLowerCase()));
+    const targetsRes = await fetch("https://powerup-proxy.onrender.com/sheet/3542697273937796");
+    const targetsData = await targetsRes.json();
+
+    const levelRow = targetsData.rows.find(r =>
+      r.cells.some(c => c.displayValue?.toString().toLowerCase() === currentLevel.toLowerCase())
+    );
+
     if (levelRow) {
       const get = (title) => {
-        const col = targetsRes.columns.find(c => c.title.toLowerCase().includes(title.toLowerCase()));
+        const col = targetsData.columns.find(c => c.title.trim().toLowerCase() === title.toLowerCase());
         const cell = levelRow.cells.find(x => x.columnId === col?.id);
         return parseFloat(cell?.displayValue || cell?.value || '');
       };
-      minTarget = get('Min Hours') || minTarget;
-      maxTarget = get('Max Hours') || maxTarget;
+
+      minTarget = get("Min Hours") || minTarget;
+      maxTarget = get("Max Hours") || maxTarget;
     }
   } catch (err) {
-    console.warn('Power Hour Targets not loaded, using default:', err);
+    console.warn("Power Hour Targets not loaded, using default range.");
   }
 
+  // 🧠 Calculate display logic
   const percent = Math.min((totalHours / minTarget) * 100, 100);
-  const barEl = document.getElementById('progressBar');
-  const phEl = document.getElementById('phProgress');
-  const tipsEl = document.getElementById('powerTips');
+  const barEl = document.getElementById("progressBar");
+  const phEl = document.getElementById("phProgress");
+  const tipsEl = document.getElementById("powerTips");
 
-  if (barEl) barEl.style.width = `${percent}%`;
-  if (phEl) phEl.textContent = `Power Hours Logged: ${totalHours.toFixed(1)} / ${minTarget}`; // Restored format
-  if (tipsEl) {
-    tipsEl.textContent = totalHours >= minTarget && totalHours <= maxTarget
-      ? '✅ Target met! Great job!'
+  barEl.style.width = `${percent}%`;
+  phEl.textContent = `${totalHours.toFixed(1)} / ${minTarget}`;
+
+  // 🎨 Bar color logic
+  barEl.style.backgroundColor =
+    totalHours >= minTarget && totalHours <= maxTarget
+      ? "#4ade80" // green
       : totalHours > maxTarget
-        ? '🎉 You\'ve gone above and beyond!'
-        : `You need ${(minTarget - totalHours).toFixed(1)} more hour(s). ${new Date().getDate() - new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()} days left.`; // Restored help text style
+        ? "#facc15" // yellow (overachiever)
+        : "#60a5fa"; // blue (in progress)
+
+  // 💡 Tips logic
+  if (totalHours >= minTarget && totalHours <= maxTarget) {
+    tipsEl.textContent = "✅ Target met! Great job!";
+  } else if (totalHours > maxTarget) {
+    tipsEl.textContent = "🎉 You've gone above and beyond!";
+  } else {
+    const now = new Date();
+    const daysLeft = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() - now.getDate();
+    const remaining = (minTarget - totalHours).toFixed(1);
+    tipsEl.textContent = `You're ${remaining} hour(s) away from your goal. ${daysLeft} day(s) left this month.`;
   }
+
+  sessionStorage.setItem("powerHours", totalHours.toFixed(1));
 }
 
+// ✅ Export if needed
 export { loadDashboard };
-
-document.addEventListener('DOMContentLoaded', loadDashboard);
