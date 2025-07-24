@@ -1,29 +1,24 @@
-async function initializePage() {
-  const sidebar = document.getElementById('sidebar');
-  const header = document.getElementById('header');
-  if (!sidebar || !header) {
-    console.error('Sidebar or header container not found');
-    return;
-  }
+// /scripts/layout.js
+
+export async function initializePage({ showName = true } = {}) {
+  const sidebar = document.getElementById("sidebar");
+  const header = document.getElementById("header");
 
   try {
-    const [sidebarHtml, headerHtml] = await Promise.all([
-      fetch('/components/sidebar.html').then(res => res.text()),
-      fetch('/components/header.html').then(res => res.text())
+    const [sidebarHTML, headerHTML] = await Promise.all([
+      fetch("/components/sidebar.html").then(res => res.text()),
+      fetch("/components/header.html").then(res => res.text()),
     ]);
 
-    sidebar.innerHTML = sidebarHtml;
-    header.innerHTML = headerHtml;
+    sidebar.innerHTML = sidebarHTML;
+    header.innerHTML = headerHTML;
 
-    // Initialize session and sidebar behavior
-    import('./session.js').then(module => {
-      module.setupSidebarBehavior();
-      module.initializeSession();
-    });
+    if (showName) {
+      const name = sessionStorage.getItem("displayName") || "User";
+      const nameEl = document.getElementById("userGreeting");
+      if (nameEl) nameEl.textContent = name;
+    }
   } catch (err) {
-    console.error('Failed to load layout components:', err);
+    console.error("Component include failed:", err);
   }
 }
-
-// Call initializePage on DOM load
-document.addEventListener('DOMContentLoaded', initializePage);
