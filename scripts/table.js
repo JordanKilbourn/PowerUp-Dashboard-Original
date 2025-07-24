@@ -1,61 +1,77 @@
-function renderTable({ containerId, sheet, title, excludeCols = [], checkmarkCols = [], filterByEmpID = false }) {
-  const container = document.getElementById(containerId);
-  container.innerHTML = '';
+// /scripts/table.js
 
-  if (!sheet || !sheet.rows || sheet.rows.length === 0) {
-    container.innerHTML = '<p>No data available.</p>';
+export function renderTable({
+  sheet,
+  containerId,
+  title = '',
+  filterByEmpID = true,
+  checkmarkCols = [],
+  excludeCols = [],
+  columnOrder = null
+}) {
+  const empID = sessionStorage.getItem("empID");
+  const container = document.getElementById(containerId);
+  if (!sheet || !container) return;
+
+  const colMap = {};
+  sheet.columns.forEach(c => {
+    colMap[c.title.trim().toLowerCase()] = c.id;
+  });
+
+  const get = (row, title) => {
+    const colId = colMap[title.toLowerCase()];
+    const cell = row.cells.find(c => c.columnId === colId);
+    return cell?.displayValue ?? cell?.value ?? '';
+  };
+
+  let rows = sheet.rows;
+  if (filterByEmpID) {
+    rows = rows.filter(r => {
+      const idVal = get(r, "Employee ID");
+      return idVal && idVal.toString().toUpperCase() === empID;
+    });
+  }
+
+  if (rows.length === 0) {
+    container.innerHTML = `<h2>${title}</h2><p>No records found.</p>`;
     return;
   }
 
-  const tableWrapper = document.createElement('div');
-  tableWrapper.classList.add('table-wrapper');
+  // Columns to show
+  const visibleCols = columnOrder
+    ? columnOrder.filter(c => !excludeCols.includes(c))
+    : sheet.columns.filter(c =>
+        !c.hidden && !excludeCols.includes(c.title.trim())
+      ).map(c => c.title);
 
-  const table = document.createElement('table');
-  table.classList.add('dashboard-table');
-
-  // Filter columns
-  const columns = sheet.columns.filter(col => !excludeCols.includes(col.title));
-  if (filterByEmpID) {
-    const empID = sessionStorage.getItem('empID');
-    sheet.rows = sheet.rows.filter(row =>
-      row.cells.some(cell => String(cell.value).toUpperCase() === empID)
-    );
-  }
-
-  // Create thead
-  const thead = document.createElement('thead');
-  const headerRow = document.createElement('tr');
-  columns.forEach(col => {
-    const th = document.createElement('th');
-    th.textContent = col.title;
-    headerRow.appendChild(th);
+  let html = `<div class="dashboard-table-container"><table class="dashboard-table">
+    <thead>
+      <tr>`;
+  visibleCols.forEach(c => {
+    html += `<th>${c}</th>`;
   });
-  thead.appendChild(headerRow);
-  table.appendChild(thead);
+  html += `</tr></thead><tbody class="dashboard-table-body">`;
 
-  // Create tbody
-  const tbody = document.createElement('tbody');
-  sheet.rows.forEach(row => {
-    const tr = document.createElement('tr');
-    columns.forEach(col => {
-      const cell = row.cells.find(c => c.columnId === col.id);
-      const td = document.createElement('td');
-      let value = cell?.displayValue || cell?.value || '';
+  rows.forEach(r => {
+    html += `<tr>`;
+    visibleCols.forEach(title => {
+      const val = get(r, title);
+      const isCheck = checkmarkCols.map(c => c.toLowerCase()).includes(title.toLowerCase());
 
-      if (checkmarkCols.includes(col.title) && typeof value === 'boolean') {
-        td.innerHTML = value
-          ? '<span class="check-icon">✔️</span>'
-          : '<span class="cross-icon">—</span>';
-      } else {
-        td.textContent = value;
+      let content = val;
+      if (isCheck) {
+        if (val === true || val === '✓') {
+          content = `<span class="checkmark">&#10003;</span>`;
+        } else if (val === false || val === '✗' || val === 'X') {
+          content = `<span class="cross">&#10007;</span>`;
+        }
       }
 
-      tr.appendChild(td);
+      html += `<td title="${val}">${content}</td>`;
     });
-    tbody.appendChild(tr);
+    html += `</tr>`;
   });
 
-  table.appendChild(tbody);
-  tableWrapper.appendChild(table);
-  container.appendChild(tableWrapper);
+  html += `</tbody></table></div>`;
+  container.innerHTML = html;
 }
