@@ -1,10 +1,9 @@
 import { initializePage } from './layout.js';
 import { renderTable } from './table.js';
-import { fetchSheet, SHEET_IDS } from './apis.js';
 import './session.js';
 
 document.addEventListener("DOMContentLoaded", async () => {
-  await initializePage();
+  await initializePage(); // Loads sidebar + header
 
   const empID = sessionStorage.getItem("empID");
   if (!empID) {
@@ -14,33 +13,58 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
-    const sheet = await fetchSheet(SHEET_IDS.powerHours);
+    const res = await fetch("https://powerup-proxy.onrender.com/sheet/1240392906264452");
+    const sheet = await res.json();
 
-    const matchingRows = sheet.rows.filter(row =>
-      row.cells.some(cell => String(cell.value).trim().toUpperCase() === empID)
+    const matchingRows = sheet.rows.filter(r =>
+      r.cells.some(c => c.value?.toString().toUpperCase() === empID)
     );
 
-    const getVal = (row, title) => {
-      const col = sheet.columns.find(c => c.title.trim().toLowerCase() === title.toLowerCase());
+    let totalHours = 0;
+
+    const getCellValue = (row, colTitle) => {
+      const col = sheet.columns.find(c => c.title.trim().toLowerCase() === colTitle.toLowerCase());
       const cell = row.cells.find(x => x.columnId === col?.id);
       return cell?.displayValue || cell?.value || '';
     };
 
-    let totalHours = 0;
-    matchingRows.forEach(row => {
-      const val = parseFloat(getVal(row, "Completed Hours") || 0);
-      if (!isNaN(val)) totalHours += val;
+    const tableRows = matchingRows.map(row => {
+      const phID = getCellValue(row, "Power Hour ID");
+      const startTime = getCellValue(row, "Start Time");
+      const endTime = getCellValue(row, "End Time");
+      const scheduled = getCellValue(row, "Scheduled?");
+      const completed = getCellValue(row, "Completed?");
+      const activity = getCellValue(row, "Activity Description");
+      const date = getCellValue(row, "Date");
+      const hours = parseFloat(getCellValue(row, "Completed Hours") || 0);
+
+      totalHours += hours;
+
+      return {
+        "Power Hour ID": phID,
+        "Date": date,
+        "Start Time": startTime,
+        "End Time": endTime,
+        "Scheduled": scheduled,
+        "Completed": completed,
+        "Completed Hours": hours,
+        "Activity Description": activity
+      };
     });
 
-    document.getElementById("powerHoursTotal").textContent = `Total Power Hours Logged: ${totalHours.toFixed(2)}`;
+    // Update summary line
+    document.getElementById("powerHoursTotal").textContent = `Total Power Hours Logged: ${totalHours}`;
 
+    // Render table
     renderTable({
-      sheet: { columns: sheet.columns, rows: matchingRows },
+      rows: tableRows,
       containerId: "powerHoursTableContainer",
       title: "Power Hours Log",
-      excludeCols: ["Employee ID"],
-      checkmarkCols: ["Scheduled?", "Completed?"],
-      filterByEmpID: false
+      checkmarkCols: ["Scheduled", "Completed"],
+      columnOrder: [
+        "Power Hour ID", "Date", "Start Time", "End Time",
+        "Scheduled", "Completed", "Completed Hours", "Activity Description"
+      ]
     });
 
   } catch (err) {
