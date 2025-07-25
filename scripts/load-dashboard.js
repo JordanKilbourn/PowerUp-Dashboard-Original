@@ -1,83 +1,68 @@
 // /scripts/load-dashboard.js
 import { renderTable } from '/scripts/table.js';
+import { SHEET_IDS, fetchSheet } from './api.js';
 
 function loadDashboard() {
   const empID = sessionStorage.getItem("empID");
   if (!empID) return;
 
-  const levelSheet = '8346763116105604';        // Level Tracker (sheet)
-  const hoursSheet = '1240392906264452';        // Power Hours (sheet)
-  const ciSheet = '7397205473185668';           // CI Submission Mirror (sheet)
-  const safetySheet = '4089265651666820';       // Safety Concerns (report)
-  const qcSheet = '1431258165890948';           // Quality Catches (report)
-
-  const proxy = 'https://powerup-proxy.onrender.com';
-
-  const loadSheet = (id, type = 'sheet') =>
-    fetch(`${proxy}/${type}/${id}`).then(res => res.json());
-
   Promise.all([
-    loadSheet(levelSheet),
-    loadSheet(hoursSheet),
-    loadSheet(ciSheet, 'sheet'),
-    loadSheet(safetySheet, 'report'),
-    loadSheet(qcSheet, 'report')
+    fetchSheet(SHEET_IDS.levelTracker),
+    fetchSheet(SHEET_IDS.powerHours),
+    fetchSheet(SHEET_IDS.ciSubmissions),
+    fetchSheet(SHEET_IDS.safetyConcerns),
+    fetchSheet(SHEET_IDS.qualityCatches)
   ])
-    .then(([level, hours, ci, safety, qc]) => {
-      updateLevelInfo(level);
-      updatePowerHours(hours);
+  .then(([level, hours, ci, safety, qc]) => {
+    updateLevelInfo(level);
+    updatePowerHours(hours);
 
-      // ✅ Render CI Submissions
-      renderTable({
-        sheet: ci,
-        containerId: "ciContent",
-        title: "CI Submissions",
-        checkmarkCols: ["Resourced", "Paid", "Project Work Completed"],
-        excludeCols: ["Submitted By", "Valid Row", "Employee ID"]
-      });
-
-      // 💰 Calculate total tokens from CI Submissions
-const tokenCol = ci.columns.find(c => c.title.trim().toLowerCase() === "token payout");
-let totalTokens = 0;
-
-ci.rows.forEach(row => {
-  const empCol = ci.columns.find(c => c.title.trim().toLowerCase() === "employee id");
-  const empCell = row.cells.find(c => c.columnId === empCol?.id);
-  const tokenCell = row.cells.find(c => c.columnId === tokenCol?.id);
-
-  const matchesEmp = empCell?.value?.toString().toUpperCase() === empID;
-  const tokenVal = parseFloat(tokenCell?.value || 0);
-
-  if (matchesEmp && !isNaN(tokenVal)) {
-    totalTokens += tokenVal;
-  }
-});
-
-const tokenDisplay = document.getElementById("tokenTotal");
-if (tokenDisplay) {
-  tokenDisplay.textContent = totalTokens.toFixed(0);
-}
-
-
-      // ✅ Render Safety Concerns
-      renderTable({
-        sheet: safety,
-        containerId: "safetyContent",
-        title: "Safety Concerns",
-        excludeCols: ["Employee ID"]
-      });
-
-      // ✅ Render Quality Catches
-      renderTable({
-        sheet: qc,
-        containerId: "qcContent",
-        title: "Quality Catches",
-        excludeCols: ["Employee ID"]
-      });
-    })
-    .catch(err => {
-      console.error("Failed to load dashboard data:", err);
+    // ✅ Render CI Submissions
+    renderTable({
+      sheet: ci,
+      containerId: "ciContent",
+      title: "CI Submissions",
+      checkmarkCols: ["Resourced", "Paid", "Project Work Completed"],
+      excludeCols: ["Submitted By", "Valid Row", "Employee ID"]
     });
+
+    // 💰 Calculate Tokens Earned from CI
+    const tokenCol = ci.columns.find(c => c.title.trim().toLowerCase() === "token payout");
+    const empCol = ci.columns.find(c => c.title.trim().toLowerCase() === "employee id");
+    let totalTokens = 0;
+
+    ci.rows.forEach(row => {
+      const empCell = row.cells.find(c => c.columnId === empCol?.id);
+      const tokenCell = row.cells.find(c => c.columnId === tokenCol?.id);
+      const matchesEmp = empCell?.value?.toString().toUpperCase() === empID;
+      const tokenVal = parseFloat(tokenCell?.value || 0);
+      if (matchesEmp && !isNaN(tokenVal)) {
+        totalTokens += tokenVal;
+      }
+    });
+
+    const tokenDisplay = document.getElementById("tokenTotal");
+    if (tokenDisplay) tokenDisplay.textContent = totalTokens.toFixed(0);
+
+    // ✅ Render Safety Concerns
+    renderTable({
+      sheet: safety,
+      containerId: "safetyContent",
+      title: "Safety Concerns",
+      excludeCols: ["Employee ID"]
+    });
+
+    // ✅ Render Quality Catches
+    renderTable({
+      sheet: qc,
+      containerId: "qcContent",
+      title: "Quality Catches",
+      excludeCols: ["Employee ID"]
+    });
+  })
+  .catch(err => {
+    console.error("Failed to load dashboard data:", err);
+  });
 }
 
 // 🧠 Update header info from level data
@@ -123,19 +108,19 @@ async function updatePowerHours(sheet) {
     r.cells.some(c => c.value?.toString().toUpperCase() === empID)
   );
 
-let totalHours = 0;
+  let totalHours = 0;
 
-for (const row of rows) {
-  const completedCol = sheet.columns.find(c => c.title.trim().toLowerCase() === "completed");
-  const hoursCol = sheet.columns.find(c => c.title.trim().toLowerCase() === "completed hours");
+  for (const row of rows) {
+    const completedCol = sheet.columns.find(c => c.title.trim().toLowerCase() === "completed");
+    const hoursCol = sheet.columns.find(c => c.title.trim().toLowerCase() === "completed hours");
 
-  const isCompleted = row.cells.find(c => c.columnId === completedCol?.id)?.value === true;
-  const completedVal = row.cells.find(c => c.columnId === hoursCol?.id)?.value;
+    const isCompleted = row.cells.find(c => c.columnId === completedCol?.id)?.value === true;
+    const completedVal = row.cells.find(c => c.columnId === hoursCol?.id)?.value;
 
-  if (isCompleted && typeof completedVal === "number") {
-    totalHours += completedVal;
+    if (isCompleted && typeof completedVal === "number") {
+      totalHours += completedVal;
+    }
   }
-}
 
   // ⏳ Fetch goal ranges from Power Hour Targets sheet
   let minTarget = 8;
@@ -195,5 +180,5 @@ for (const row of rows) {
   sessionStorage.setItem("powerHours", totalHours.toFixed(1));
 }
 
-// ✅ Export if needed
+// ✅ Export
 export { loadDashboard };
