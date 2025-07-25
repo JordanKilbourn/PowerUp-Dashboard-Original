@@ -36,6 +36,29 @@ function loadDashboard() {
         excludeCols: ["Submitted By", "Valid Row", "Employee ID"]
       });
 
+      // 💰 Calculate total tokens from CI Submissions
+const tokenCol = ci.columns.find(c => c.title.trim().toLowerCase() === "token payout");
+let totalTokens = 0;
+
+ci.rows.forEach(row => {
+  const empCol = ci.columns.find(c => c.title.trim().toLowerCase() === "employee id");
+  const empCell = row.cells.find(c => c.columnId === empCol?.id);
+  const tokenCell = row.cells.find(c => c.columnId === tokenCol?.id);
+
+  const matchesEmp = empCell?.value?.toString().toUpperCase() === empID;
+  const tokenVal = parseFloat(tokenCell?.value || 0);
+
+  if (matchesEmp && !isNaN(tokenVal)) {
+    totalTokens += tokenVal;
+  }
+});
+
+const tokenDisplay = document.getElementById("tokenTotal");
+if (tokenDisplay) {
+  tokenDisplay.textContent = totalTokens.toFixed(0);
+}
+
+
       // ✅ Render Safety Concerns
       renderTable({
         sheet: safety,
