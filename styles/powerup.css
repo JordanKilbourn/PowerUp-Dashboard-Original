@@ -202,3 +202,10 @@ header h1 {
 .rotate-icon.open {
   transform: rotate(90deg);
 }
+
+.empty-state {
+  color: #888;
+  font-style: italic;
+  padding: 0.5rem 0 1rem;
+}
+
