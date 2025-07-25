@@ -3,9 +3,9 @@
 const SHEET_IDS = Object.freeze({
   powerHours: '1240392906264452',
   levelTracker: '8346763116105604',
-  ciSubmissions: '7397205473185668',
-  safetyConcerns: '4089265651666820',
-  qualityCatches: '1431258165890948'
+  ciSubmissions: '6797575881445252',
+  safetyConcerns: '3310696565526404',
+  qualityCatches: '8096237664292740'
 });
 
 const API_PROXY = 'https://powerup-proxy.onrender.com';
