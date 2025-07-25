@@ -25,7 +25,9 @@ export function renderTable({
   };
 
   let rows = sheet.rows;
-  if (filterByEmpID) {
+
+  // 🔧 Quick debug bypass: skip filtering for Safety Concerns
+  if (filterByEmpID && title !== "Safety Concerns") {
     rows = rows.filter(r => {
       const idVal = get(r, "Employee ID");
       return idVal && idVal.toString().toUpperCase() === empID;
