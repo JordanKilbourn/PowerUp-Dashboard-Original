@@ -25,9 +25,7 @@ export function renderTable({
   };
 
   let rows = sheet.rows;
-
-  // 🔧 Quick debug bypass: skip filtering for Safety Concerns
-  if (filterByEmpID && title !== "Safety Concerns") {
+  if (filterByEmpID) {
     rows = rows.filter(r => {
       const idVal = get(r, "Employee ID");
       return idVal && idVal.toString().toUpperCase() === empID;
@@ -35,7 +33,10 @@ export function renderTable({
   }
 
   if (rows.length === 0) {
-    container.innerHTML = `<h2>${title}</h2><p>No records found.</p>`;
+    container.innerHTML = `
+      <h2>${title}</h2>
+      <p class="empty-state">You haven’t submitted any ${title} yet.</p>
+    `;
     return;
   }
 
