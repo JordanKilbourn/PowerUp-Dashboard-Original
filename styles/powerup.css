@@ -203,20 +203,20 @@ header h1 {
   transform: rotate(90deg);
 }
 
-.empty-message {
-  padding: 1rem;
+.empty-state {
+  color: #bbb;
+  font-size: 0.95rem;
   background-color: #1a1a1a;
   border: 1px solid #333;
+  padding: 1rem;
   border-radius: 8px;
   margin-top: 0.5rem;
-  color: #ccc;
-  font-size: 0.95rem;
+  font-style: normal;
   line-height: 1.4;
 }
-.empty-message strong {
+.empty-state strong {
   color: #fff;
 }
-
 /* Column sizing */
 .col-narrow {
   width: 50px;
