@@ -62,8 +62,10 @@ export function renderTable({
     "paid": "Paid"
   };
 
-  const narrowCols = ["submission date", "submission id", "ci approval", "token payout", "resourced", "resourced date", "assigned to (primary)", "action item entry date", "status", "paid"];
+  const narrowCols = ["submission date", "submission id", "token payout", "resourced", "resourced date", "assigned to (primary)", "action item entry date", "paid"];
+  const mediumCols = ["status", "ci approval"];
   const wideCols = ["problem statements", "proposed improvement", "last meeting action item's"];
+  const centeredCols = [...narrowCols, ...mediumCols];
 
   const visibleCols = columnOrder
     ? columnOrder.filter(c => !excludeCols.includes(c))
@@ -76,12 +78,14 @@ export function renderTable({
   visibleCols.forEach(c => {
     const normalizedCol = c.trim().toLowerCase();
     const label = colHeaderMap[normalizedCol] || c;
-    const widthClass = narrowCols.includes(normalizedCol)
-      ? 'col-narrow'
-      : wideCols.includes(normalizedCol)
-      ? 'col-wide'
-      : '';
-    html += `<th class="${widthClass}" data-col="${normalizedCol}">${label}</th>`;
+
+    let widthClass = '';
+    if (narrowCols.includes(normalizedCol)) widthClass = 'col-narrow';
+    else if (mediumCols.includes(normalizedCol)) widthClass = 'col-medium';
+    else if (wideCols.includes(normalizedCol)) widthClass = 'col-wide';
+
+    const centered = centeredCols.includes(normalizedCol) ? 'centered' : '';
+    html += `<th class="${widthClass} ${centered}" data-col="${normalizedCol}">${label}</th>`;
   });
   html += `</tr></thead><tbody class="dashboard-table-body">`;
 
@@ -121,13 +125,14 @@ export function renderTable({
         content = `<span class="badge ${badgeClass}">${val}</span>`;
       }
 
-      const widthClass = narrowCols.includes(normalizedCol)
-        ? 'col-narrow'
-        : wideCols.includes(normalizedCol)
-        ? 'col-wide'
-        : '';
+      let widthClass = '';
+      if (narrowCols.includes(normalizedCol)) widthClass = 'col-narrow';
+      else if (mediumCols.includes(normalizedCol)) widthClass = 'col-medium';
+      else if (wideCols.includes(normalizedCol)) widthClass = 'col-wide';
 
-      html += `<td class="${widthClass}" data-col="${normalizedCol}" title="${val}">
+      const centered = centeredCols.includes(normalizedCol) ? 'centered' : '';
+
+      html += `<td class="${widthClass} ${centered}" data-col="${normalizedCol}" title="${val}">
         <div class="cell-content">${content}</div>
       </td>`;
     });
