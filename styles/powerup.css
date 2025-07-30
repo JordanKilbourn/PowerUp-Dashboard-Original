@@ -204,16 +204,15 @@ header h1 {
 }
 
 .empty-state {
-  color: #bbb;
-  font-size: 0.95rem;
   background-color: #1a1a1a;
-  border: 1px solid #333;
-  padding: 1rem;
+  color: #ccc;
+  font-style: italic;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
   border-radius: 8px;
-  margin-top: 0.5rem;
-  font-style: normal;
-  line-height: 1.4;
+  font-size: 0.95rem;
 }
+
 .empty-state strong {
   color: #fff;
 }
