@@ -18,13 +18,27 @@ function loadDashboard() {
     updatePowerHours(hours);
 
     // ✅ Render CI Submissions
-    renderTable({
-      sheet: ci,
-      containerId: "ciContent",
-      title: "CI Submissions",
-      checkmarkCols: ["Resourced", "Paid", "Project Work Completed"],
-      excludeCols: ["Submitted By", "Valid Row", "Employee ID"]
-    });
+renderTable({
+  sheet: ci,
+  containerId: "ciContent",
+  title: "CI Submissions",
+  checkmarkCols: ["Resourced", "Paid"],
+  columnOrder: [
+    "Submission Date",
+    "Submission ID",
+    "Problem Statements",
+    "Proposed Improvement",
+    "CI Approval",
+    "Assigned to (Primary)",
+    "Status",
+    "Action Item Entry Date",
+    "Last Meeting Action Item's",
+    "Token Payout",
+    "Resourced",
+    "Resourced Date",
+    "Paid"
+  ]
+});
 
     // 💰 Calculate Tokens Earned from CI
     const tokenCol = ci.columns.find(c => c.title.trim().toLowerCase() === "token payout");
