@@ -72,8 +72,7 @@ export function renderTable({
       ).map(c => c.title);
 
   let html = `<div class="dashboard-table-container"><table class="dashboard-table">
-    <thead>
-      <tr>`;
+    <thead><tr>`;
   visibleCols.forEach(c => {
     const label = colHeaderMap[c.toLowerCase()] || c;
     html += `<th>${label}</th>`;
@@ -84,7 +83,7 @@ export function renderTable({
     html += `<tr>`;
     visibleCols.forEach(title => {
       const val = get(r, title);
-      const titleKey = title.toLowerCase();
+      const titleKey = title.toLowerCase().trim();
       const isCheck = checkmarkCols.map(c => c.toLowerCase()).includes(titleKey);
 
       let content = val;
@@ -116,10 +115,9 @@ export function renderTable({
         content = `<span class="badge ${badgeClass}">${val}</span>`;
       }
 
-      const normalized = titleKey.trim().toLowerCase();
-      const widthClass = narrowCols.includes(normalized)
+      const widthClass = narrowCols.includes(titleKey)
         ? 'col-narrow'
-        : wideCols.includes(normalized)
+        : wideCols.includes(titleKey)
         ? 'col-wide'
         : '';
 
