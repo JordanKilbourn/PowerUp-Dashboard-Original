@@ -218,8 +218,9 @@ header h1 {
 }
 /* Column sizing */
 .col-narrow {
-  width: 50px;
+  width: 80px;
   max-width: 80px;
+  min-width: 60px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -233,5 +234,23 @@ header h1 {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* Badge Styling */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.badge-green   { background: #4ade80; color: #1e3a1e; }
+.badge-yellow  { background: #fde047; color: #3b3b1b; }
+.badge-red     { background: #f87171; color: #fff; }
+.badge-blue    { background: #38bdf8; color: #0c4a6e; }
+.badge-gray    { background: #cbd5e1; color: #1e293b; }
+.badge-default { background: #94a3b8; color: #0f172a; }
+
 
 
