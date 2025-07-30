@@ -62,7 +62,7 @@ export function renderTable({
     "paid": "Paid"
   };
 
-  const narrowCols = ["submission date", "submission id", "ci approval", "token payout", "resourced", "resourced date", "paid"];
+  const narrowCols = ["submission date", "submission id", "ci approval", "token payout", "resourced", "resourced date", "assigned to (primary)", "action item entry date", "status", "paid"];
   const wideCols = ["problem statements", "proposed improvement", "last meeting action item's"];
 
   const visibleCols = columnOrder
