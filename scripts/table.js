@@ -75,7 +75,13 @@ export function renderTable({
     <thead><tr>`;
   visibleCols.forEach(c => {
     const label = colHeaderMap[c.toLowerCase()] || c;
-    html += `<th>${label}</th>`;
+    const normalized = c.toLowerCase().trim();
+    const widthClass = narrowCols.includes(normalized)
+      ? 'col-narrow'
+      : wideCols.includes(normalized)
+      ? 'col-wide'
+      : '';
+    html += `<th class="${widthClass}">${label}</th>`;
   });
   html += `</tr></thead><tbody class="dashboard-table-body">`;
 
