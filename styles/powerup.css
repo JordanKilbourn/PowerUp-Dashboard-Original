@@ -203,16 +203,24 @@ header h1 {
   transform: rotate(90deg);
 }
 
-.empty-state {
-  color: #888;
-  font-style: italic;
-  padding: 0.5rem 0 1rem;
+.empty-message {
+  padding: 1rem;
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  margin-top: 0.5rem;
+  color: #ccc;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+.empty-message strong {
+  color: #fff;
 }
 
 /* Column sizing */
 .col-narrow {
-  width: 80px;
-  max-width: 100px;
+  width: 50px;
+  max-width: 80px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -220,7 +228,7 @@ header h1 {
 }
 
 .col-wide {
-  min-width: 200px;
+  min-width: 225px;
   max-width: 300px;
   white-space: nowrap;
   overflow: hidden;
