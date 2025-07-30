@@ -230,8 +230,10 @@ header h1 {
   width: 150px;
   min-width: 150px;
   max-width: 150px;
+  white-space: nowrap;              /* Prevent text from wrapping */
+  overflow: hidden;                 /* Hide anything that overflows */
+  text-overflow: ellipsis;         /* Show ... when content is too long */
 }
-
 
 /* Badge Styling */
 .badge {
