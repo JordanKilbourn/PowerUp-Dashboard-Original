@@ -37,14 +37,14 @@ export function renderTable({
     });
   }
 
-if (rows.length === 0) {
-  container.innerHTML = `
-    <h2>${title}</h2>
-    <div class="empty-state">
-      <p>You don’t have any records yet for <strong>${title}</strong>.</p>
-    </div>`;
-  return;
-}
+  if (rows.length === 0) {
+    container.innerHTML = `
+      <h2>${title}</h2>
+      <div class="empty-state">
+        <p>You don’t have any records yet for <strong>${title}</strong>.</p>
+      </div>`;
+    return;
+  }
 
   const colHeaderMap = {
     "submission date": "Date",
@@ -62,7 +62,7 @@ if (rows.length === 0) {
     "paid": "Paid"
   };
 
-  const narrowCols = ["date", "id", "ci decision", "tokens", "resourced", "resourced on", "paid"];
+  const narrowCols = ["date", "id", "approval", "tokens", "resourced", "resourced on", "paid"];
   const wideCols = ["problem", "improvement", "last action"];
 
   const visibleCols = columnOrder
