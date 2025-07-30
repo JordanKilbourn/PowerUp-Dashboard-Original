@@ -216,23 +216,27 @@ header h1 {
 .empty-state strong {
   color: #fff;
 }
+
 /* Column sizing */
+/* Column content wrapper */
+.cell-content {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Narrow column widths (e.g. Date, ID, Tokens) */
 .col-narrow {
   width: 80px;
   min-width: 80px;
   max-width: 80px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
+/* Wide columns (e.g. Problem, Improvement, Last Action) */
 .col-wide {
-  width: 150px;
-  min-width: 150px;
-  max-width: 150px;
-  white-space: nowrap;              /* Prevent text from wrapping */
-  overflow: hidden;                 /* Hide anything that overflows */
-  text-overflow: ellipsis;         /* Show ... when content is too long */
+  width: 160px;
+  min-width: 160px;
+  max-width: 160px;
 }
 
 /* Badge Styling */
