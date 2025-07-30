@@ -65,7 +65,7 @@ export function renderTable({
   const narrowCols = ["submission date", "submission id", "token payout", "resourced", "resourced date", "assigned to (primary)", "action item entry date", "paid"];
   const mediumCols = ["status", "ci approval"];
   const wideCols = ["problem statements", "proposed improvement", "last meeting action item's"];
-  const centeredCols = [...narrowCols, ...mediumCols];
+  const centeredCols = [...narrowCols];
 
   const visibleCols = columnOrder
     ? columnOrder.filter(c => !excludeCols.includes(c))
