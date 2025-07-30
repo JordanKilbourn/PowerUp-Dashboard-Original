@@ -116,7 +116,7 @@ export function renderTable({
         content = `<span class="badge ${badgeClass}">${val}</span>`;
       }
 
-      const normalized = titleKey.trim();
+      const normalized = titleKey.trim().toLowerCase();
       const widthClass = narrowCols.includes(normalized)
         ? 'col-narrow'
         : wideCols.includes(normalized)
