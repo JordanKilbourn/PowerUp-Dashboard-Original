@@ -21,7 +21,12 @@ export function renderTable({
   const get = (row, title) => {
     const colId = colMap[title.toLowerCase()];
     const cell = row.cells.find(c => c.columnId === colId);
-    return cell?.displayValue ?? cell?.value ?? '';
+    const value = cell?.displayValue ?? cell?.value ?? '';
+    if (title.toLowerCase().includes("date") && value && !isNaN(Date.parse(value))) {
+      const date = new Date(value);
+      return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear().toString().slice(-2)}`;
+    }
+    return value;
   };
 
   let rows = sheet.rows;
@@ -37,10 +42,9 @@ export function renderTable({
     return;
   }
 
-  // Define column display titles and widths
-  const headerMap = {
-    "submission id": "ID",
+  const colHeaderMap = {
     "submission date": "Date",
+    "submission id": "ID",
     "problem statements": "Problem",
     "proposed improvement": "Improvement",
     "ci approval": "CI Decision",
@@ -54,6 +58,9 @@ export function renderTable({
     "paid": "Paid"
   };
 
+  const narrowCols = ["date", "id", "ci decision", "tokens", "resourced", "resourced on", "paid"];
+  const wideCols = ["problem", "improvement", "last action"];
+
   const visibleCols = columnOrder
     ? columnOrder.filter(c => !excludeCols.includes(c))
     : sheet.columns.filter(c =>
@@ -63,8 +70,8 @@ export function renderTable({
   let html = `<div class="dashboard-table-container"><table class="dashboard-table">
     <thead>
       <tr>`;
-  visibleCols.forEach(title => {
-    const label = headerMap[title.trim().toLowerCase()] || title;
+  visibleCols.forEach(c => {
+    const label = colHeaderMap[c.toLowerCase()] || c;
     html += `<th>${label}</th>`;
   });
   html += `</tr></thead><tbody class="dashboard-table-body">`;
@@ -73,45 +80,9 @@ export function renderTable({
     html += `<tr>`;
     visibleCols.forEach(title => {
       const val = get(r, title);
-      const rawVal = val?.toString().trim();
-      const lowerTitle = title.toLowerCase();
+      const titleKey = title.toLowerCase();
+      const isCheck = checkmarkCols.map(c => c.toLowerCase()).includes(titleKey);
 
-      // Date formatting for submission date
-      if (lowerTitle === "submission date" && val) {
-        const dateObj = new Date(val);
-        const content = !isNaN(dateObj) ? dateObj.toLocaleDateString("en-US") : val;
-        html += `<td title="${val}">${content}</td>`;
-        return;
-      }
-
-      // Badge formatting for status
-      if (lowerTitle === "status") {
-        const statusClass = {
-          "not started": "badge-pending",
-          "open": "badge-in-review",
-          "needs researched": "badge-in-review",
-          "completed": "badge-success",
-          "denied/cancelled": "badge-denied"
-        }[rawVal?.toLowerCase()] || "";
-
-        html += `<td><span class="badge ${statusClass}">${val}</span></td>`;
-        return;
-      }
-
-      // Badge formatting for CI approval
-      if (lowerTitle === "ci approval") {
-        const approvalClass = {
-          "approved": "badge-success",
-          "pending": "badge-pending",
-          "denied": "badge-denied"
-        }[rawVal?.toLowerCase()] || "";
-
-        html += `<td><span class="badge ${approvalClass}">${val}</span></td>`;
-        return;
-      }
-
-      // Checkbox rendering
-      const isCheck = checkmarkCols.map(c => c.toLowerCase()).includes(lowerTitle);
       let content = val;
       if (isCheck) {
         if (val === true || val === '✓') {
@@ -121,7 +92,28 @@ export function renderTable({
         }
       }
 
-      html += `<td title="${val}">${content}</td>`;
+      if (titleKey === "status") {
+        const badgeClass = {
+          "not started": "badge-gray",
+          "open": "badge-blue",
+          "needs researched": "badge-yellow",
+          "completed": "badge-green",
+          "denied/cancelled": "badge-red"
+        }[val.toLowerCase()] || "badge-default";
+        content = `<span class="badge ${badgeClass}">${val}</span>`;
+      }
+
+      if (titleKey === "ci approval") {
+        const badgeClass = {
+          "approved": "badge-green",
+          "pending": "badge-yellow",
+          "denied": "badge-red"
+        }[val.toLowerCase()] || "badge-default";
+        content = `<span class="badge ${badgeClass}">${val}</span>`;
+      }
+
+      const widthClass = narrowCols.includes(titleKey) ? 'col-narrow' : wideCols.includes(titleKey) ? 'col-wide' : '';
+      html += `<td class="${widthClass}" title="${val}">${content}</td>`;
     });
     html += `</tr>`;
   });
