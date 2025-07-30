@@ -227,9 +227,9 @@ header h1 {
 }
 
 .col-wide {
-  width: 300px;
-  min-width: 300px;
-  max-width: 300px;
+  width: 150px;
+  min-width: 150px;
+  max-width: 150px;
 }
 
 
