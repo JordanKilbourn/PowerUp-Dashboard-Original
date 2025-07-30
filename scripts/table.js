@@ -37,10 +37,14 @@ export function renderTable({
     });
   }
 
-  if (rows.length === 0) {
-    container.innerHTML = `<h2>${title}</h2><p>No records found.</p>`;
-    return;
-  }
+if (rows.length === 0) {
+  container.innerHTML = `
+    <h2>${title}</h2>
+    <div class="empty-state">
+      <p>You don’t have any records yet for <strong>${title}</strong>.</p>
+    </div>`;
+  return;
+}
 
   const colHeaderMap = {
     "submission date": "Date",
