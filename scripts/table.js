@@ -1,5 +1,3 @@
-// /scripts/table.js
-
 export function renderTable({
   sheet,
   containerId,
@@ -81,7 +79,10 @@ export function renderTable({
       : wideCols.includes(normalized)
       ? 'col-wide'
       : '';
-    html += `<th class="${widthClass}">${label}</th>`;
+
+    console.log(`Header: "${c}" → class: ${widthClass}`); // Debug line
+
+    html += `<th class="${widthClass}" data-debug="${normalized}">${label}</th>`;
   });
   html += `</tr></thead><tbody class="dashboard-table-body">`;
 
@@ -127,7 +128,9 @@ export function renderTable({
         ? 'col-wide'
         : '';
 
-      html += `<td class="${widthClass}" title="${val}">
+      console.log(`Cell: "${title}" → class: ${widthClass}`); // Debug line
+
+      html += `<td class="${widthClass}" title="${val}" data-debug="${titleKey}">
         <div class="cell-content">${content}</div>
       </td>`;
     });
