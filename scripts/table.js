@@ -1,3 +1,5 @@
+// /scripts/table.js
+
 export function renderTable({
   sheet,
   containerId,
@@ -61,7 +63,7 @@ export function renderTable({
   };
 
   const narrowCols = ["date", "id", "approval", "tokens", "resourced", "resourced on", "paid"];
-  const wideCols = ["problem", "improvement", "last action"];
+  const wideCols = ["problem statements", "proposed improvement", "last meeting action item's"];
 
   const visibleCols = columnOrder
     ? columnOrder.filter(c => !excludeCols.includes(c))
@@ -72,17 +74,14 @@ export function renderTable({
   let html = `<div class="dashboard-table-container"><table class="dashboard-table">
     <thead><tr>`;
   visibleCols.forEach(c => {
-    const label = colHeaderMap[c.toLowerCase()] || c;
-    const normalized = c.toLowerCase().trim();
-    const widthClass = narrowCols.includes(normalized)
+    const normalizedCol = c.trim().toLowerCase();
+    const label = colHeaderMap[normalizedCol] || c;
+    const widthClass = narrowCols.includes(normalizedCol)
       ? 'col-narrow'
-      : wideCols.includes(normalized)
+      : wideCols.includes(normalizedCol)
       ? 'col-wide'
       : '';
-
-    console.log(`Header: "${c}" → class: ${widthClass}`); // Debug line
-
-    html += `<th class="${widthClass}" data-debug="${normalized}">${label}</th>`;
+    html += `<th class="${widthClass}" data-col="${normalizedCol}">${label}</th>`;
   });
   html += `</tr></thead><tbody class="dashboard-table-body">`;
 
@@ -90,8 +89,8 @@ export function renderTable({
     html += `<tr>`;
     visibleCols.forEach(title => {
       const val = get(r, title);
-      const titleKey = title.toLowerCase().trim();
-      const isCheck = checkmarkCols.map(c => c.toLowerCase()).includes(titleKey);
+      const normalizedCol = title.trim().toLowerCase();
+      const isCheck = checkmarkCols.map(c => c.toLowerCase()).includes(normalizedCol);
 
       let content = val;
       if (isCheck) {
@@ -102,7 +101,7 @@ export function renderTable({
         }
       }
 
-      if (titleKey === "status") {
+      if (normalizedCol === "status") {
         const badgeClass = {
           "not started": "badge-gray",
           "open": "badge-blue",
@@ -113,7 +112,7 @@ export function renderTable({
         content = `<span class="badge ${badgeClass}">${val}</span>`;
       }
 
-      if (titleKey === "ci approval") {
+      if (normalizedCol === "ci approval") {
         const badgeClass = {
           "approved": "badge-green",
           "pending": "badge-yellow",
@@ -122,15 +121,13 @@ export function renderTable({
         content = `<span class="badge ${badgeClass}">${val}</span>`;
       }
 
-      const widthClass = narrowCols.includes(titleKey)
+      const widthClass = narrowCols.includes(normalizedCol)
         ? 'col-narrow'
-        : wideCols.includes(titleKey)
+        : wideCols.includes(normalizedCol)
         ? 'col-wide'
         : '';
 
-      console.log(`Cell: "${title}" → class: ${widthClass}`); // Debug line
-
-      html += `<td class="${widthClass}" title="${val}" data-debug="${titleKey}">
+      html += `<td class="${widthClass}" data-col="${normalizedCol}" title="${val}">
         <div class="cell-content">${content}</div>
       </td>`;
     });
