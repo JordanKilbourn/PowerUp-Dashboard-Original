@@ -62,8 +62,8 @@ export function renderTable({
     "paid": "Paid"
   };
 
-  const narrowCols = ["date", "id", "approval", "tokens", "resourced", "resourced on", "paid"];
-  const wideCols = ["problem", "improvement", "last action"];
+  const narrowCols = ["Date", "ID", "Approval", "Tokens", "Resourced", "Resourced On", "Paid"];
+  const wideCols = ["Problem", "Improvement", "Last Action"];
 
   const visibleCols = columnOrder
     ? columnOrder.filter(c => !excludeCols.includes(c))
@@ -116,8 +116,15 @@ export function renderTable({
         content = `<span class="badge ${badgeClass}">${val}</span>`;
       }
 
-      const widthClass = narrowCols.includes(titleKey) ? 'col-narrow' : wideCols.includes(titleKey) ? 'col-wide' : '';
-      html += `<td class="${widthClass}" title="${val}">${content}</td>`;
+      const widthClass = narrowCols.includes(titleKey)
+        ? 'col-narrow'
+        : wideCols.includes(titleKey)
+        ? 'col-wide'
+        : '';
+
+      html += `<td class="${widthClass}" title="${val}">
+        <div class="cell-content">${content}</div>
+      </td>`;
     });
     html += `</tr>`;
   });
