@@ -365,7 +365,7 @@ html, body {
   top: 0;
   left: 0;
   width: 100%;
-  height: 220px; /* Adjust if needed to match header + progress height */
+  height: 240px; /* Adjust if needed to match header + progress height */
   background-color: #0f172a;
   z-index: 1025; /* Between table content and sticky progress bar */
   pointer-events: none;
