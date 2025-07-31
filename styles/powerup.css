@@ -221,19 +221,16 @@ header h1 {
   width: 80px;
   min-width: 80px;
   max-width: 80px;
-  background-color: rgba(255, 0, 0, 0.2); /* red tint */
 }
 .col-medium {
   width: 120px;
   min-width: 120px;
   max-width: 120px;
-  background-color: rgba(255, 255, 0, 0.15); /* yellow tint */
 }
 .col-wide {
   width: 240px;
   min-width: 240px;
   max-width: 240px;
-  background-color: rgba(0, 255, 0, 0.2); /* green tint */
 }
 
 /* Align selected columns */
