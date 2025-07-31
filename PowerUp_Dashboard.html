@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PowerUp Dashboard</title>
-
+  
   <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-
+  
   <!-- Styles -->
   <link rel="stylesheet" href="/styles/powerup.css" />
 </head>
@@ -42,27 +42,24 @@
           <h2 class="accordion-header" data-target="ciContent">
             <i class="fas fa-chevron-right rotate-icon"></i> CI Submissions
           </h2>
-          <div class="accordion-content" id="ciContent">
-            <!-- Filter bar and counter will be dynamically injected by JS -->
-            <div class="filter-bar">
+
+          <!-- CI Filter Bar -->
+          <div class="ci-controls">
+            <div class="filter-group">
               <label for="ciStatusFilter">CI Status:</label>
               <select id="ciStatusFilter">
                 <option value="All">All</option>
                 <option value="Approved">Approved</option>
                 <option value="Pending">Pending</option>
+                <option value="In Review">In Review</option>
                 <option value="Denied">Denied</option>
-                <option value="Needs Researched">Needs Researched</option>
-                <option value="Not Started">Not Started</option>
-                <option value="Completed">Completed</option>
-                <option value="Denied/Cancelled">Denied/Cancelled</option>
               </select>
-              <button id="addCiBtn" class="add-btn">+ Add CI Submission</button>
-              <div class="submission-counter">Showing <span id="ciSubmissionCount">0</span> submission(s)</div>
             </div>
-
-            <!-- Table will be rendered here -->
-            <div id="ciTableContainer"></div>
+            <button id="addCiBtn" class="add-btn">+ Add CI Submission</button>
+            <div class="ci-count" id="ciSubmissionCount">0 Submissions</div>
           </div>
+
+          <div class="accordion-content" id="ciContent"></div>
         </div>
 
         <!-- Accordion Section - Safety Concerns -->
@@ -84,7 +81,7 @@
     </div>
   </div>
 
-  <!-- Scripts -->
+  <!-- JavaScript -->
   <script type="module" src="/scripts/init-dashboard.js"></script>
 </body>
 </html>
