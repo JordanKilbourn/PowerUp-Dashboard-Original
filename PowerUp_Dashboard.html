@@ -40,21 +40,25 @@
       <div class="accordion">
         <div class="accordion-item">
 
-          <!-- 👇 Flex row: Title and controls together -->
-          <div class="accordion-header-row">
-            <h2 class="accordion-header" data-target="ciContent">
-              <i class="fas fa-chevron-right rotate-icon"></i> CI Submissions
-            </h2>
+          <!-- ✅ NEW HEADER ROW SECTION with filter, button, counter embedded in header -->
+          <div class="accordion-header-row accordion-header" onclick="toggleAccordion('ciContent')">
+            <div class="accordion-title">
+              <span class="accordion-icon">▸</span>
+              <span>CI Submissions</span>
+            </div>
             <div class="ci-controls">
               <label for="ciStatusFilter">CI Status:</label>
-              <select id="ciStatusFilter">
+              <select id="ciStatusFilter" onchange="filterCITable()">
                 <option value="All">All</option>
                 <option value="Approved">Approved</option>
-                <option value="Pending">Pending</option>
                 <option value="Denied">Denied</option>
+                <option value="Pending">Pending</option>
+                <option value="Needs Researched">Needs Researched</option>
+                <option value="Completed">Completed</option>
+                <option value="Not Started">Not Started</option>
               </select>
-              <button id="addCiBtn" class="add-btn">+ Add CI Submission</button>
-              <span id="ciCount" class="submission-count">0 Submissions</span>
+              <button class="add-btn" onclick="openCISubmissionForm()">+ Add CI Submission</button>
+              <span class="submission-count" id="ciSubmissionCount">0 Submissions</span>
             </div>
           </div>
 
