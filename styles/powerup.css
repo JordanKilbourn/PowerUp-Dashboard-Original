@@ -17,7 +17,7 @@ body {
   overflow-x: hidden;
   transition: width 0.3s;
   box-shadow: 2px 0 8px rgba(0,0,0,0.4);
-  z-index: 1000;
+  z-index: 1100;
   white-space: nowrap;
 }
 .sidebar.open { width: 220px; }
@@ -59,6 +59,7 @@ header {
   color: #fff;
   margin-left: 60px;
   position: relative;
+  z-index: 1100;
 }
 header h1 {
   font-size: 28px;
@@ -341,6 +342,7 @@ body, html {
   border-bottom: 1px solid #1e293b;
   box-shadow: 0 2px 6px rgba(0,0,0,0.4);
   margin-bottom: 32px;
+  z-index: 1050;
 }
 .progress-token-section::after {
   content: '';
@@ -359,9 +361,9 @@ body, html {
   top: 0;
   left: 0;
   width: 100%;
-  height: 160px; /* Match the total header + progress bar height */
+  height: 200px; /* Match the total header + progress bar height */
   background-color: #0f172a; /* Same as your dashboard bg */
-  z-index: 1001;
+  z-index: 900;
   pointer-events: none;
 }
 
