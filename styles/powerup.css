@@ -318,3 +318,28 @@ header h1 {
   .sidebar.open { width: 100%; position: relative; height: auto; }
   table, th, td { font-size: 13px; }
 }
+
+/* Sticky Layout */
+body, html {
+  height: 100%;
+  overflow: hidden;
+}
+
+.container {
+  height: calc(100% - 80px); /* Assuming header is ~80px tall */
+  overflow-y: auto;
+  padding: 20px;
+  scroll-behavior: smooth;
+}
+
+/* Sticky Progress Section */
+.progress-token-section {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #0f172a;
+  border-bottom: 1px solid #1e293b;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  margin-bottom: 32px;
+}
+
