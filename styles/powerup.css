@@ -320,29 +320,33 @@ header h1 {
   table, th, td { font-size: 13px; }
 }
 
-/* Sticky Layout */
-body, html {
+/* ========== LAYOUT: ScrollBlocker and Sticky Elements ========== */
+
+/* Ensure full height and disable outer scroll */
+html, body {
   height: 100%;
   overflow: hidden;
 }
 
+/* Main scrollable area */
 .container {
-  height: calc(100% - 80px); /* Assuming header is ~80px tall */
+  margin-left: 60px;
+  height: calc(100% - 80px); /* Header height */
   overflow-y: auto;
   padding: 20px;
   scroll-behavior: smooth;
+  transition: margin-left 0.3s ease;
 }
 
-/* Sticky Progress Section */
+/* Sticky Progress Section (stays under header) */
 .progress-token-section {
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 1050; /* Below header (1100), above tables */
   background: #0f172a;
   border-bottom: 1px solid #1e293b;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
   margin-bottom: 32px;
-  z-index: 1050;
 }
 .progress-token-section::after {
   content: '';
@@ -355,18 +359,38 @@ body, html {
   background: linear-gradient(to bottom, rgba(15, 23, 42, 0.7), transparent);
 }
 
-/* Top blocker layer that hides table scroll bleed-through */
+/* ScrollBlocker Layer to block scroll bleed */
 .top-overlay-bg {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 200px; /* Match the total header + progress bar height */
-  background-color: #0f172a; /* Same as your dashboard bg */
-  z-index: 900;
+  height: 200px; /* Adjust if needed to match header + progress height */
+  background-color: #0f172a;
+  z-index: 1025; /* Between table content and sticky progress bar */
   pointer-events: none;
 }
 
+/* Z-Index Summary:
+   1100 = header, sidebar
+   1050 = progress-token-section
+   1025 = top-overlay-bg (scroll blocker)
+   ≤1000 = card/table content
+*/
 
-
-
+/* ========== Responsive Sidebar Layout ========== */
+@media (max-width: 768px) {
+  .container {
+    margin-left: 0 !important;
+    padding: 15px;
+  }
+  .sidebar.open {
+    width: 100%;
+    position: relative;
+    height: auto;
+    z-index: 1100;
+  }
+  table, th, td {
+    font-size: 13px;
+  }
+}
