@@ -91,7 +91,10 @@ header h1 {
 .container {
   margin-left: 60px;
   padding: 20px;
-  transition: margin-left 0.3s;
+  transition: margin-left 0.3s ease;
+}
+.sidebar.open ~ .container {
+  margin-left: 220px; /* matches the open sidebar width */
 }
 .dashboard-header,
 .card,
@@ -369,6 +372,12 @@ html, body {
   background-color: #0f172a;
   z-index: 1025; /* Between table content and sticky progress bar */
   pointer-events: none;
+  transition: left 0.3s ease, width 0.3s ease;
+}
+
+.sidebar.open ~ .top-overlay-bg {
+  left: 220px;
+  width: calc(100% - 220px);
 }
 
 /* Z-Index Summary:
