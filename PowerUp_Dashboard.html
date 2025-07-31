@@ -43,14 +43,14 @@
 <!-- ✅ NEW HEADER ROW SECTION with filter, button, counter embedded in header -->
 <div class="accordion-header-row accordion-header">
   <div class="accordion-title">
-    <span class="accordion-icon" onclick="toggleAccordion('ciContent')">▸</span>
-    <span onclick="toggleAccordion('ciContent')">CI Submissions</span>
+    <span class="accordion-icon" onclick="toggleAccordion('ciContent'); event.stopPropagation();">▸</span>
+    <span class="accordion-label" onclick="toggleAccordion('ciContent'); event.stopPropagation();">CI Submissions</span>
   </div>
-  <div class="ci-controls">
-    <label for="ciStatusFilter">CI Status:</label>
+  <div class="ci-controls" onclick="event.stopPropagation();">
+    <label for="ciStatusFilter" onclick="event.stopPropagation();">CI Status:</label>
     <select id="ciStatusFilter"
-            onclick="event.stopPropagation()"
-            onmousedown="event.stopPropagation()"
+            onclick="event.stopPropagation();"
+            onmousedown="event.stopPropagation();"
             onchange="filterCITable();">
       <option value="All">All</option>
       <option value="Approved">Approved</option>
@@ -61,10 +61,9 @@
       <option value="Not Started">Not Started</option>
     </select>
     <button class="add-btn" onclick="event.stopPropagation(); openCISubmissionForm()">+ Add CI Submission</button>
-    <span class="submission-count" id="ciSubmissionCount">0 Submissions</span>
+    <span class="submission-count" id="ciSubmissionCount" onclick="event.stopPropagation();">0 Submissions</span>
   </div>
 </div>
-
           <div class="accordion-content" id="ciContent"></div>
         </div>
 
