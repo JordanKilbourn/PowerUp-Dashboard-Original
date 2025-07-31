@@ -86,82 +86,49 @@ header h1 {
   margin-left: 5px;
 }
 
-/* ========== LAYOUT & SECTIONS ========== */
+/* ========== LAYOUT & CONTAINERS ========== */
 .container {
   margin-left: 60px;
   padding: 20px;
   transition: margin-left 0.3s;
 }
-.dashboard-header {
+.progress-token-section {
+  margin-bottom: 32px;
+}
+.card {
   background: #0f172a;
   border: 1px solid #1e293b;
-  padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 0 12px rgba(0,0,0,0.2);
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.section {
-  background: #0f172a;
-  border: 1px solid #1e293b;
   padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 12px rgba(0,0,0,0.3);
-  margin-top: 30px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+  margin-bottom: 32px;
 }
-.token-tracker {
-  font-size: 16px;
-  font-weight: 500;
-}
-.improved-token-display {
-  font-size: 20px;
+.card h3 {
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 18px;
   font-weight: 600;
-  color: #facc15;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.improved-token-display i {
-  color: #facc15;
-  font-size: 22px;
-}
-
-/* ========== PILLS & PROGRESS ========== */
-.goal-pill-group { display: flex; flex-wrap: wrap; gap: 10px; }
-.pill {
-  padding: 6px 14px;
-  border-radius: 30px;
-  font-weight: 600;
-  font-size: 13px;
-  box-shadow: 0 0 5px rgba(0,0,0,0.3);
-}
-.pill.green { background: #4ade80; color: #1e3a1e; }
-.pill.yellow { background: #fde047; color: #3b3b1b; }
-.pill.red { background: #f87171; color: #fff; }
-
-.progress-container { margin-top: 5px; }
-.progress-label {
-  font-weight: 600;
-  font-size: 14px;
-  margin-bottom: 5px;
-}
-.progress-bar {
-  background: #2e2e40;
-  border-radius: 20px;
-  height: 16px;
-  overflow: hidden;
-  max-width: 400px;
-}
-.progress-bar-fill {
-  width: 62.5%;
-  height: 100%;
-  background: linear-gradient(to right, #38bdf8, #3b82f6);
-  border-radius: 20px;
-  transition: width 0.4s ease;
+  color: #f8fafc;
 }
 
 /* ========== TABLES ========== */
+.table-section:not(:last-child) {
+  margin-bottom: 32px;
+}
+.table-wrapper {
+  padding: 0 8px;
+  max-height: 360px;
+  overflow-y: auto;
+  border-radius: 8px;
+}
+.dashboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  background-color: #1e293b;
+  font-size: 14px;
+  color: white;
+}
 .dashboard-table-container {
   max-height: 240px;
   overflow-y: auto;
@@ -174,14 +141,6 @@ header h1 {
 .dashboard-table-container::-webkit-scrollbar-thumb {
   background-color: #334155;
   border-radius: 4px;
-}
-.dashboard-table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-  background-color: #1e293b;
-  font-size: 14px;
-  color: white;
 }
 .dashboard-table thead th {
   position: sticky;
@@ -208,38 +167,60 @@ header h1 {
 .dashboard-table tr:nth-child(odd)  { background: #141b2d; }
 .dashboard-table tr:hover { background: rgba(255,255,255,0.05); }
 
-/* Column content wrapper */
 .cell-content {
   display: block;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
+.col-narrow { width: 80px; min-width: 80px; max-width: 80px; }
+.col-medium { width: 120px; min-width: 120px; max-width: 120px; }
+.col-wide { width: 240px; min-width: 240px; max-width: 240px; }
 
-/* Column width classes */
-.col-narrow {
-  width: 80px;
-  min-width: 80px;
-  max-width: 80px;
-}
-.col-medium {
-  width: 120px;
-  min-width: 120px;
-  max-width: 120px;
-}
-.col-wide {
-  width: 240px;
-  min-width: 240px;
-  max-width: 240px;
-}
-
-/* Align selected columns */
 .dashboard-table td.centered,
 .dashboard-table th.centered {
   text-align: center;
 }
 
-/* Badges */
+/* ========== FILTER BAR ========== */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+.filter-bar label,
+.filter-bar select,
+.filter-bar .add-btn,
+.filter-bar .submission-count {
+  min-height: 32px;
+  line-height: 32px;
+}
+.filter-bar .add-btn {
+  padding: 0.4rem 1rem;
+  background: #374151;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.filter-bar .add-btn:hover {
+  background: #4b5563;
+}
+.filter-bar select {
+  background-color: #1f2937;
+  color: #f9fafb;
+  border: 1px solid #4b5563;
+  border-radius: 6px;
+  padding: 0.4rem;
+}
+.submission-count {
+  font-weight: 600;
+  color: #93c5fd;
+}
+
+/* ========== BADGES & ICONS ========== */
 .badge {
   display: inline-block;
   padding: 1px 6px;
@@ -255,11 +236,10 @@ header h1 {
 .badge-gray    { background: #cbd5e1; color: #1e293b; }
 .badge-default { background: #94a3b8; color: #0f172a; }
 
-/* Icons */
 .checkmark { color: #4ade80; font-weight: bold; }
 .cross     { color: #f87171; font-weight: bold; }
 
-/* ========== ACCORDIONS ========== */
+/* ========== ACCORDIONS (LEGACY) ========== */
 .accordion-header {
   cursor: pointer;
   padding: 12px 20px;
@@ -290,7 +270,7 @@ header h1 {
 .rotate-icon { transition: transform 0.3s ease; }
 .rotate-icon.open { transform: rotate(90deg); }
 
-/* Empty state fallback */
+/* ========== EMPTY STATES ========== */
 .empty-state {
   background-color: #1a1a1a;
   color: #ccc;
@@ -308,50 +288,3 @@ header h1 {
   .sidebar.open { width: 100%; position: relative; height: auto; }
   table, th, td { font-size: 13px; }
 }
-
-/* === Static Table Layout Enhancements === */
-
-.table-section {
-  margin-top: 2rem;
-}
-
-.table-wrapper {
-  max-height: 360px; /* Approx. 6 rows visible */
-  overflow-y: auto;
-  border-radius: 8px;
-}
-
-.filter-bar {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.filter-bar .add-btn {
-  padding: 0.4rem 1rem;
-  background: #374151;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.filter-bar .add-btn:hover {
-  background: #4b5563;
-}
-
-.filter-bar select {
-  background-color: #1f2937;
-  color: #f9fafb;
-  border: 1px solid #4b5563;
-  border-radius: 6px;
-  padding: 0.4rem;
-}
-
-.submission-count {
-  font-weight: 600;
-  color: #93c5fd;
-}
-
