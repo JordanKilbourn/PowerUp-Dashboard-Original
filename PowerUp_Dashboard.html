@@ -40,12 +40,11 @@
       <div class="accordion">
         <div class="accordion-item">
 
-          <!-- ✅ NEW HEADER ROW SECTION with filter, button, counter embedded in header -->
 <!-- ✅ NEW HEADER ROW SECTION with filter, button, counter embedded in header -->
-<div class="accordion-header-row accordion-header" onclick="toggleAccordion('ciContent')">
+<div class="accordion-header-row accordion-header">
   <div class="accordion-title">
-    <span class="accordion-icon">▸</span>
-    <span>CI Submissions</span>
+    <span class="accordion-icon" onclick="toggleAccordion('ciContent')">▸</span>
+    <span onclick="toggleAccordion('ciContent')">CI Submissions</span>
   </div>
   <div class="ci-controls">
     <label for="ciStatusFilter">CI Status:</label>
