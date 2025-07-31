@@ -1,4 +1,3 @@
-// /scripts/load-dashboard.js
 import { renderTable } from '/scripts/table.js';
 import { SHEET_IDS, fetchSheet } from './api.js';
 
@@ -17,30 +16,30 @@ function loadDashboard() {
     updateLevelInfo(level);
     updatePowerHours(hours);
 
-    // ✅ Render CI Submissions
-renderTable({
-  sheet: ci,
-  containerId: "ciContent",
-  title: "CI Submissions",
-  checkmarkCols: ["Resourced", "Paid"],
-  columnOrder: [
-    "Submission Date",
-    "Submission ID",
-    "Problem Statements",
-    "Proposed Improvement",
-    "CI Approval",
-    "Assigned to (Primary)",
-    "Status",
-    "Action Item Entry Date",
-    "Last Meeting Action Item's",
-    "Token Payout",
-    "Resourced",
-    "Resourced Date",
-    "Paid"
-  ]
-});
+    // ✅ CI Submissions
+    renderTable({
+      sheet: ci,
+      containerId: "ciSubmissionsTable", // updated
+      title: "CI Submissions",
+      checkmarkCols: ["Resourced", "Paid"],
+      columnOrder: [
+        "Submission Date",
+        "Submission ID",
+        "Problem Statements",
+        "Proposed Improvement",
+        "CI Approval",
+        "Assigned to (Primary)",
+        "Status",
+        "Action Item Entry Date",
+        "Last Meeting Action Item's",
+        "Token Payout",
+        "Resourced",
+        "Resourced Date",
+        "Paid"
+      ]
+    });
 
-    // 💰 Calculate Tokens Earned from CI
+    // ✅ Token Calculation
     const tokenCol = ci.columns.find(c => c.title.trim().toLowerCase() === "token payout");
     const empCol = ci.columns.find(c => c.title.trim().toLowerCase() === "employee id");
     let totalTokens = 0;
@@ -58,18 +57,18 @@ renderTable({
     const tokenDisplay = document.getElementById("tokenTotal");
     if (tokenDisplay) tokenDisplay.textContent = totalTokens.toFixed(0);
 
-    // ✅ Render Safety Concerns
+    // ✅ Safety Concerns
     renderTable({
       sheet: safety,
-      containerId: "safetyContent",
+      containerId: "safetyTable", // updated
       title: "Safety Concerns",
       excludeCols: ["Employee ID"]
     });
 
-    // ✅ Render Quality Catches
+    // ✅ Quality Catches
     renderTable({
       sheet: qc,
-      containerId: "qcContent",
+      containerId: "qcTable", // updated
       title: "Quality Catches",
       excludeCols: ["Employee ID"]
     });
@@ -79,7 +78,6 @@ renderTable({
   });
 }
 
-// 🧠 Update header info from level data
 function updateLevelInfo(sheet) {
   const empID = sessionStorage.getItem("empID");
   const rows = sheet.rows.filter(r => r.cells.some(c =>
@@ -113,7 +111,6 @@ function updateLevelInfo(sheet) {
   if (monthEl) monthEl.textContent = monthStr;
 }
 
-// 🧮 Calculate Power Hours Progress using dynamic goal ranges
 async function updatePowerHours(sheet) {
   const empID = sessionStorage.getItem("empID");
   const currentLevel = sessionStorage.getItem("currentLevel") || "N/A";
@@ -136,7 +133,6 @@ async function updatePowerHours(sheet) {
     }
   }
 
-  // ⏳ Fetch goal ranges from Power Hour Targets sheet
   let minTarget = 8;
   let maxTarget = 12;
 
@@ -162,7 +158,6 @@ async function updatePowerHours(sheet) {
     console.warn("Power Hour Targets not loaded, using default range.");
   }
 
-  // 🧠 Calculate display logic
   const percent = Math.min((totalHours / minTarget) * 100, 100);
   const barEl = document.getElementById("progressBar");
   const phEl = document.getElementById("phProgress");
@@ -171,15 +166,13 @@ async function updatePowerHours(sheet) {
   barEl.style.width = `${percent}%`;
   phEl.textContent = `${totalHours.toFixed(1)} / ${minTarget}`;
 
-  // 🎨 Bar color logic
   barEl.style.backgroundColor =
     totalHours >= minTarget && totalHours <= maxTarget
-      ? "#4ade80" // green
+      ? "#4ade80"
       : totalHours > maxTarget
-        ? "#facc15" // yellow (overachiever)
-        : "#60a5fa"; // blue (in progress)
+        ? "#facc15"
+        : "#60a5fa";
 
-  // 💡 Tips logic
   if (totalHours >= minTarget && totalHours <= maxTarget) {
     tipsEl.textContent = "✅ Target met! Great job!";
   } else if (totalHours > maxTarget) {
@@ -194,5 +187,4 @@ async function updatePowerHours(sheet) {
   sessionStorage.setItem("powerHours", totalHours.toFixed(1));
 }
 
-// ✅ Export
 export { loadDashboard };
