@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PowerUp Dashboard</title>
-  
+
   <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  
+
   <!-- Styles -->
   <link rel="stylesheet" href="/styles/powerup.css" />
 </head>
@@ -39,26 +39,22 @@
       <!-- Accordion Section - CI Submissions -->
       <div class="accordion">
         <div class="accordion-item">
-          <h2 class="accordion-header" data-target="ciContent">
-            <i class="fas fa-chevron-right rotate-icon"></i> CI Submissions
-          </h2>
-
-          <!-- CI Filter Bar -->
-          <div class="ci-controls">
-            <div class="filter-group">
+          <div class="accordion-header-row">
+            <h2 class="accordion-header" data-target="ciContent">
+              <i class="fas fa-chevron-right rotate-icon"></i> CI Submissions
+            </h2>
+            <div class="ci-controls">
               <label for="ciStatusFilter">CI Status:</label>
               <select id="ciStatusFilter">
                 <option value="All">All</option>
                 <option value="Approved">Approved</option>
                 <option value="Pending">Pending</option>
-                <option value="In Review">In Review</option>
                 <option value="Denied">Denied</option>
               </select>
+              <button id="addCiBtn" class="add-btn">+ Add CI Submission</button>
+              <span id="ciCount" class="submission-count">0 Submissions</span>
             </div>
-            <button id="addCiBtn" class="add-btn">+ Add CI Submission</button>
-            <div class="ci-count" id="ciSubmissionCount">0 Submissions</div>
           </div>
-
           <div class="accordion-content" id="ciContent"></div>
         </div>
 
@@ -81,7 +77,7 @@
     </div>
   </div>
 
-  <!-- JavaScript -->
+  <!-- Modern entry point -->
   <script type="module" src="/scripts/init-dashboard.js"></script>
 </body>
 </html>
