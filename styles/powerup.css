@@ -372,8 +372,8 @@ html, body {
 }
 
 /* Z-Index Summary:
-   1100 = header, sidebar
-   1050 = progress-token-section
+   1100 = sidebar
+   1050 = progress-token-section, header
    1025 = top-overlay-bg (scroll blocker)
    ≤1000 = card/table content
 */
