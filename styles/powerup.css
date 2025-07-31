@@ -403,3 +403,8 @@ html, body {
     font-size: 13px;
   }
 }
+.sidebar.open ~ #header {
+  margin-left: 220px;
+  transition: margin-left 0.3s ease;
+}
+
