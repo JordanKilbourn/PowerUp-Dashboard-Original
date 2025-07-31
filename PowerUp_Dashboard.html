@@ -11,15 +11,16 @@
 
   <!-- Styles -->
   <link rel="stylesheet" href="/styles/powerup.css" />
+  
 </head>
 <body>
   <div id="sidebar"></div>
   <div id="header"></div>
 
   <div class="container">
-    <div class="dashboard-header">
+    <!-- Progress + Token Container -->
+    <div class="card progress-token-section">
       <div class="goal-pill-group" id="pillSummary"></div>
-
       <div class="progress-container">
         <div class="progress-label">Power Hours Logged: <strong id="phProgress">0 / 8</strong></div>
         <div class="progress-bar">
@@ -27,74 +28,73 @@
         </div>
         <p id="powerTips" style="font-size: 14px; color: #93c5fd; margin-top: 8px;"></p>
       </div>
-
       <div class="token-tracker improved-token-display">
         <i class="fas fa-coins"></i>
         <span id="tokenTotal">0</span>
       </div>
+    </div>
 
-      <!-- CI Submissions Table -->
-      <div class="card table-section">
-        <div class="filter-bar">
-          <label for="ciStatusFilter">CI Status:</label>
-          <select id="ciStatusFilter" onchange="filterCITable();">
-            <option value="All">All</option>
-            <option value="Approved">Approved</option>
-            <option value="Denied">Denied</option>
-            <option value="Pending">Pending</option>
-            <option value="Needs Researched">Needs Researched</option>
-            <option value="Completed">Completed</option>
-            <option value="Not Started">Not Started</option>
-          </select>
-          <button class="add-btn" onclick="openCISubmissionForm()">+ Add CI Submission</button>
-          <span class="submission-count" id="ciSubmissionCount">0 Submissions</span>
-        </div>
-        <h3>Continuous Improvement (CI)</h3>
-        <div class="table-wrapper">
-          <table class="dashboard-table" id="ciSubmissionsTable">
-            <!-- CI table content goes here -->
-          </table>
-        </div>
+    <!-- CI Submissions Table -->
+    <div class="card table-section">
+      <div class="filter-bar">
+        <label for="ciStatusFilter">CI Status:</label>
+        <select id="ciStatusFilter" onchange="filterCITable();">
+          <option value="All">All</option>
+          <option value="Approved">Approved</option>
+          <option value="Denied">Denied</option>
+          <option value="Pending">Pending</option>
+          <option value="Needs Researched">Needs Researched</option>
+          <option value="Completed">Completed</option>
+          <option value="Not Started">Not Started</option>
+        </select>
+        <button class="add-btn" onclick="openCISubmissionForm()">+ Add CI Submission</button>
+        <span class="submission-count" id="ciSubmissionCount">0 Submissions</span>
       </div>
-
-      <!-- Safety Concerns Table -->
-      <div class="card table-section">
-        <div class="filter-bar">
-          <label for="safetyStatusFilter">Safety Status:</label>
-          <select id="safetyStatusFilter" onchange="filterSafetyTable();">
-            <option value="All">All</option>
-            <option value="Pending">Pending</option>
-            <option value="Resolved">Resolved</option>
-          </select>
-          <button class="add-btn" onclick="openSafetyForm()">+ Add Safety Concern</button>
-          <span class="submission-count" id="safetySubmissionCount">0 Submissions</span>
-        </div>
-        <h3>Safety Concerns</h3>
-        <div class="table-wrapper">
-          <table class="dashboard-table" id="safetyTable">
-            <!-- Safety table content goes here -->
-          </table>
-        </div>
+      <h3>Continuous Improvement (CI)</h3>
+      <div class="table-wrapper">
+        <table class="dashboard-table" id="ciSubmissionsTable">
+          <!-- CI table content goes here -->
+        </table>
       </div>
+    </div>
 
-      <!-- Quality Catches Table -->
-      <div class="card table-section">
-        <div class="filter-bar">
-          <label for="qcStatusFilter">Quality Status:</label>
-          <select id="qcStatusFilter" onchange="filterQCTable();">
-            <option value="All">All</option>
-            <option value="In Review">In Review</option>
-            <option value="Resolved">Resolved</option>
-          </select>
-          <button class="add-btn" onclick="openQCForm()">+ Add Quality Catch</button>
-          <span class="submission-count" id="qcSubmissionCount">0 Submissions</span>
-        </div>
-        <h3>Quality Catches</h3>
-        <div class="table-wrapper">
-          <table class="dashboard-table" id="qcTable">
-            <!-- QC table content goes here -->
-          </table>
-        </div>
+    <!-- Safety Concerns Table -->
+    <div class="card table-section">
+      <div class="filter-bar">
+        <label for="safetyStatusFilter">Safety Status:</label>
+        <select id="safetyStatusFilter" onchange="filterSafetyTable();">
+          <option value="All">All</option>
+          <option value="Pending">Pending</option>
+          <option value="Resolved">Resolved</option>
+        </select>
+        <button class="add-btn" onclick="openSafetyForm()">+ Add Safety Concern</button>
+        <span class="submission-count" id="safetySubmissionCount">0 Submissions</span>
+      </div>
+      <h3>Safety Concerns</h3>
+      <div class="table-wrapper">
+        <table class="dashboard-table" id="safetyTable">
+          <!-- Safety table content goes here -->
+        </table>
+      </div>
+    </div>
+
+    <!-- Quality Catches Table -->
+    <div class="card table-section">
+      <div class="filter-bar">
+        <label for="qcStatusFilter">Quality Status:</label>
+        <select id="qcStatusFilter" onchange="filterQCTable();">
+          <option value="All">All</option>
+          <option value="In Review">In Review</option>
+          <option value="Resolved">Resolved</option>
+        </select>
+        <button class="add-btn" onclick="openQCForm()">+ Add Quality Catch</button>
+        <span class="submission-count" id="qcSubmissionCount">0 Submissions</span>
+      </div>
+      <h3>Quality Catches</h3>
+      <div class="table-wrapper">
+        <table class="dashboard-table" id="qcTable">
+          <!-- QC table content goes here -->
+        </table>
       </div>
     </div>
   </div>
