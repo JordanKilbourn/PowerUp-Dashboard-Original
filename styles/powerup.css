@@ -311,3 +311,50 @@ header h1 {
   .sidebar.open { width: 100%; position: relative; height: auto; }
   table, th, td { font-size: 13px; }
 }
+
+/* === Static Table Layout Enhancements === */
+
+.table-section {
+  margin-top: 2rem;
+}
+
+.table-wrapper {
+  max-height: 360px; /* Approx. 6 rows visible */
+  overflow-y: auto;
+  border-radius: 8px;
+}
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-bar .add-btn {
+  padding: 0.4rem 1rem;
+  background: #374151;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.filter-bar .add-btn:hover {
+  background: #4b5563;
+}
+
+.filter-bar select {
+  background-color: #1f2937;
+  color: #f9fafb;
+  border: 1px solid #4b5563;
+  border-radius: 6px;
+  padding: 0.4rem;
+}
+
+.submission-count {
+  font-weight: 600;
+  color: #93c5fd;
+}
+
