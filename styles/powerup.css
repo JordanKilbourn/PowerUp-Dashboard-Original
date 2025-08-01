@@ -8,10 +8,6 @@ body {
   line-height: 1.6;
   overflow-x: hidden;
 }
-html, body {
-  height: 100%;
-  overflow: hidden;
-}
 
 /* ========== SIDEBAR ========== */
 .sidebar {
@@ -61,13 +57,16 @@ html, body {
   background: linear-gradient(to right, #1a1a40, #000);
   padding: 20px 30px;
   color: #fff;
-  margin-left: 60px;
-  position: relative;
+  height: 80px;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 60px;
   z-index: 1050;
-  transition: margin-left 0.3s ease;
+  transition: left 0.3s ease;
 }
 #header.sidebar-open {
-  margin-left: 220px;
+  left: 220px;
 }
 #header h1 {
   font-size: 28px;
@@ -95,70 +94,47 @@ html, body {
   margin-left: 5px;
 }
 
-/* ========== LAYOUT ========== */
-#container.container {
+/* ========== CONTAINER ========== */
+.container {
+  position: relative;
   margin-left: 60px;
-  height: calc(100% - 80px); /* Header height */
+  margin-top: 100px;
+  height: calc(100% - 100px);
   overflow-y: auto;
   padding: 20px;
   scroll-behavior: smooth;
   transition: margin-left 0.3s ease;
 }
-#container.sidebar-open {
+.sidebar-open #container {
   margin-left: 220px;
 }
-#topOverlayBg {
+
+/* ========== TOP OVERLAY ========== */
+.top-overlay-bg {
   position: fixed;
   top: 0;
-  left: 0;
-  width: 100%;
+  left: 60px;
+  width: calc(100% - 60px);
   height: 260px;
   background-color: #0f172a;
   z-index: 1025;
   pointer-events: none;
   transition: left 0.3s ease, width 0.3s ease;
 }
-#topOverlayBg.sidebar-open {
+.sidebar-open ~ .top-overlay-bg {
   left: 220px;
   width: calc(100% - 220px);
 }
 
-.dashboard-header,
-.card,
-.section {
-  background: #0f172a;
-  border: 1px solid #1e293b;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 0 12px rgba(0,0,0,0.3);
-  margin-bottom: 32px;
-}
-.card h3 {
-  margin-top: 0.5rem;
-  margin-bottom: 1rem;
-  font-size: 18px;
-  font-weight: 600;
-  color: #f8fafc;
-}
-
-/* ========== TABLE SECTION SPACING ========== */
-.table-section:not(:last-child) {
-  margin-bottom: 32px;
-}
-.table-wrapper {
-  max-height: 360px;
-  overflow-y: auto;
-  border-radius: 8px;
-  padding: 0 8px;
-}
+/* ========== PROGRESS SECTION ========== */
 .progress-token-section {
-  margin-bottom: 32px;
   position: sticky;
   top: 0;
-  z-index: 1050;
+  z-index: 1040;
   background: #0f172a;
   border-bottom: 1px solid #1e293b;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  margin-bottom: 32px;
 }
 .progress-token-section::after {
   content: '';
@@ -172,7 +148,9 @@ html, body {
 }
 
 /* ========== PROGRESS BAR ========== */
-.progress-container { margin-top: 5px; }
+.progress-container {
+  margin-top: 5px;
+}
 .progress-label {
   font-weight: 600;
   font-size: 14px;
@@ -193,7 +171,7 @@ html, body {
   transition: width 0.4s ease;
 }
 
-/* ========== TOKEN STYLING ========== */
+/* ========== TOKENS ========== */
 .token-tracker {
   font-size: 16px;
   font-weight: 500;
@@ -264,12 +242,11 @@ html, body {
   text-overflow: ellipsis;
 }
 
-/* Column width classes */
-.col-narrow { width: 80px; min-width: 80px; max-width: 80px; }
-.col-medium { width: 120px; min-width: 120px; max-width: 120px; }
-.col-wide { width: 240px; min-width: 240px; max-width: 240px; }
+/* Width classes */
+.col-narrow  { width: 80px;  min-width: 80px;  max-width: 80px; }
+.col-medium  { width: 120px; min-width: 120px; max-width: 120px; }
+.col-wide    { width: 240px; min-width: 240px; max-width: 240px; }
 
-/* Centered cells */
 .dashboard-table td.centered,
 .dashboard-table th.centered {
   text-align: center;
@@ -290,10 +267,6 @@ html, body {
 .badge-blue    { background: #38bdf8; color: #0c4a6e; }
 .badge-gray    { background: #cbd5e1; color: #1e293b; }
 .badge-default { background: #94a3b8; color: #0f172a; }
-
-/* Icons */
-.checkmark { color: #4ade80; font-weight: bold; }
-.cross     { color: #f87171; font-weight: bold; }
 
 /* ========== FILTER BAR ========== */
 .filter-bar {
@@ -357,9 +330,9 @@ html, body {
 .rotate-icon { transition: transform 0.3s ease; }
 .rotate-icon.open { transform: rotate(90deg); }
 
-/* ========== RESPONSIVE ========== */
+/* ========== MOBILE ========== */
 @media (max-width: 768px) {
-  #container {
+  .container {
     margin-left: 0 !important;
     padding: 15px;
   }
