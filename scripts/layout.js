@@ -18,6 +18,18 @@ export async function initializePage({ showName = true } = {}) {
       const nameEl = document.getElementById("userGreeting");
       if (nameEl) nameEl.textContent = name;
     }
+
+    // 👉 Sidebar toggle logic (binds once DOM is updated)
+    const toggleButton = document.getElementById("sidebarToggle");
+    if (toggleButton) {
+      toggleButton.addEventListener("click", () => {
+        document.getElementById("sidebar")?.classList.toggle("open");
+        document.getElementById("container")?.classList.toggle("sidebar-open");
+        document.getElementById("topOverlayBg")?.classList.toggle("sidebar-open");
+        document.getElementById("header")?.classList.toggle("sidebar-open");
+      });
+    }
+
   } catch (err) {
     console.error("Component include failed:", err);
   }
