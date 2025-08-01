@@ -15,7 +15,7 @@ body {
   top: 0; left: 0; height: 100%; width: 60px;
   background: #0b0e2c;
   overflow-x: hidden;
-  transition: width 0.3s ease;
+  transition: width 0.3s;
   box-shadow: 2px 0 8px rgba(0,0,0,0.4);
   z-index: 1100;
   white-space: nowrap;
@@ -50,25 +50,18 @@ body {
 .sidebar.open .sidebar-section { display: block; }
 
 /* ========== HEADER ========== */
-#header {
+header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   background: linear-gradient(to right, #1a1a40, #000);
   padding: 20px 30px;
   color: #fff;
-  height: 80px;
-  width: 100%;
-  position: fixed;
-  top: 0;
-  left: 60px;
+  margin-left: 60px;
+  position: relative;
   z-index: 1050;
-  transition: left 0.3s ease;
 }
-#header.sidebar-open {
-  left: 220px;
-}
-#header h1 {
+header h1 {
   font-size: 28px;
   font-weight: 700;
   color: #ffb400;
@@ -94,43 +87,54 @@ body {
   margin-left: 5px;
 }
 
-/* ========== CONTAINER ========== */
+/* ========== LAYOUT & CONTAINER ========== */
 .container {
-  position: relative;
   margin-left: 60px;
-  margin-top: 100px;
-  height: calc(100% - 100px);
+  height: calc(100% - 80px);
   overflow-y: auto;
   padding: 20px;
   scroll-behavior: smooth;
   transition: margin-left 0.3s ease;
 }
-.sidebar-open #container {
+.sidebar.open ~ .container {
   margin-left: 220px;
 }
-
-/* ========== TOP OVERLAY ========== */
-.top-overlay-bg {
-  position: fixed;
-  top: 0;
-  left: 60px;
-  width: calc(100% - 60px);
-  height: 260px;
-  background-color: #0f172a;
-  z-index: 1025;
-  pointer-events: none;
-  transition: left 0.3s ease, width 0.3s ease;
-}
-.sidebar-open ~ .top-overlay-bg {
-  left: 220px;
-  width: calc(100% - 220px);
+#header.sidebar-open {
+  margin-left: 220px;
+  transition: margin-left 0.3s ease;
 }
 
-/* ========== PROGRESS SECTION ========== */
+/* ========== CARD & TABLE STYLING ========== */
+.card, .section {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.3);
+  margin-bottom: 32px;
+}
+.card h3 {
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 18px;
+  font-weight: 600;
+  color: #f8fafc;
+}
+.table-section:not(:last-child) {
+  margin-bottom: 32px;
+}
+.table-wrapper {
+  max-height: 360px;
+  overflow-y: auto;
+  border-radius: 8px;
+  padding: 0 8px;
+}
+
+/* ========== PROGRESS BAR ========== */
 .progress-token-section {
   position: sticky;
   top: 0;
-  z-index: 1040;
+  z-index: 1050;
   background: #0f172a;
   border-bottom: 1px solid #1e293b;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
@@ -146,11 +150,7 @@ body {
   pointer-events: none;
   background: linear-gradient(to bottom, rgba(15, 23, 42, 0.7), transparent);
 }
-
-/* ========== PROGRESS BAR ========== */
-.progress-container {
-  margin-top: 5px;
-}
+.progress-container { margin-top: 5px; }
 .progress-label {
   font-weight: 600;
   font-size: 14px;
@@ -190,19 +190,6 @@ body {
 }
 
 /* ========== TABLES ========== */
-.dashboard-table-container {
-  max-height: 240px;
-  overflow-y: auto;
-  position: relative;
-  padding-right: 4px;
-  scrollbar-width: thin;
-  scrollbar-color: #334155 transparent;
-}
-.dashboard-table-container::-webkit-scrollbar { width: 6px; }
-.dashboard-table-container::-webkit-scrollbar-thumb {
-  background-color: #334155;
-  border-radius: 4px;
-}
 .dashboard-table {
   width: 100%;
   border-collapse: collapse;
@@ -241,18 +228,15 @@ body {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-
-/* Width classes */
-.col-narrow  { width: 80px;  min-width: 80px;  max-width: 80px; }
-.col-medium  { width: 120px; min-width: 120px; max-width: 120px; }
-.col-wide    { width: 240px; min-width: 240px; max-width: 240px; }
-
+.col-narrow  { width: 80px; }
+.col-medium  { width: 120px; }
+.col-wide    { width: 240px; }
 .dashboard-table td.centered,
 .dashboard-table th.centered {
   text-align: center;
 }
 
-/* Badges */
+/* ========== BADGES ========== */
 .badge {
   display: inline-block;
   padding: 1px 6px;
@@ -284,9 +268,7 @@ body {
   border-radius: 6px;
   cursor: pointer;
 }
-.filter-bar .add-btn:hover {
-  background: #4b5563;
-}
+.filter-bar .add-btn:hover { background: #4b5563; }
 .filter-bar select {
   background-color: #1f2937;
   color: #f9fafb;
@@ -299,36 +281,22 @@ body {
   color: #93c5fd;
 }
 
-/* ========== ACCORDIONS ========== */
-.accordion-header {
-  cursor: pointer;
-  padding: 12px 20px;
-  font-size: 16px;
-  font-weight: 600;
-  color: #f8fafc;
-  background: #1c2237;
-  border-top: 1px solid #334155;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+/* ========== OVERLAY SCROLLBLOCKER ========== */
+.top-overlay-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 260px;
+  background-color: #0f172a;
+  z-index: 1025;
+  pointer-events: none;
+  transition: left 0.3s ease, width 0.3s ease;
 }
-.accordion-item:last-child .accordion-header {
-  border-bottom: 1px solid #334155;
+.sidebar.open ~ .top-overlay-bg {
+  left: 220px;
+  width: calc(100% - 220px);
 }
-.accordion-content {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease;
-  background: #0f172a;
-  padding: 0 20px;
-}
-.accordion-item.open .accordion-content {
-  max-height: 1000px;
-  padding-top: 10px;
-  padding-bottom: 10px;
-}
-.rotate-icon { transition: transform 0.3s ease; }
-.rotate-icon.open { transform: rotate(90deg); }
 
 /* ========== MOBILE ========== */
 @media (max-width: 768px) {
@@ -340,7 +308,6 @@ body {
     width: 100%;
     position: relative;
     height: auto;
-    z-index: 1100;
   }
   table, th, td {
     font-size: 13px;
