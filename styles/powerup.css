@@ -8,6 +8,10 @@ body {
   line-height: 1.6;
   overflow-x: hidden;
 }
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
 
 /* ========== SIDEBAR ========== */
 .sidebar {
@@ -15,7 +19,7 @@ body {
   top: 0; left: 0; height: 100%; width: 60px;
   background: #0b0e2c;
   overflow-x: hidden;
-  transition: width 0.3s;
+  transition: width 0.3s ease;
   box-shadow: 2px 0 8px rgba(0,0,0,0.4);
   z-index: 1100;
   white-space: nowrap;
@@ -50,7 +54,7 @@ body {
 .sidebar.open .sidebar-section { display: block; }
 
 /* ========== HEADER ========== */
-header {
+#header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -60,8 +64,12 @@ header {
   margin-left: 60px;
   position: relative;
   z-index: 1050;
+  transition: margin-left 0.3s ease;
 }
-header h1 {
+#header.sidebar-open {
+  margin-left: 220px;
+}
+#header h1 {
   font-size: 28px;
   font-weight: 700;
   color: #ffb400;
@@ -88,14 +96,33 @@ header h1 {
 }
 
 /* ========== LAYOUT ========== */
-.container {
+#container.container {
   margin-left: 60px;
+  height: calc(100% - 80px); /* Header height */
+  overflow-y: auto;
   padding: 20px;
+  scroll-behavior: smooth;
   transition: margin-left 0.3s ease;
 }
-.sidebar.open ~ .container {
-  margin-left: 220px; /* matches the open sidebar width */
+#container.sidebar-open {
+  margin-left: 220px;
 }
+#topOverlayBg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 260px;
+  background-color: #0f172a;
+  z-index: 1025;
+  pointer-events: none;
+  transition: left 0.3s ease, width 0.3s ease;
+}
+#topOverlayBg.sidebar-open {
+  left: 220px;
+  width: calc(100% - 220px);
+}
+
 .dashboard-header,
 .card,
 .section {
@@ -126,12 +153,26 @@ header h1 {
 }
 .progress-token-section {
   margin-bottom: 32px;
+  position: sticky;
+  top: 0;
+  z-index: 1050;
+  background: #0f172a;
+  border-bottom: 1px solid #1e293b;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+.progress-token-section::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 12px;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(15, 23, 42, 0.7), transparent);
 }
 
 /* ========== PROGRESS BAR ========== */
-.progress-container {
-  margin-top: 5px;
-}
+.progress-container { margin-top: 5px; }
 .progress-label {
   font-weight: 600;
   font-size: 14px;
@@ -316,80 +357,9 @@ header h1 {
 .rotate-icon { transition: transform 0.3s ease; }
 .rotate-icon.open { transform: rotate(90deg); }
 
-/* ========== MOBILE ========== */
+/* ========== RESPONSIVE ========== */
 @media (max-width: 768px) {
-  .container { margin-left: 0 !important; padding: 15px; }
-  .sidebar.open { width: 100%; position: relative; height: auto; }
-  table, th, td { font-size: 13px; }
-}
-
-/* ========== LAYOUT: ScrollBlocker and Sticky Elements ========== */
-
-/* Ensure full height and disable outer scroll */
-html, body {
-  height: 100%;
-  overflow: hidden;
-}
-
-/* Main scrollable area */
-.container {
-  margin-left: 60px;
-  height: calc(100% - 80px); /* Header height */
-  overflow-y: auto;
-  padding: 20px;
-  scroll-behavior: smooth;
-  transition: margin-left 0.3s ease;
-}
-
-/* Sticky Progress Section (stays under header) */
-.progress-token-section {
-  position: sticky;
-  top: 0;
-  z-index: 1050; /* Below header (1100), above tables */
-  background: #0f172a;
-  border-bottom: 1px solid #1e293b;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-  margin-bottom: 32px;
-}
-.progress-token-section::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  right: 0;
-  height: 12px;
-  pointer-events: none;
-  background: linear-gradient(to bottom, rgba(15, 23, 42, 0.7), transparent);
-}
-
-/* ScrollBlocker Layer to block scroll bleed */
-.top-overlay-bg {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 260px; /* Adjust if needed to match header + progress height */
-  background-color: #0f172a;
-  z-index: 1025; /* Between table content and sticky progress bar */
-  pointer-events: none;
-  transition: left 0.3s ease, width 0.3s ease;
-}
-
-.sidebar.open ~ .top-overlay-bg {
-  left: 220px;
-  width: calc(100% - 220px);
-}
-
-/* Z-Index Summary:
-   1100 = sidebar
-   1050 = progress-token-section, header
-   1025 = top-overlay-bg (scroll blocker)
-   ≤1000 = card/table content
-*/
-
-/* ========== Responsive Sidebar Layout ========== */
-@media (max-width: 768px) {
-  .container {
+  #container {
     margin-left: 0 !important;
     padding: 15px;
   }
@@ -403,8 +373,3 @@ html, body {
     font-size: 13px;
   }
 }
-.sidebar.open ~ #header {
-  margin-left: 220px;
-  transition: margin-left 0.3s ease;
-}
-
