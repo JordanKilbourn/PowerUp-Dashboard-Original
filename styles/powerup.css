@@ -718,4 +718,47 @@ body.notes .note-editor:empty:before {
   opacity: 1;
 }
 
+/* ────────────────────────────────────────────────
+   Layout fix: let each tab panel scroll vertically
+   so the "Load More" button is always reachable.
+   ──────────────────────────────────────────────── */
+
+html, body{
+  height:100%;
+}
+
+/* container already uses flex — make sure it fills the viewport */
+.container{
+  display:flex;
+  height:100%;
+  overflow:hidden;     /* keep sidebar + main side-by-side */
+}
+
+/* main = flex column: header/top-cards stay fixed, panel fills rest */
+.main{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;     /* no page-level scroll */
+}
+
+/* the active tab panel should provide the vertical scroll */
+.tab-panel{
+  flex:1;              /* fills remaining height */
+  overflow-y:auto;     /* ← vertical scroll here */
+  overflow-x:hidden;   /* keep horizontal overflow inside .table-scroll */
+  padding-bottom:1rem; /* so the button isn’t flush to the edge */
+}
+
+/* keep horizontal scrolling only for the table body */
+.table-scroll{
+  overflow-x:auto;
+}
+
+/* optional: stick the Load More button to bottom of viewport */
+.tab-panel .load-more{
+  margin:1rem 0;
+}
+
+
 
