@@ -87,6 +87,7 @@
             <span id="ci-count" class="row-count">0 submissions</span>
           </div>
         </div>
+
         <div class="table-scroll">
           <table id="ci-table"></table>
         </div>
@@ -107,6 +108,7 @@
             <span id="safety-count" class="row-count">0 submissions</span>
           </div>
         </div>
+
         <div class="table-scroll">
           <table id="safety-table"></table>
         </div>
@@ -126,6 +128,7 @@
             <span id="quality-count" class="row-count">0 submissions</span>
           </div>
         </div>
+
         <div class="table-scroll">
           <table id="quality-table"></table>
         </div>
@@ -134,12 +137,14 @@
     </div><!-- /main -->
   </div><!-- /container -->
 
-  <!-- ── Inline helpers (Load-More removed) ───────────────────── -->
+  <!-- ── Inline helpers ───────────────────────────────────────── -->
   <script>
-    // Sidebar
-    function toggleSidebar(){document.getElementById('sidebar').classList.toggle('expanded');}
+    /* Sidebar toggle */
+    function toggleSidebar(){
+      document.getElementById('sidebar').classList.toggle('expanded');
+    }
 
-    // Tabs
+    /* Tab switching */
     function showTab(id){
       document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
       document.querySelectorAll('.tab-button').forEach(b=>b.classList.remove('active'));
@@ -149,8 +154,8 @@
       if(currentSort.tabId===id)sortTable(id,currentSort.colIndex);
     }
 
-    // Data filters & sorting
-    const visibleCount={ci:Infinity,safety:Infinity,quality:Infinity};   // show all rows
+    /* Filtering & sorting */
+    const visibleCount={ci:Infinity,safety:Infinity,quality:Infinity}; // show every row
     let currentSort={tabId:null,colIndex:null,asc:true};
 
     function filterTable(t){
@@ -162,7 +167,7 @@
         r.style.display=show?'':'none';
         if(show)count++;
       });
-      document.getElementById(`${t}-count`).innerText=`${count} submission${count!==1?'s':''}`;
+      document.getElementById(`${t}-count`).textContent=`${count} submission${count!==1?'s':''}`;
     }
 
     function sortTable(t,i){
