@@ -87,12 +87,9 @@
             <span id="ci-count" class="row-count">0 submissions</span>
           </div>
         </div>
-
         <div class="table-scroll">
           <table id="ci-table"></table>
         </div>
-
-        <button class="load-more" onclick="loadMore('ci')">Load More</button>
       </div>
 
       <!-- ── Safety Tab ────────────────────────────────────────── -->
@@ -110,12 +107,9 @@
             <span id="safety-count" class="row-count">0 submissions</span>
           </div>
         </div>
-
         <div class="table-scroll">
           <table id="safety-table"></table>
         </div>
-
-        <button class="load-more" onclick="loadMore('safety')">Load More</button>
       </div>
 
       <!-- ── Quality Catches Tab ───────────────────────────────── -->
@@ -132,18 +126,15 @@
             <span id="quality-count" class="row-count">0 submissions</span>
           </div>
         </div>
-
         <div class="table-scroll">
           <table id="quality-table"></table>
         </div>
-
-        <button class="load-more" onclick="loadMore('quality')">Load More</button>
       </div>
 
     </div><!-- /main -->
   </div><!-- /container -->
 
-  <!-- ── Inline helpers (unchanged) ───────────────────────────── -->
+  <!-- ── Inline helpers (Load-More removed) ───────────────────── -->
   <script>
     // Sidebar
     function toggleSidebar(){document.getElementById('sidebar').classList.toggle('expanded');}
@@ -158,24 +149,21 @@
       if(currentSort.tabId===id)sortTable(id,currentSort.colIndex);
     }
 
-    // Data filters, sorting, load-more (same logic, just add “quality” key)
-    const visibleCount={ci:10,safety:10,quality:10};
+    // Data filters & sorting
+    const visibleCount={ci:Infinity,safety:Infinity,quality:Infinity};   // show all rows
     let currentSort={tabId:null,colIndex:null,asc:true};
 
     function filterTable(t){
       const rows=[...document.querySelectorAll(`#${t}-table tbody tr`)];
       const filter=(document.getElementById(`${t}-filter`)||{}).value?.toLowerCase()||'all';
       let count=0;
-      rows.forEach((r,i)=>{
+      rows.forEach(r=>{
         const show=(filter==='all'||r.innerText.toLowerCase().includes(filter));
-        r.style.display=show&&i<visibleCount[t]?'':'none';
-        if(show&&i<visibleCount[t])count++;
+        r.style.display=show?'':'none';
+        if(show)count++;
       });
       document.getElementById(`${t}-count`).innerText=`${count} submission${count!==1?'s':''}`;
     }
-
-    function loadMore(t){visibleCount[t]+=10;filterTable(t);
-      if(currentSort.tabId===t&&currentSort.colIndex!==null)sortTable(t,currentSort.colIndex);}
 
     function sortTable(t,i){
       const tbody=document.querySelector(`#${t}-table tbody`);
