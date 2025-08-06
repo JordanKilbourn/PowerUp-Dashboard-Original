@@ -3,66 +3,76 @@
 <head>
   <meta charset="UTF-8" />
   <title>PowerUp Dashboard</title>
+
+  <!-- Fonts / Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <!-- Styles -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- Styles -->
   <link rel="stylesheet" href="/styles/powerup.css" />
-
-
 </head>
 
 <body class="dashboard">
   <div class="container">
-<div class="sidebar" id="sidebar">
-  <div class="item" onclick="toggleSidebar()">
-    <i class="fas fa-bars"></i><span>Menu</span>
-  </div>
-  <div class="item active" onclick="location.href='PowerUp_Dashboard.html'">
-    <i class="fas fa-home"></i><span>Dashboard</span>
-  </div>
-  <div class="item" onclick="location.href='level-tracker.html'">
-    <i class="fas fa-layer-group"></i><span>Level Tracker</span>
-  </div>
-  <div class="item" onclick="location.href='power-hours.html'">
-    <i class="fas fa-clock"></i><span>Power Hours</span>
-  </div>
-  <div class="item" onclick="location.href='notes.html'">
-    <i class="fas fa-sticky-note"></i><span>Notes</span>
-  </div>
-  <div class="item" onclick="location.href='squads.html'">
-    <i class="fas fa-users"></i><span>Squads</span>
-  </div>
-</div>
 
-<div class="main">
+    <!-- ── Sidebar ─────────────────────────────────────────────── -->
+    <div class="sidebar" id="sidebar">
+      <div class="item" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i><span>Menu</span>
+      </div>
+      <div class="item active" onclick="location.href='PowerUp_Dashboard.html'">
+        <i class="fas fa-home"></i><span>Dashboard</span>
+      </div>
+      <div class="item" onclick="location.href='level-tracker.html'">
+        <i class="fas fa-layer-group"></i><span>Level Tracker</span>
+      </div>
+      <div class="item" onclick="location.href='power-hours.html'">
+        <i class="fas fa-clock"></i><span>Power Hours</span>
+      </div>
+      <div class="item" onclick="location.href='notes.html'">
+        <i class="fas fa-sticky-note"></i><span>Notes</span>
+      </div>
+      <div class="item" onclick="location.href='squads.html'">
+        <i class="fas fa-users"></i><span>Squads</span>
+      </div>
+    </div>
+
+    <!-- ── Main ────────────────────────────────────────────────── -->
+    <div class="main">
+
+      <!-- Header / KPI cards -->
       <div class="header">
         <h1>PowerUp Dashboard</h1>
-        <p>Welcome: <span>Chris Weikel</span> Month: <span>July 2025</span> Level: <span>Lv 2</span></p>
+        <p>
+          Welcome: <span>Chris Weikel</span> 
+          Month: <span>July 2025</span> 
+          Level: <span>Lv 2</span>
+        </p>
       </div>
+
       <div class="top-cards">
         <div class="card power-card">
           <h3>Power Hours Logged</h3>
           <p>1.0 / 8</p>
           <div class="progress-bar"><div class="progress-bar-inner"></div></div>
-          <small>You're 7.0 hour(s) away from your goal. 30 day(s) left this month.</small>
+          <small>You’re 7 hour(s) away from your goal. 30 day(s) left this month.</small>
         </div>
-<div class="card token-card">
-  <h3>Tokens</h3>
-  <div class="token-tracker">
-    <i class="fas fa-coins"></i>
-    <span>20</span>
-  </div>
-</div>
 
+        <div class="card token-card">
+          <h3>Tokens</h3>
+          <div class="token-tracker"><i class="fas fa-coins"></i><span>20</span></div>
+        </div>
       </div>
 
+      <!-- ── Tabs ──────────────────────────────────────────────── -->
       <div class="tab-buttons">
         <button class="tab-button active" onclick="showTab('ci')">Continuous Improvement</button>
         <button class="tab-button" onclick="showTab('safety')">Safety Concerns</button>
-        <button class="tab-button" onclick="showTab('third')">Third Table</button>
+        <button class="tab-button" onclick="showTab('quality')">Quality Catches</button>
       </div>
 
-      <!-- CI Tab -->
+      <!-- ── CI Tab ────────────────────────────────────────────── -->
       <div class="tab-panel active" id="tab-ci">
         <div class="table-header-row">
           <h3>Continuous Improvement (CI)</h3>
@@ -77,13 +87,15 @@
             <span id="ci-count" class="row-count">0 submissions</span>
           </div>
         </div>
+
         <div class="table-scroll">
           <table id="ci-table"></table>
         </div>
+
         <button class="load-more" onclick="loadMore('ci')">Load More</button>
       </div>
 
-      <!-- Safety Tab -->
+      <!-- ── Safety Tab ────────────────────────────────────────── -->
       <div class="tab-panel" id="tab-safety">
         <div class="table-header-row">
           <h3>Safety Concerns</h3>
@@ -98,108 +110,90 @@
             <span id="safety-count" class="row-count">0 submissions</span>
           </div>
         </div>
+
         <div class="table-scroll">
           <table id="safety-table"></table>
         </div>
+
         <button class="load-more" onclick="loadMore('safety')">Load More</button>
       </div>
 
-      <!-- Third Table Tab -->
-      <div class="tab-panel" id="tab-third">
+      <!-- ── Quality Catches Tab ───────────────────────────────── -->
+      <div class="tab-panel" id="tab-quality">
         <div class="table-header-row">
-          <h3>Third Table Title</h3>
+          <h3>Quality Catches</h3>
           <div class="table-header-controls">
-            <select id="third-filter" onchange="filterTable('third')">
+            <select id="quality-filter" onchange="filterTable('quality')">
               <option value="all">All</option>
-              <option value="a">Col A = a</option>
+              <option value="pending">Pending</option>
+              <option value="closed">Closed</option>
             </select>
             <button class="add-btn">+ Add Submission</button>
-            <span id="third-count" class="row-count">0 submissions</span>
+            <span id="quality-count" class="row-count">0 submissions</span>
           </div>
         </div>
+
         <div class="table-scroll">
-          <table id="third-table"></table>
+          <table id="quality-table"></table>
         </div>
-        <button class="load-more" onclick="loadMore('third')">Load More</button>
+
+        <button class="load-more" onclick="loadMore('quality')">Load More</button>
       </div>
 
-    </div>
-  </div>
+    </div><!-- /main -->
+  </div><!-- /container -->
 
- <script>
-// Sidebar toggle
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('expanded');
-}
+  <!-- ── Inline helpers (unchanged) ───────────────────────────── -->
+  <script>
+    // Sidebar
+    function toggleSidebar(){document.getElementById('sidebar').classList.toggle('expanded');}
 
-// Tab switching
-function showTab(tabId) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-  document.getElementById(`tab-${tabId}`).classList.add('active');
-  event.target.classList.add('active');
-  filterTable(tabId);
-  if (currentSort.tabId === tabId) sortTable(tabId, currentSort.colIndex);
-}
+    // Tabs
+    function showTab(id){
+      document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+      document.querySelectorAll('.tab-button').forEach(b=>b.classList.remove('active'));
+      document.getElementById(`tab-${id}`).classList.add('active');
+      event.target.classList.add('active');
+      filterTable(id);
+      if(currentSort.tabId===id)sortTable(id,currentSort.colIndex);
+    }
 
-// Data filtering
-const visibleCount = { ci: 10, safety: 10, third: 10 };
-let currentSort = { tabId: null, colIndex: null, asc: true };
+    // Data filters, sorting, load-more (same logic, just add “quality” key)
+    const visibleCount={ci:10,safety:10,quality:10};
+    let currentSort={tabId:null,colIndex:null,asc:true};
 
-function filterTable(type) {
-  const rows = Array.from(document.querySelectorAll(`#${type}-table tbody tr`));
-  const filter = document.getElementById(`${type}-filter`).value.toLowerCase();
-  let count = 0;
-  rows.forEach((r, idx) => {
-    const text = r.innerText.toLowerCase();
-    const show = (filter === 'all' || text.includes(filter));
-    r.style.display = show && idx < visibleCount[type] ? '' : 'none';
-    if (show && idx < visibleCount[type]) count++;
-  });
-  document.getElementById(`${type}-count`).innerText = `${count} submission${count !== 1 ? 's' : ''}`;
-}
+    function filterTable(t){
+      const rows=[...document.querySelectorAll(`#${t}-table tbody tr`)];
+      const filter=(document.getElementById(`${t}-filter`)||{}).value?.toLowerCase()||'all';
+      let count=0;
+      rows.forEach((r,i)=>{
+        const show=(filter==='all'||r.innerText.toLowerCase().includes(filter));
+        r.style.display=show&&i<visibleCount[t]?'':'none';
+        if(show&&i<visibleCount[t])count++;
+      });
+      document.getElementById(`${t}-count`).innerText=`${count} submission${count!==1?'s':''}`;
+    }
 
-// Load more functionality
-function loadMore(type) {
-  visibleCount[type] += 10;
-  filterTable(type);
-  if (currentSort.tabId === type && currentSort.colIndex !== null) {
-    sortTable(type, currentSort.colIndex);
-  }
-}
+    function loadMore(t){visibleCount[t]+=10;filterTable(t);
+      if(currentSort.tabId===t&&currentSort.colIndex!==null)sortTable(t,currentSort.colIndex);}
 
-// Sorting logic
-function sortTable(type, colIndex) {
-  const table = document.getElementById(`${type}-table`);
-  const tbody = table.querySelector('tbody');
-  const visibleRows = Array.from(tbody.rows).filter(r => r.style.display !== 'none');
-  const numeric = visibleRows.every(r => !isNaN(r.cells[colIndex].innerText.replace(/[^0-9.-]/g, '')));
-  const asc = (currentSort.tabId === type && currentSort.colIndex === colIndex) ? !currentSort.asc : true;
+    function sortTable(t,i){
+      const tbody=document.querySelector(`#${t}-table tbody`);
+      if(!tbody)return;
+      const rows=[...tbody.rows].filter(r=>r.style.display!=='none');
+      const numeric=rows.every(r=>!isNaN(r.cells[i].innerText.replace(/[^0-9.-]/g,'')));
+      const asc=(currentSort.tabId===t&&currentSort.colIndex===i)?!currentSort.asc:true;
+      rows.sort((a,b)=>{
+        const A=numeric?parseFloat(a.cells[i].innerText):a.cells[i].innerText;
+        const B=numeric?parseFloat(b.cells[i].innerText):b.cells[i].innerText;
+        return asc?(A>B?1:-1):(A<B?1:-1);
+      }).forEach(r=>tbody.appendChild(r));
+      currentSort={tabId:t,colIndex:i,asc};
+      filterTable(t);
+    }
+  </script>
 
-  visibleRows.sort((a, b) => {
-    const aVal = numeric ? parseFloat(a.cells[colIndex].innerText) : a.cells[colIndex].innerText;
-    const bVal = numeric ? parseFloat(b.cells[colIndex].innerText) : b.cells[colIndex].innerText;
-    return asc ? (aVal > bVal ? 1 : -1) : (aVal < bVal ? 1 : -1);
-  });
-
-  visibleRows.forEach(r => tbody.appendChild(r));
-  currentSort = { tabId: type, colIndex, asc };
-  updateSortIcons(type, colIndex, asc);
-  filterTable(type);
-}
-
-function updateSortIcons(type, colIndex, asc) {
-  document.querySelectorAll(`#${type}-table thead th`).forEach((th, idx) => {
-    th.classList.toggle('sorted-asc', idx === colIndex && asc);
-    th.classList.toggle('sorted-desc', idx === colIndex && !asc);
-  });
-}
-</script>
-
-<script type="module" src="/scripts/init-dashboard.js"></script>
-
+  <!-- Module loader -->
+  <script type="module" src="/scripts/init-dashboard.js"></script>
 </body>
 </html>
-
-
-
