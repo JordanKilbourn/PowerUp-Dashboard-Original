@@ -2,106 +2,266 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PowerUp Dashboard</title>
-
-  <!-- Fonts & Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-
-  <!-- Styles -->
+    <!-- Styles -->
   <link rel="stylesheet" href="/styles/powerup.css" />
+
+
 </head>
-<body>
 
-  <!-- 👇 New invisible background layer to block scroll bleed-through -->
-  <div id="topOverlayBg" class="top-overlay-bg"></div>
+<body class="dashboard">
+  <div class="container">
+<div class="sidebar" id="sidebar">
+  <div class="item" onclick="toggleSidebar()">
+    <i class="fas fa-bars"></i><span>Menu</span>
+  </div>
+  <div class="item active" onclick="location.href='duh 2.0.html'">
+    <i class="fas fa-home"></i><span>Dashboard</span>
+  </div>
+  <div class="item" onclick="location.href='level-tracker.html'">
+    <i class="fas fa-layer-group"></i><span>Level Tracker</span>
+  </div>
+  <div class="item" onclick="location.href='power-hours.html'">
+    <i class="fas fa-clock"></i><span>Power Hours</span>
+  </div>
+  <div class="item" onclick="location.href='notes.html'">
+    <i class="fas fa-sticky-note"></i><span>Notes</span>
+  </div>
+  <div class="item" onclick="location.href='squads.html'">
+    <i class="fas fa-users"></i><span>Squads</span>
+  </div>
+</div>
 
-  <div id="sidebar" class="sidebar"></div>
-  <div id="header"></div>
-
-  <div id="container" class="container">
-    <!-- Progress + Token Container -->
-    <div class="card progress-token-section">
-      <div class="goal-pill-group" id="pillSummary"></div>
-      <div class="progress-container">
-        <div class="progress-label">Power Hours Logged: <strong id="phProgress">0 / 8</strong></div>
-        <div class="progress-bar">
-          <div class="progress-bar-fill" id="progressBar"></div>
+<div class="main">
+      <div class="header">
+        <h1>PowerUp Dashboard</h1>
+        <p>Welcome: <span>Chris Weikel</span> Month: <span>July 2025</span> Level: <span>Lv 2</span></p>
+      </div>
+      <div class="top-cards">
+        <div class="card power-card">
+          <h3>Power Hours Logged</h3>
+          <p>1.0 / 8</p>
+          <div class="progress-bar"><div class="progress-bar-inner"></div></div>
+          <small>You're 7.0 hour(s) away from your goal. 30 day(s) left this month.</small>
         </div>
-        <p id="powerTips" style="font-size: 14px; color: #93c5fd; margin-top: 8px;"></p>
-      </div>
-      <div class="token-tracker improved-token-display">
-        <i class="fas fa-coins"></i>
-        <span id="tokenTotal">0</span>
-      </div>
-    </div>
+<div class="card token-card">
+  <h3>Tokens</h3>
+  <div class="token-tracker">
+    <i class="fas fa-coins"></i>
+    <span>20</span>
+  </div>
+</div>
 
-    <!-- CI Submissions Table -->
-    <div class="card table-section">
-      <div class="filter-bar">
-        <label for="ciStatusFilter">CI Status:</label>
-        <select id="ciStatusFilter" onchange="filterCITable();">
-          <option value="All">All</option>
-          <option value="Approved">Approved</option>
-          <option value="Denied">Denied</option>
-          <option value="Pending">Pending</option>
-          <option value="Needs Researched">Needs Researched</option>
-          <option value="Completed">Completed</option>
-          <option value="Not Started">Not Started</option>
-        </select>
-        <button class="add-btn" onclick="openCISubmissionForm()">+ Add CI Submission</button>
-        <span class="submission-count" id="ciSubmissionCount">0 Submissions</span>
       </div>
-      <h3>Continuous Improvement (CI)</h3>
-      <div class="table-wrapper">
-        <table class="dashboard-table" id="ciSubmissionsTable">
-          <!-- CI table content goes here -->
-        </table>
-      </div>
-    </div>
 
-    <!-- Safety Concerns Table -->
-    <div class="card table-section">
-      <div class="filter-bar">
-        <label for="safetyStatusFilter">Safety Status:</label>
-        <select id="safetyStatusFilter" onchange="filterSafetyTable();">
-          <option value="All">All</option>
-          <option value="Pending">Pending</option>
-          <option value="Resolved">Resolved</option>
-        </select>
-        <button class="add-btn" onclick="openSafetyForm()">+ Add Safety Concern</button>
-        <span class="submission-count" id="safetySubmissionCount">0 Submissions</span>
+      <div class="tab-buttons">
+        <button class="tab-button active" onclick="showTab('ci')">Continuous Improvement</button>
+        <button class="tab-button" onclick="showTab('safety')">Safety Concerns</button>
+        <button class="tab-button" onclick="showTab('third')">Third Table</button>
       </div>
-      <h3>Safety Concerns</h3>
-      <div class="table-wrapper">
-        <table class="dashboard-table" id="safetyTable">
-          <!-- Safety table content goes here -->
-        </table>
-      </div>
-    </div>
 
-    <!-- Quality Catches Table -->
-    <div class="card table-section">
-      <div class="filter-bar">
-        <label for="qcStatusFilter">Quality Status:</label>
-        <select id="qcStatusFilter" onchange="filterQCTable();">
-          <option value="All">All</option>
-          <option value="In Review">In Review</option>
-          <option value="Resolved">Resolved</option>
-        </select>
-        <button class="add-btn" onclick="openQCForm()">+ Add Quality Catch</button>
-        <span class="submission-count" id="qcSubmissionCount">0 Submissions</span>
+      <!-- CI Tab -->
+      <div class="tab-panel active" id="tab-ci">
+        <div class="table-header-row">
+          <h3>Continuous Improvement (CI)</h3>
+          <div class="table-header-controls">
+            <select id="ci-filter" onchange="filterTable('ci')">
+              <option value="all">All Statuses</option>
+              <option value="approved">Approved</option>
+              <option value="pending">Pending</option>
+              <option value="denied">Denied</option>
+            </select>
+            <button class="add-btn">+ Add Submission</button>
+            <span id="ci-count" class="row-count">0 submissions</span>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table id="ci-table">
+            <thead><tr>
+              <th class="sortable">Date</th><th class="sortable">ID</th><th class="sortable">Problem</th>
+              <th class="sortable">Improvement</th><th class="sortable">Approval</th><th class="sortable">Status</th>
+              <th class="sortable">Action Date</th><th class="sortable">Last Action</th>
+              <th class="sortable">Tokens</th><th class="sortable">Resourced</th><th class="sortable">Paid</th>
+            </tr></thead>
+            <tbody>
+  <tr><td>9/23/24</td><td>CI‑089</td><td>Tubing leaving…</td><td>Move caps…</td><td><span class="badge denied">Denied</span></td><td><span class="badge denied">Denied/Cancelled</span>
+                <td>9/22/24</td><td>Work with Chris…</td><td>$0</td><td>✗</td><td>✗</td></tr>
+                <tr><td>9/24/24</td><td>CI‑090</td><td>Loose parts</td><td>Tighten tolerances</td><td><span class="badge approved">Approved</span></td><td><span class="badge completed">Completed</span><td>9/25/24</td><td>Updated fixture</td><td>$10</td><td>✓</td><td>✓</td></tr>
+                <tr><td>9/25/24</td><td>CI‑091</td><td>Long setup</td><td>Standardize process</td><td><span class="badge approved">Approved</span></td><td><span class="badge pending">In Progress</span><td>9/26/24</td><td>Initial run</td><td>$5</td><td>✓</td><td>✗</td></tr>
+                <tr><td>9/26/24</td><td>CI‑092</td><td>Missing labels</td><td>Auto labeling</td><td><span class="badge pending">Pending</span></td><td><span class="badge pending">Needs Review</span><td>—</td><td>Proposal</td><td>$0</td><td>✗</td><td>✗</td></tr>
+                <tr><td>9/27/24</td><td>CI‑093</td><td>Manual handling</td><td>Install arm</td><td><span class="badge denied">Denied</span></td><td><span class="badge denied">Denied/Cancelled</span><td>9/27/24</td><td>Budget rejected</td><td>$0</td><td>✗</td><td>✗</td></tr>
+                <tr><td>9/28/24</td><td>CI‑094</td><td>Operator fatigue</td><td>Anti‑fatigue mats</td><td><span class="badge approved">Approved</span></td><td><span class="badge completed">Completed</span><td>9/29/24</td><td>Rolled out</td><td>$8</td><td>✓</td><td>✓</td></tr>
+                <tr><td>9/29/24</td><td>CI‑095</td><td>Low throughput</td><td>Extra staff</td><td><span class="badge pending">Pending</span></td><td><span class="badge pending">Needs Review</span><td>—</td><td>Awaiting input</td><td>$0</td><td>✗</td><td>✗</td></tr>
+                <tr><td>9/30/24</td><td>CI‑096</td><td>Rework high</td><td>Quality checklist</td><td><span class="badge approved">Approved</span></td><td><span class="badge completed">Completed</span><td>10/1/24</td><td>Checklist live</td><td>$12</td><td>✓</td><td>✓</td></tr>
+                <tr><td>10/1/24</td><td>CI‑097</td><td>Noise</td><td>Sound curtains</td><td><span class="badge approved">Approved</span></td><td><span class="badge completed">Completed</span><td>10/2/24</td><td>Installed</td><td>$6</td><td>✓</td><td>✓</td></tr>
+                <tr><td>10/2/24</td><td>CI‑098</td><td>Tool misplacement</td><td>Shadow board</td><td><span class="badge approved">Approved</span></td><td><span class="badge completed">Completed</span><td>10/3/24</td><td>Board mounted</td><td>$4</td><td>✓</td><td>✓</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <button class="load-more" onclick="loadMore('ci')">Load More</button>
       </div>
-      <h3>Quality Catches</h3>
-      <div class="table-wrapper">
-        <table class="dashboard-table" id="qcTable">
-          <!-- QC table content goes here -->
-        </table>
+
+      <!-- Safety Tab -->
+      <div class="tab-panel" id="tab-safety">
+        <div class="table-header-row">
+          <h3>Safety Concerns</h3>
+          <div class="table-header-controls">
+            <select id="safety-filter" onchange="filterTable('safety')">
+              <option value="all">All Statuses</option>
+              <option value="accepted">Accepted</option>
+              <option value="pending">Pending</option>
+              <option value="denied">Denied</option>
+            </select>
+            <button class="add-btn">+ Add Submission</button>
+            <span id="safety-count" class="row-count">0 submissions</span>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table id="safety-table">
+            <thead><tr>
+              <th class="sortable">Submit Date</th><th class="sortable">Facility</th>
+              <th class="sortable">Description</th><th class="sortable">Resolution</th><th class="sortable">Status</th>
+            </tr></thead>
+            <tbody>
+       <tr><td>7/25/25</td><td>Lewis</td><td>Ergonomic issue</td><td>Redesigned station</td><td><span class="badge approved">Accepted</span></td></tr>
+                <tr><td>7/24/25</td><td>North Plant</td><td>Trip hazard</td><td>Secured cords</td><td><span class="badge approved">Accepted</span></td></tr>
+                <tr><td>7/23/25</td><td>South Wing</td><td>Excessive noise</td><td>Installed barriers</td><td><span class="badge approved">Accepted</span></td></tr>
+                <tr><td>7/22/25</td><td>Main Floor</td><td>Blocked exit</td><td>Moved equipment</td><td><span class="badge approved">Accepted</span></td></tr>
+                <tr><td>7/21/25</td><td>Packaging</td><td>Cut hazard</td><td>Added guards</td><td><span class="badge approved">Accepted</span></td></tr>
+                <tr><td>7/20/25</td><td>Plastics</td><td>Slippery floor</td><td>Applied grip paint</td><td><span class="badge approved">Accepted</span></td></tr>
+                <tr><td>7/19/25</td><td>Powder Coating</td><td>View obstructed</td><td>Installed mirror</td><td><span class="badge pending">Pending</span></td></tr>
+                <tr><td>7/18/25</td><td>Machining</td><td>No emergency stop</td><td>Retrofit panel</td><td><span class="badge approved">Accepted</span></td></tr>
+                <tr><td>7/17/25</td><td>Loading Dock</td><td>Sharp edge</td><td>Rounded corners</td><td><span class="badge approved">Accepted</span></td></tr>
+                <tr><td>7/16/25</td><td>Lab</td><td>No eye wash</td><td>Installed station</td><td><span class="badge approved">Accepted</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <button class="load-more" onclick="loadMore('safety')">Load More</button>
       </div>
+
+      <!-- Third Table Tab -->
+      <div class="tab-panel" id="tab-third">
+        <div class="table-header-row">
+          <h3>Third Table Title</h3>
+          <div class="table-header-controls">
+            <select id="third-filter" onchange="filterTable('third')">
+              <option value="all">All</option>
+              <option value="a">Col A = a</option>
+            </select>
+            <button class="add-btn">+ Add Submission</button>
+            <span id="third-count" class="row-count">0 submissions</span>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table id="third-table">
+            <thead><tr>
+              <th class="sortable">Col A</th><th class="sortable">Col B</th><th class="sortable">Col C</th>
+            </tr></thead>
+            <tbody>
+       <tr><td>a1</td><td>b1</td><td>c1</td></tr>
+                <tr><td>a2</td><td>b2</td><td>c2</td></tr>
+                <tr><td>a3</td><td>b3</td><td>c3</td></tr>
+                <tr><td>a4</td><td>b4</td><td>c4</td></tr>
+                <tr><td>a5</td><td>b5</td><td>c5</td></tr>
+                <tr><td>a6</td><td>b6</td><td>c6</td></tr>
+                <tr><td>a7</td><td>b7</td><td>c7</td></tr>
+                <tr><td>a8</td><td>b8</td><td>c8</td></tr>
+                <tr><td>a9</td><td>b9</td><td>c9</td></tr>
+                <tr><td>a10</td><td>b10</td><td>c10</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <button class="load-more" onclick="loadMore('third')">Load More</button>
+      </div>
+
     </div>
   </div>
 
-  <script type="module" src="/scripts/init-dashboard.js"></script>
+ <script>
+// Sidebar toggle
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('expanded');
+}
+
+// Tab switching
+function showTab(tabId) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+  document.getElementById(`tab-${tabId}`).classList.add('active');
+  event.target.classList.add('active');
+  filterTable(tabId);
+  if (currentSort.tabId === tabId) sortTable(tabId, currentSort.colIndex);
+}
+
+// Data filtering
+const visibleCount = { ci: 10, safety: 10, third: 10 };
+let currentSort = { tabId: null, colIndex: null, asc: true };
+
+function filterTable(type) {
+  const rows = Array.from(document.querySelectorAll(`#${type}-table tbody tr`));
+  const filter = document.getElementById(`${type}-filter`).value.toLowerCase();
+  let count = 0;
+  rows.forEach((r, idx) => {
+    const text = r.innerText.toLowerCase();
+    const show = (filter === 'all' || text.includes(filter));
+    r.style.display = show && idx < visibleCount[type] ? '' : 'none';
+    if (show && idx < visibleCount[type]) count++;
+  });
+  document.getElementById(`${type}-count`).innerText = `${count} submission${count !== 1 ? 's' : ''}`;
+}
+
+// Load more functionality
+function loadMore(type) {
+  visibleCount[type] += 10;
+  filterTable(type);
+  if (currentSort.tabId === type && currentSort.colIndex !== null) {
+    sortTable(type, currentSort.colIndex);
+  }
+}
+
+// Sorting logic
+function sortTable(type, colIndex) {
+  const table = document.getElementById(`${type}-table`);
+  const tbody = table.querySelector('tbody');
+  const visibleRows = Array.from(tbody.rows).filter(r => r.style.display !== 'none');
+  const numeric = visibleRows.every(r => !isNaN(r.cells[colIndex].innerText.replace(/[^0-9.-]/g, '')));
+  const asc = (currentSort.tabId === type && currentSort.colIndex === colIndex) ? !currentSort.asc : true;
+
+  visibleRows.sort((a, b) => {
+    const aVal = numeric ? parseFloat(a.cells[colIndex].innerText) : a.cells[colIndex].innerText;
+    const bVal = numeric ? parseFloat(b.cells[colIndex].innerText) : b.cells[colIndex].innerText;
+    return asc ? (aVal > bVal ? 1 : -1) : (aVal < bVal ? 1 : -1);
+  });
+
+  visibleRows.forEach(r => tbody.appendChild(r));
+  currentSort = { tabId: type, colIndex, asc };
+  updateSortIcons(type, colIndex, asc);
+  filterTable(type);
+}
+
+function updateSortIcons(type, colIndex, asc) {
+  document.querySelectorAll(`#${type}-table thead th`).forEach((th, idx) => {
+    th.classList.toggle('sorted-asc', idx === colIndex && asc);
+    th.classList.toggle('sorted-desc', idx === colIndex && !asc);
+  });
+}
+
+// Initialization logic
+document.addEventListener('DOMContentLoaded', () => {
+  ['ci', 'safety', 'third'].forEach(type => {
+    document.querySelectorAll(`#${type}-table thead th`).forEach((th, idx) => {
+      th.classList.add('sortable');
+      th.addEventListener('click', () => sortTable(type, idx));
+    });
+    filterTable(type);
+  });
+});
+</script>
+
+<script type="module" src="/scripts/init-dashboard.js"></script>
+
 </body>
 </html>
+
