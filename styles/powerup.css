@@ -716,3 +716,30 @@ body.notes .note-editor:empty:before {
 .delete-icon:hover {
   opacity: 1;
 }
+
+
+/* ───────── Dashboard table: single-line cells like desktop mock-up ───────── */
+
+/* 1) Default: every cell shows a single line with … if it overflows  */
+.table-scroll td .cell-content,
+.table-scroll th .cell-content{
+  white-space: nowrap;      /* keep on one line   */
+  overflow: hidden;         /* clip extra text    */
+  text-overflow: ellipsis;  /* add …             */
+  line-height: 1.25;        /* rows a bit tighter */
+}
+
+/* 2) EXCEPTION: allow wrapping in the two long-text columns         */
+.table-scroll td[data-col="problem"]   .cell-content,
+.table-scroll td[data-col="proposed improvement"] .cell-content,
+.table-scroll th[data-col="problem"]   .cell-content,
+.table-scroll th[data-col="proposed improvement"] .cell-content{
+  white-space: normal;      /* wrap naturally */
+}
+
+/* 3) Slightly reduce padding so rows match desktop height           */
+.table-scroll th,
+.table-scroll td{
+  padding: 6px 10px;        /* was 10px  all around */
+}
+
