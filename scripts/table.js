@@ -106,25 +106,32 @@ export function renderTable({
       }
 
       if (normalizedCol === "status") {
-        const badgeClass = {
-          "not started": "badge-gray",
-          "open": "badge-blue",
-          "needs researched": "badge-yellow",
-          "completed": "badge-green",
-          "denied/cancelled": "badge-red"
-        }[val.toLowerCase()] || "badge-default";
-        content = `<span class="badge ${badgeClass}">${val}</span>`;
-      }
+  const cls = ({
+    "completed": "completed",
+    "done": "completed",
+    "open": "pending",
+    "needs researched": "pending",
+    "needs review": "pending",
+    "in progress": "pending",
+    "pending": "pending",
+    "not started": "pending",
+    "denied/cancelled": "denied",
+    "cancelled": "denied",
+    "denied": "denied",
+    "approved": "approved"
+  }[val.toLowerCase()] || null);
+  content = cls ? `<span class="badge ${cls}">${val}</span>` : val;
+}
 
-      if (normalizedCol === "ci approval") {
-        const badgeClass = {
-          "approved": "badge-green",
-          "pending": "badge-yellow",
-          "denied": "badge-red"
-        }[val.toLowerCase()] || "badge-default";
-        content = `<span class="badge ${badgeClass}">${val}</span>`;
-      }
-
+if (normalizedCol === "ci approval") {
+  const cls = ({
+    "approved": "approved",
+    "pending": "pending",
+    "denied": "denied"
+  }[val.toLowerCase()] || null);
+  content = cls ? `<span class="badge ${cls}">${val}</span>` : val;
+}
+      
       let widthClass = '';
       if (narrowCols.includes(normalizedCol)) widthClass = 'col-narrow';
       else if (mediumCols.includes(normalizedCol)) widthClass = 'col-medium';
