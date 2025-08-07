@@ -734,28 +734,3 @@ body.notes .note-editor:empty:before {
 .table-scroll td{
   padding: 6px 10px;        /* was 10px  all around */
 }
-
-
-.dashboard-table {
-  width: 100%;
-  table-layout: fixed;
-  border-collapse: collapse;
-}
-
-.dashboard-table th,
-.dashboard-table td {
-  padding: 10px;
-  text-align: left;
-  border-bottom: 1px solid #3a4e4e;
-}
-
-.cell-content {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: block;
-  line-height: 1.4;
-}
-
-
-
