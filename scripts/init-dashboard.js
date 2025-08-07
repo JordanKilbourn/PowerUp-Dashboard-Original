@@ -56,7 +56,7 @@ async function loadCI(){
     const sheet = await fetchSheet(SHEET_IDS.ciSubmissions);
     renderTable({
       sheet,
-      containerId:'#ci-table',
+      containerId:'ci-table',
       columnOrder:COLS.ci,
       checkmarkCols:['Resourced','Paid'],
       formatters:  FORMATTERS
@@ -70,7 +70,7 @@ async function loadSafety(){
     const sheet = await fetchSheet(SHEET_IDS.safetyConcerns);
     renderTable({
       sheet,
-      containerId:'#safety-table',
+      containerId:'safety-table',
       columnOrder:COLS.safety,
       formatters:  FORMATTERS
     });
@@ -83,7 +83,7 @@ async function loadQuality(){
     const sheet = await fetchSheet(SHEET_IDS.qualityCatches);
     renderTable({
       sheet,
-      containerId:'#quality-table',
+      containerId:'quality-table',
       columnOrder:COLS.quality,
       formatters:  FORMATTERS
     });
