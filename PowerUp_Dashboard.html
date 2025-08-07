@@ -148,7 +148,7 @@
     function showTab(id){
       document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
       document.querySelectorAll('.tab-button').forEach(b=>b.classList.remove('active'));
-      document.getElementById(tab-${id}).classList.add('active');
+      document.getElementById(`tab-${id}`).classList.add('active');
       event.target.classList.add('active');
       filterTable(id);
       if(currentSort.tabId===id)sortTable(id,currentSort.colIndex);
@@ -159,19 +159,19 @@
     let currentSort={tabId:null,colIndex:null,asc:true};
 
     function filterTable(t){
-      const rows=[...document.querySelectorAll(#${t}-table tbody tr)];
-      const filter=(document.getElementById(${t}-filter)||{}).value?.toLowerCase()||'all';
+      const rows=[...document.querySelectorAll(`#${t}-table tbody tr`)];
+      const filter=(document.getElementById(`${t}-filter`)||{}).value?.toLowerCase()||'all';
       let count=0;
       rows.forEach(r=>{
         const show=(filter==='all'||r.innerText.toLowerCase().includes(filter));
         r.style.display=show?'':'none';
         if(show)count++;
       });
-      document.getElementById(${t}-count).textContent=${count} submission${count!==1?'s':''};
+      document.getElementById(`${t}-count`).textContent=`${count} submission${count!==1?'s':''}`;
     }
 
     function sortTable(t,i){
-      const tbody=document.querySelector(#${t}-table tbody);
+      const tbody=document.querySelector(`#${t}-table tbody`);
       if(!tbody)return;
       const rows=[...tbody.rows].filter(r=>r.style.display!=='none');
       const numeric=rows.every(r=>!isNaN(r.cells[i].innerText.replace(/[^0-9.-]/g,'')));
