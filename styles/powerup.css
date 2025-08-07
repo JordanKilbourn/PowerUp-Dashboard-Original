@@ -757,8 +757,5 @@ body.notes .note-editor:empty:before {
   line-height: 1.4;
 }
 
-.dashboard-table * {
-  background-color: rgba(0, 255, 255, 0.05); /* Light cyan for visibility */
-}
 
 
