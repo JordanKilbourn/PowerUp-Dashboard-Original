@@ -29,7 +29,7 @@ const PILL_CLASS = {
 function pillify(txt){
   if(!txt) return '';
   const cls = PILL_CLASS[String(txt).trim().toLowerCase()];
-  return cls ? <span class="badge ${cls}">${txt}</span> : txt;
+  return cls ? `<span class="badge ${cls}">${txt}</span>` : txt;
 }
 
 /* Common formatter map for all three tables */
@@ -37,7 +37,7 @@ const FORMATTERS = { 'CI Approval': pillify, 'Status': pillify };
 
 /* ── Add sortable headers after renderTable() runs ────────────── */
 const attachSort = type => {
-  document.querySelectorAll(#${type}-table thead th)
+  document.querySelectorAll(`#${type}-table thead th`)
     .forEach((th,idx)=>{
       th.classList.add('sortable');
       th.onclick = () => sortTable(type,idx);   // uses inline helper in HTML
@@ -56,7 +56,7 @@ async function loadCI(){
     const sheet = await fetchSheet(SHEET_IDS.ciSubmissions);
     renderTable({
       sheet,
-      containerId:'ci-table',
+      containerId:'#ci-table',
       columnOrder:COLS.ci,
       checkmarkCols:['Resourced','Paid'],
       formatters:  FORMATTERS
@@ -70,7 +70,7 @@ async function loadSafety(){
     const sheet = await fetchSheet(SHEET_IDS.safetyConcerns);
     renderTable({
       sheet,
-      containerId:'safety-table',
+      containerId:'#safety-table',
       columnOrder:COLS.safety,
       formatters:  FORMATTERS
     });
@@ -83,7 +83,7 @@ async function loadQuality(){
     const sheet = await fetchSheet(SHEET_IDS.qualityCatches);
     renderTable({
       sheet,
-      containerId:'quality-table',
+      containerId:'#quality-table',
       columnOrder:COLS.quality,
       formatters:  FORMATTERS
     });
