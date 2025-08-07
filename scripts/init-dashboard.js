@@ -1,11 +1,11 @@
 // Dynamic loader for refreshed dashboard (CI / Safety / Quality)
 
-// ── Imports ───────────────────────────────────────────────────
-import { fetchSheet, SHEET_IDS } from './api.js';   // your existing proxy
-import { renderTable }           from './table.js'; // existing helper
-import './session.js';                            // provides initializeSession()
+/* ── Imports ─────────────────────────────────────────────────── */
+import { fetchSheet, SHEET_IDS } from './api.js';   // your proxy
+import { renderTable }           from './table.js'; // helper we just edited
+import './session.js';                              // provides initializeSession()
 
-// ── Column order config ───────────────────────────────────────
+/* ── Column order config ─────────────────────────────────────── */
 const COLS = {
   ci: [
     "Submission Date","Submission ID","Problem Statements","Proposed Improvement",
@@ -17,60 +17,76 @@ const COLS = {
   ],
   quality: [
     "Catch ID","Entry Date","Submitted By","Area",
-    "Quality Catch","Part Number","Description"
+    "Quality Catch","Part Number","Description","Status"
   ]
 };
 
-// helper to map column titles → columnId
-const colMap = sheet => Object.fromEntries(
-  sheet.columns.map(c=>[c.title.trim().toLowerCase(),c.id])
-);
-
-// cell helper
-const cell = (row,map,title) => {
-  const cId = map[title.toLowerCase()];
-  if(!cId) return '';
-  const c   = row.cells.find(k=>k.columnId===cId)||{};
-  return c.displayValue ?? c.value ?? '';
+/* ── Pill (badge) formatter ──────────────────────────────────── */
+const PILL_CLASS = {
+  approved:'approved', denied:'denied', rejected:'denied',
+  pending:'pending','in progress':'pending', completed:'completed'
 };
+function pillify(txt){
+  if(!txt) return '';
+  const cls = PILL_CLASS[String(txt).trim().toLowerCase()];
+  return cls ? `<span class="badge ${cls}">${txt}</span>` : txt;
+}
 
-// after renderTable, add sortable headers
+/* Common formatter map for all three tables */
+const FORMATTERS = { 'CI Approval': pillify, 'Status': pillify };
+
+/* ── Add sortable headers after renderTable() runs ────────────── */
 const attachSort = type => {
   document.querySelectorAll(`#${type}-table thead th`)
     .forEach((th,idx)=>{
       th.classList.add('sortable');
-      th.onclick = () => sortTable(type,idx);   // uses inline helper
+      th.onclick = () => sortTable(type,idx);   // uses inline helper in HTML
     });
 };
 
-// ── Page bootstrap ────────────────────────────────────────────
+/* ── Page bootstrap ──────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded',()=>{
-  if(typeof initializeSession==='function')initializeSession();  // guard + username
+  if(typeof initializeSession==='function') initializeSession();
   loadCI(); loadSafety(); loadQuality();
 });
 
-// ── Loaders ───────────────────────────────────────────────────
+/* ── Loaders ─────────────────────────────────────────────────── */
 async function loadCI(){
   try{
-    const sheet=await fetchSheet(SHEET_IDS.ciSubmissions);
-    renderTable({ sheet, containerId:'ci-table', columnOrder:COLS.ci,
-                  checkmarkCols:['Resourced','Paid'] });
+    const sheet = await fetchSheet(SHEET_IDS.ciSubmissions);
+    renderTable({
+      sheet,
+      containerId:'#ci-table',
+      columnOrder:COLS.ci,
+      checkmarkCols:['Resourced','Paid'],
+      formatters:  FORMATTERS
+    });
     filterTable('ci'); attachSort('ci');
   }catch(e){console.error('CI load',e);}
 }
 
 async function loadSafety(){
   try{
-    const sheet=await fetchSheet(SHEET_IDS.safetyConcerns);
-    renderTable({ sheet, containerId:'safety-table', columnOrder:COLS.safety });
+    const sheet = await fetchSheet(SHEET_IDS.safetyConcerns);
+    renderTable({
+      sheet,
+      containerId:'#safety-table',
+      columnOrder:COLS.safety,
+      formatters:  FORMATTERS
+    });
     filterTable('safety'); attachSort('safety');
   }catch(e){console.error('Safety load',e);}
 }
 
 async function loadQuality(){
   try{
-    const sheet=await fetchSheet(SHEET_IDS.qualityCatches);
-    renderTable({ sheet, containerId:'quality-table', columnOrder:COLS.quality });
+    const sheet = await fetchSheet(SHEET_IDS.qualityCatches);
+    renderTable({
+      sheet,
+      containerId:'#quality-table',
+      columnOrder:COLS.quality,
+      formatters:  FORMATTERS
+    });
     filterTable('quality'); attachSort('quality');
   }catch(e){console.error('Quality load',e);}
 }
