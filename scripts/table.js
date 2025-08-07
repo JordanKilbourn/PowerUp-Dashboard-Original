@@ -66,10 +66,9 @@ export function renderTable({
         .filter(c => !c.hidden && !excludeCols.includes(c.title.trim()))
         .map(c => c.title);
 
-  let html = `<div class="table-scroll"><table class="dashboard-table">
-    <thead><tr>`;
+  let html = `<table class="dashboard-table"><thead><tr>`;
 
-  // Headers (no width/alignment classes)
+  // Headers
   visibleCols.forEach(c => {
     const norm = c.trim().toLowerCase();
     const label = colHeaderMap[norm] || c;
@@ -129,6 +128,6 @@ export function renderTable({
     html += `</tr>`;
   });
 
-  html += `</tbody></table></div>`;
+  html += `</tbody></table>`;
   container.innerHTML = html;
 }
