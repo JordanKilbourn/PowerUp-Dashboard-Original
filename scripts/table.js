@@ -1,5 +1,3 @@
-// /scripts/table.js  (original logic + updated pill classes)
-
 export function renderTable({
   sheet,
   containerId,
@@ -13,13 +11,11 @@ export function renderTable({
   const container = document.getElementById(containerId);
   if (!sheet || !container) return;
 
-  /* ---- column id map ---- */
   const colMap = {};
   sheet.columns.forEach(c => {
     colMap[c.title.trim().toLowerCase()] = c.id;
   });
 
-  /* ---- helper to read / format a cell ---- */
   const get = (row, title) => {
     const colId = colMap[title.toLowerCase()];
     const cell = row.cells.find(c => c.columnId === colId);
@@ -31,7 +27,6 @@ export function renderTable({
     return value;
   };
 
-  /* ---- optional employee filter ---- */
   let rows = sheet.rows;
   if (filterByEmpID) {
     rows = rows.filter(r => {
@@ -40,7 +35,6 @@ export function renderTable({
     });
   }
 
-  /* ---- empty-state ---- */
   if (rows.length === 0) {
     container.innerHTML = `
       <h2>${title}</h2>
@@ -50,7 +44,6 @@ export function renderTable({
     return;
   }
 
-  /* ---- header label overrides ---- */
   const colHeaderMap = {
     "submission date": "Date",
     "submission id": "ID",
@@ -67,71 +60,55 @@ export function renderTable({
     "paid": "Paid"
   };
 
-  /* ---- width / alignment helpers ---- */
-  const narrowCols   = ["submission date","submission id","token payout","resourced","resourced date","action item entry date","paid"];
-  const mediumCols   = ["status","assigned to (primary)","ci approval"];
-  const wideCols     = ["problem statements","proposed improvement","last meeting action item's"];
-  const centeredCols = [...narrowCols];
-
-  /* ---- choose visible columns ---- */
   const visibleCols = columnOrder
     ? columnOrder.filter(c => !excludeCols.includes(c))
     : sheet.columns
         .filter(c => !c.hidden && !excludeCols.includes(c.title.trim()))
         .map(c => c.title);
 
-  /* ======== BUILD HTML ======== */
-  let html = `<div class="table-scroll"><table class="dashboard-table">`
+  let html = `<div class="table-scroll"><table class="dashboard-table">
     <thead><tr>`;
 
-  /* headers */
+  // Headers (no width/alignment classes)
   visibleCols.forEach(c => {
     const norm = c.trim().toLowerCase();
     const label = colHeaderMap[norm] || c;
-
-    let widthClass = '';
-    if (narrowCols.includes(norm))      widthClass = 'col-narrow';
-    else if (mediumCols.includes(norm)) widthClass = 'col-medium';
-    else if (wideCols.includes(norm))   widthClass = 'col-wide';
-
-    const centered = centeredCols.includes(norm) ? 'centered' : '';
-    html += `<th class="${widthClass} ${centered}" data-col="${norm}">${label}</th>`;
+    html += `<th data-col="${norm}">${label}</th>`;
   });
 
   html += `</tr></thead><tbody class="dashboard-table-body">`;
 
-  /* rows */
+  // Rows
   rows.forEach(r => {
     html += `<tr>`;
     visibleCols.forEach(title => {
-      const val  = get(r, title);
+      const val = get(r, title);
       const norm = title.trim().toLowerCase();
       const isCheck = checkmarkCols.map(c => c.toLowerCase()).includes(norm);
 
       let content = val;
 
-      /* ✓ / ✗ for checkmark columns */
+      // Checkmarks
       if (isCheck) {
-        if (val === true || val === '✓')         content = `<span class="checkmark">&#10003;</span>`;
-        else if (val === false || val === '✗' || val === 'X')
-                                                content = `<span class="cross">&#10007;</span>`;
+        if (val === true || val === '✓') content = `<span class="checkmark">&#10003;</span>`;
+        else if (val === false || val === '✗' || val === 'X') content = `<span class="cross">&#10007;</span>`;
       }
 
-      /* ---------- updated pill logic ---------- */
+      // Pill badge logic
       if (norm === "status") {
         const cls = ({
-          "completed"       : "completed",
-          "done"            : "completed",
-          "open"            : "pending",
+          "completed": "completed",
+          "done": "completed",
+          "open": "pending",
           "needs researched": "pending",
-          "needs review"    : "pending",
-          "in progress"     : "pending",
-          "pending"         : "pending",
-          "not started"     : "pending",
+          "needs review": "pending",
+          "in progress": "pending",
+          "pending": "pending",
+          "not started": "pending",
           "denied/cancelled": "denied",
-          "cancelled"       : "denied",
-          "denied"          : "denied",
-          "approved"        : "approved"
+          "cancelled": "denied",
+          "denied": "denied",
+          "approved": "approved"
         }[val.toLowerCase()] || null);
         if (cls) content = `<span class="badge ${cls}">${val}</span>`;
       }
@@ -139,21 +116,13 @@ export function renderTable({
       if (norm === "ci approval") {
         const cls = ({
           "approved": "approved",
-          "pending" : "pending",
-          "denied"  : "denied"
+          "pending": "pending",
+          "denied": "denied"
         }[val.toLowerCase()] || null);
         if (cls) content = `<span class="badge ${cls}">${val}</span>`;
       }
-      /* ---------------------------------------- */
 
-      let widthClass = '';
-      if (narrowCols.includes(norm))      widthClass = 'col-narrow';
-      else if (mediumCols.includes(norm)) widthClass = 'col-medium';
-      else if (wideCols.includes(norm))   widthClass = 'col-wide';
-
-      const centered = centeredCols.includes(norm) ? 'centered' : '';
-
-      html += `<td class="${widthClass} ${centered}" data-col="${norm}" title="${val}">
+      html += `<td data-col="${norm}" title="${val}">
                 <div class="cell-content">${content}</div>
                </td>`;
     });
