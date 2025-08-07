@@ -6,7 +6,8 @@
 
   <!-- Fonts / Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
   <!-- Styles -->
   <link rel="stylesheet" href="/styles/powerup.css" />
@@ -86,7 +87,10 @@
             <span id="ci-count" class="row-count">0 submissions</span>
           </div>
         </div>
-        <table id="ci-table"></table>
+
+        <div class="table-scroll">
+          <table id="ci-table"></table>
+        </div>
       </div>
 
       <!-- ── Safety Tab ────────────────────────────────────────── -->
@@ -104,7 +108,10 @@
             <span id="safety-count" class="row-count">0 submissions</span>
           </div>
         </div>
-        <table id="safety-table"></table>
+
+        <div class="table-scroll">
+          <table id="safety-table"></table>
+        </div>
       </div>
 
       <!-- ── Quality Catches Tab ───────────────────────────────── -->
@@ -121,7 +128,10 @@
             <span id="quality-count" class="row-count">0 submissions</span>
           </div>
         </div>
-        <table id="quality-table"></table>
+
+        <div class="table-scroll">
+          <table id="quality-table"></table>
+        </div>
       </div>
 
     </div><!-- /main -->
@@ -129,36 +139,39 @@
 
   <!-- ── Inline helpers ───────────────────────────────────────── -->
   <script>
+    /* Sidebar toggle */
     function toggleSidebar(){
       document.getElementById('sidebar').classList.toggle('expanded');
     }
 
+    /* Tab switching */
     function showTab(id){
       document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
       document.querySelectorAll('.tab-button').forEach(b=>b.classList.remove('active'));
-      document.getElementById(`tab-${id}`).classList.add('active');
+      document.getElementById(tab-${id}).classList.add('active');
       event.target.classList.add('active');
       filterTable(id);
       if(currentSort.tabId===id)sortTable(id,currentSort.colIndex);
     }
 
-    const visibleCount={ci:Infinity,safety:Infinity,quality:Infinity};
+    /* Filtering & sorting */
+    const visibleCount={ci:Infinity,safety:Infinity,quality:Infinity}; // show every row
     let currentSort={tabId:null,colIndex:null,asc:true};
 
     function filterTable(t){
-      const rows=[...document.querySelectorAll(`#${t}-table tbody tr`)];
-      const filter=(document.getElementById(`${t}-filter`)||{}).value?.toLowerCase()||'all';
+      const rows=[...document.querySelectorAll(#${t}-table tbody tr)];
+      const filter=(document.getElementById(${t}-filter)||{}).value?.toLowerCase()||'all';
       let count=0;
       rows.forEach(r=>{
         const show=(filter==='all'||r.innerText.toLowerCase().includes(filter));
         r.style.display=show?'':'none';
         if(show)count++;
       });
-      document.getElementById(`${t}-count`).textContent=`${count} submission${count!==1?'s':''}`;
+      document.getElementById(${t}-count).textContent=${count} submission${count!==1?'s':''};
     }
 
     function sortTable(t,i){
-      const tbody=document.querySelector(`#${t}-table tbody`);
+      const tbody=document.querySelector(#${t}-table tbody);
       if(!tbody)return;
       const rows=[...tbody.rows].filter(r=>r.style.display!=='none');
       const numeric=rows.every(r=>!isNaN(r.cells[i].innerText.replace(/[^0-9.-]/g,'')));
