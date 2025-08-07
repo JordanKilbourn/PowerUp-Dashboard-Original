@@ -353,7 +353,6 @@ body.power-hours .progress-bar-inner {
 }
 .table-scroll table {
   width: 100%;
-  table-layout: fixed;
   border-collapse: collapse;
 }
 .table-scroll th, .table-scroll td {
@@ -716,21 +715,4 @@ body.notes .note-editor:empty:before {
 
 .delete-icon:hover {
   opacity: 1;
-}
-
-
-/* ───────── Dashboard table: single-line cells like desktop mock-up ───────── */
-
-/* 1) Default: every cell shows a single line with … if it overflows  */
-.table-scroll td .cell-content,
-.table-scroll th .cell-content{
-  white-space: nowrap;      /* keep on one line   */
-  overflow: hidden;         /* clip extra text    */
-  text-overflow: ellipsis;  /* add …             */
-  line-height: 1.25;        /* rows a bit tighter */
-}
-/* 3) Slightly reduce padding so rows match desktop height           */
-.table-scroll th,
-.table-scroll td{
-  padding: 6px 10px;        /* was 10px  all around */
 }
