@@ -353,6 +353,7 @@ body.power-hours .progress-bar-inner {
 }
 .table-scroll table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
 }
 .table-scroll th, .table-scroll td {
