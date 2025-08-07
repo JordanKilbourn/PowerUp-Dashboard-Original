@@ -81,7 +81,7 @@ export function renderTable({
         .map(c => c.title);
 
   /* ======== BUILD HTML ======== */
-  let html = `<div class="dashboard-table-container"><table class="dashboard-table">
+  let html = `<div class="table-scroll"><table class="dashboard-table">`
     <thead><tr>`;
 
   /* headers */
