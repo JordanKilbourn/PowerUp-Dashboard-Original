@@ -728,15 +728,6 @@ body.notes .note-editor:empty:before {
   text-overflow: ellipsis;  /* add …             */
   line-height: 1.25;        /* rows a bit tighter */
 }
-
-/* 2) EXCEPTION: allow wrapping in the two long-text columns         */
-.table-scroll td[data-col="problem"]   .cell-content,
-.table-scroll td[data-col="proposed improvement"] .cell-content,
-.table-scroll th[data-col="problem"]   .cell-content,
-.table-scroll th[data-col="proposed improvement"] .cell-content{
-  white-space: normal;      /* wrap naturally */
-}
-
 /* 3) Slightly reduce padding so rows match desktop height           */
 .table-scroll th,
 .table-scroll td{
