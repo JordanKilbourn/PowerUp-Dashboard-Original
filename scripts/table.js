@@ -105,25 +105,32 @@ export function renderTable({
         }
       }
 
-      if (normalizedCol === "status") {
-        const badgeClass = {
-          "not started": "badge-gray",
-          "open": "badge-blue",
-          "needs researched": "badge-yellow",
-          "completed": "badge-green",
-          "denied/cancelled": "badge-red"
-        }[String(val).toLowerCase()] || "badge-default";
-        content = `<span class="badge ${badgeClass}">${val}</span>`;
-      }
+if (normalizedCol === "status") {
+  const cls = ({
+    'completed': 'completed',
+    'done': 'completed',
+    'denied/cancelled': 'denied',
+    'cancelled': 'denied',
+    'needs researched': 'pending',
+    'needs research': 'pending',
+    'needs review': 'pending',
+    'in progress': 'pending',
+    'open': 'pending',
+    'not started': 'pending'
+  }[String(val).toLowerCase()] || 'pending');
+  content = `<span class="badge ${cls}">${val}</span>`;
+}
 
-      if (normalizedCol === "ci approval") {
-        const badgeClass = {
-          "approved": "badge-green",
-          "pending": "badge-yellow",
-          "denied": "badge-red"
-        }[String(val).toLowerCase()] || "badge-default";
-        content = `<span class="badge ${badgeClass}">${val}</span>`;
-      }
+if (normalizedCol === "ci approval") {
+  const cls = ({
+    'approved': 'approved',
+    'pending': 'pending',
+    'denied': 'denied',
+    'rejected': 'denied'
+  }[String(val).toLowerCase()] || 'pending');
+  content = `<span class="badge ${cls}">${val}</span>`;
+}
+
 
       let widthClass = '';
       if (narrowCols.includes(normalizedCol)) widthClass = 'col-narrow';
