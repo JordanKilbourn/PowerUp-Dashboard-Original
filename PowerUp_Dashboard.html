@@ -18,7 +18,7 @@
 
     <!-- ── Sidebar ─────────────────────────────────────────────── -->
     <div class="sidebar" id="sidebar">
-      <div class="item" onclick="toggleSidebar()">
+      <div class="item" id="sidebar-toggle">
         <i class="fas fa-bars"></i><span>Menu</span>
       </div>
       <div class="item active" onclick="location.href='PowerUp_Dashboard.html'">
@@ -139,6 +139,17 @@
 
  <!-- ── Inline helpers ───────────────────────────────────────── -->
 <script>
+  // Make the toggle work without relying on inline onclick
+  document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('sidebar-toggle');
+    const bar = document.getElementById('sidebar');
+    if (btn && bar) {
+      btn.addEventListener('click', () => {
+        bar.classList.toggle('expanded');
+      });
+    }
+  });
+  
   /* Sidebar toggle — make it global so inline onclick can reach it */
   window.toggleSidebar = function () {
     document.getElementById('sidebar').classList.toggle('expanded');
@@ -200,4 +211,5 @@
   <script type="module" src="/scripts/init-dashboard.js"></script>
 </body>
 </html>
+
 
