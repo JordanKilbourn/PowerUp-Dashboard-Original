@@ -137,56 +137,67 @@
     </div><!-- /main -->
   </div><!-- /container -->
 
-  <!-- ── Inline helpers ───────────────────────────────────────── -->
-  <script>
-    /* Sidebar toggle */
-    function toggleSidebar(){
-      document.getElementById('sidebar').classList.toggle('expanded');
-    }
+ <!-- ── Inline helpers ───────────────────────────────────────── -->
+<script>
+  /* Sidebar toggle — make it global so inline onclick can reach it */
+  window.toggleSidebar = function () {
+    document.getElementById('sidebar').classList.toggle('expanded');
+  };
 
-    /* Tab switching */
-    function showTab(id){
-      document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-      document.querySelectorAll('.tab-button').forEach(b=>b.classList.remove('active'));
-      document.getElementById(`tab-${id}`).classList.add('active');
-      event.target.classList.add('active');
-      filterTable(id);
-      if(currentSort.tabId===id)sortTable(id,currentSort.colIndex);
-    }
+  /* Tab switching — also global; works even if `event` is undefined */
+  window.showTab = function (id) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
 
-    /* Filtering & sorting */
-    const visibleCount={ci:Infinity,safety:Infinity,quality:Infinity}; // show every row
-    let currentSort={tabId:null,colIndex:null,asc:true};
+    document.getElementById(`tab-${id}`)?.classList.add('active');
 
-    function filterTable(t){
-      const rows=[...document.querySelectorAll(`#${t}-table tbody tr`)];
-      const filter=(document.getElementById(`${t}-filter`)||{}).value?.toLowerCase()||'all';
-      let count=0;
-      rows.forEach(r=>{
-        const show=(filter==='all'||r.innerText.toLowerCase().includes(filter));
-        r.style.display=show?'':'none';
-        if(show)count++;
-      });
-      document.getElementById(`${t}-count`).textContent=`${count} submission${count!==1?'s':''}`;
-    }
+    // Make the clicked button active (fallback if `event` isn't available)
+    const btn =
+      (window.event && window.event.currentTarget) ||
+      document.querySelector(`.tab-buttons .tab-button[onclick*="'${id}'"]`);
+    if (btn) btn.classList.add('active');
 
-    function sortTable(t,i){
-      const tbody=document.querySelector(`#${t}-table tbody`);
-      if(!tbody)return;
-      const rows=[...tbody.rows].filter(r=>r.style.display!=='none');
-      const numeric=rows.every(r=>!isNaN(r.cells[i].innerText.replace(/[^0-9.-]/g,'')));
-      const asc=(currentSort.tabId===t&&currentSort.colIndex===i)?!currentSort.asc:true;
-      rows.sort((a,b)=>{
-        const A=numeric?parseFloat(a.cells[i].innerText):a.cells[i].innerText;
-        const B=numeric?parseFloat(b.cells[i].innerText):b.cells[i].innerText;
-        return asc?(A>B?1:-1):(A<B?1:-1);
-      }).forEach(r=>tbody.appendChild(r));
-      currentSort={tabId:t,colIndex:i,asc};
-      filterTable(t);
-    }
-  </script>
+    filterTable(id);
+    if (currentSort.tabId === id) sortTable(id, currentSort.colIndex);
+  };
+
+  /* Filtering & sorting (keep these global for inline calls) */
+  const visibleCount = { ci: Infinity, safety: Infinity, quality: Infinity }; // show every row
+  let currentSort = { tabId: null, colIndex: null, asc: true };
+
+  window.filterTable = function (t) {
+    const rows = [...document.querySelectorAll(`#${t}-table tbody tr`)];
+    const filter = (document.getElementById(`${t}-filter`) || {}).value?.toLowerCase() || 'all';
+    let count = 0;
+    rows.forEach(r => {
+      const show = (filter === 'all' || r.innerText.toLowerCase().includes(filter));
+      r.style.display = show ? '' : 'none';
+      if (show) count++;
+    });
+    const counter = document.getElementById(`${t}-count`);
+    if (counter) counter.textContent = `${count} submission${count !== 1 ? 's' : ''}`;
+  };
+
+  window.sortTable = function (t, i) {
+    const tbody = document.querySelector(`#${t}-table tbody`);
+    if (!tbody) return;
+    const rows = [...tbody.rows].filter(r => r.style.display !== 'none');
+    const numeric = rows.every(r => !isNaN(r.cells[i].innerText.replace(/[^0-9.-]/g, '')));
+    const asc = (currentSort.tabId === t && currentSort.colIndex === i) ? !currentSort.asc : true;
+
+    rows.sort((a, b) => {
+      const A = numeric ? parseFloat(a.cells[i].innerText) : a.cells[i].innerText;
+      const B = numeric ? parseFloat(b.cells[i].innerText) : b.cells[i].innerText;
+      return asc ? (A > B ? 1 : -1) : (A < B ? 1 : -1);
+    }).forEach(r => tbody.appendChild(r));
+
+    currentSort = { tabId: t, colIndex: i, asc };
+    filterTable(t);
+  };
+</script>
 
   <!-- Module loader -->
   <script type="module" src="/scripts/init-dashboard.js"></script>
 </body>
 </html>
+
