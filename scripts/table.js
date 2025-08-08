@@ -1,4 +1,4 @@
-// /scripts/table.js  (original logic + updated pill classes)
+// /scripts/table.js
 
 export function renderTable({
   sheet,
@@ -13,13 +13,11 @@ export function renderTable({
   const container = document.getElementById(containerId);
   if (!sheet || !container) return;
 
-  /* ---- column id map ---- */
   const colMap = {};
   sheet.columns.forEach(c => {
     colMap[c.title.trim().toLowerCase()] = c.id;
   });
 
-  /* ---- helper to read / format a cell ---- */
   const get = (row, title) => {
     const colId = colMap[title.toLowerCase()];
     const cell = row.cells.find(c => c.columnId === colId);
@@ -31,7 +29,6 @@ export function renderTable({
     return value;
   };
 
-  /* ---- optional employee filter ---- */
   let rows = sheet.rows;
   if (filterByEmpID) {
     rows = rows.filter(r => {
@@ -40,7 +37,6 @@ export function renderTable({
     });
   }
 
-  /* ---- empty-state ---- */
   if (rows.length === 0) {
     container.innerHTML = `
       <h2>${title}</h2>
@@ -50,7 +46,6 @@ export function renderTable({
     return;
   }
 
-  /* ---- header label overrides ---- */
   const colHeaderMap = {
     "submission date": "Date",
     "submission id": "ID",
@@ -67,95 +62,79 @@ export function renderTable({
     "paid": "Paid"
   };
 
-  /* ---- width / alignment helpers ---- */
-  const narrowCols   = ["submission date","submission id","token payout","resourced","resourced date","action item entry date","paid"];
-  const mediumCols   = ["status","assigned to (primary)","ci approval"];
-  const wideCols     = ["problem statements","proposed improvement","last meeting action item's"];
+  const narrowCols = ["submission date", "submission id", "token payout", "resourced", "resourced date", "action item entry date", "paid"];
+  const mediumCols = ["status", "assigned to (primary)", "ci approval"];
+  const wideCols = ["problem statements", "proposed improvement", "last meeting action item's"];
   const centeredCols = [...narrowCols];
 
-  /* ---- choose visible columns ---- */
   const visibleCols = columnOrder
     ? columnOrder.filter(c => !excludeCols.includes(c))
-    : sheet.columns
-        .filter(c => !c.hidden && !excludeCols.includes(c.title.trim()))
-        .map(c => c.title);
+    : sheet.columns.filter(c =>
+        !c.hidden && !excludeCols.includes(c.title.trim())
+      ).map(c => c.title);
 
-  /* ======== BUILD HTML ======== */
   let html = `<div class="dashboard-table-container"><table class="dashboard-table">
     <thead><tr>`;
-
-  /* headers */
   visibleCols.forEach(c => {
-    const norm = c.trim().toLowerCase();
-    const label = colHeaderMap[norm] || c;
+    const normalizedCol = c.trim().toLowerCase();
+    const label = colHeaderMap[normalizedCol] || c;
 
     let widthClass = '';
-    if (narrowCols.includes(norm))      widthClass = 'col-narrow';
-    else if (mediumCols.includes(norm)) widthClass = 'col-medium';
-    else if (wideCols.includes(norm))   widthClass = 'col-wide';
+    if (narrowCols.includes(normalizedCol)) widthClass = 'col-narrow';
+    else if (mediumCols.includes(normalizedCol)) widthClass = 'col-medium';
+    else if (wideCols.includes(normalizedCol)) widthClass = 'col-wide';
 
-    const centered = centeredCols.includes(norm) ? 'centered' : '';
-    html += `<th class="${widthClass} ${centered}" data-col="${norm}">${label}</th>`;
+    const centered = centeredCols.includes(normalizedCol) ? 'centered' : '';
+    html += `<th class="${widthClass} ${centered}" data-col="${normalizedCol}">${label}</th>`;
   });
-
   html += `</tr></thead><tbody class="dashboard-table-body">`;
 
-  /* rows */
   rows.forEach(r => {
     html += `<tr>`;
     visibleCols.forEach(title => {
-      const val  = get(r, title);
-      const norm = title.trim().toLowerCase();
-      const isCheck = checkmarkCols.map(c => c.toLowerCase()).includes(norm);
+      const val = get(r, title);
+      const normalizedCol = title.trim().toLowerCase();
+      const isCheck = checkmarkCols.map(c => c.toLowerCase()).includes(normalizedCol);
 
       let content = val;
-
-      /* ✓ / ✗ for checkmark columns */
       if (isCheck) {
-        if (val === true || val === '✓')         content = `<span class="checkmark">&#10003;</span>`;
-        else if (val === false || val === '✗' || val === 'X')
-                                                content = `<span class="cross">&#10007;</span>`;
+        if (val === true || val === '✓') {
+          content = `<span class="checkmark">&#10003;</span>`;
+        } else if (val === false || val === '✗' || val === 'X') {
+          content = `<span class="cross">&#10007;</span>`;
+        }
       }
 
-      /* ---------- updated pill logic ---------- */
-      if (norm === "status") {
-        const cls = ({
-          "completed"       : "completed",
-          "done"            : "completed",
-          "open"            : "pending",
-          "needs researched": "pending",
-          "needs review"    : "pending",
-          "in progress"     : "pending",
-          "pending"         : "pending",
-          "not started"     : "pending",
-          "denied/cancelled": "denied",
-          "cancelled"       : "denied",
-          "denied"          : "denied",
-          "approved"        : "approved"
-        }[val.toLowerCase()] || null);
-        if (cls) content = `<span class="badge ${cls}">${val}</span>`;
+      if (normalizedCol === "status") {
+        const badgeClass = {
+          "not started": "badge-gray",
+          "open": "badge-blue",
+          "needs researched": "badge-yellow",
+          "completed": "badge-green",
+          "denied/cancelled": "badge-red"
+        }[String(val).toLowerCase()] || "badge-default";
+        content = `<span class="badge ${badgeClass}">${val}</span>`;
       }
 
-      if (norm === "ci approval") {
-        const cls = ({
-          "approved": "approved",
-          "pending" : "pending",
-          "denied"  : "denied"
-        }[val.toLowerCase()] || null);
-        if (cls) content = `<span class="badge ${cls}">${val}</span>`;
+      if (normalizedCol === "ci approval") {
+        const badgeClass = {
+          "approved": "badge-green",
+          "pending": "badge-yellow",
+          "denied": "badge-red"
+        }[String(val).toLowerCase()] || "badge-default";
+        content = `<span class="badge ${badgeClass}">${val}</span>`;
       }
-      /* ---------------------------------------- */
 
       let widthClass = '';
-      if (narrowCols.includes(norm))      widthClass = 'col-narrow';
-      else if (mediumCols.includes(norm)) widthClass = 'col-medium';
-      else if (wideCols.includes(norm))   widthClass = 'col-wide';
+      if (narrowCols.includes(normalizedCol)) widthClass = 'col-narrow';
+      else if (mediumCols.includes(normalizedCol)) widthClass = 'col-medium';
+      else if (wideCols.includes(normalizedCol)) widthClass = 'col-wide';
 
-      const centered = centeredCols.includes(norm) ? 'centered' : '';
+      const centered = centeredCols.includes(normalizedCol) ? 'centered' : '';
 
-      html += `<td class="${widthClass} ${centered}" data-col="${norm}" title="${val}">
-                <div class="cell-content">${content}</div>
-               </td>`;
+      html += `<td class="${widthClass} ${centered}" data-col="${normalizedCol}" title="${val}">
+        <div class="cell-content">${content}</div>
+      </td>`;
     });
     html += `</tr>`;
   });
