@@ -8,10 +8,19 @@ import './session.js';                              // provides initializeSessio
 /* ── Column order config ─────────────────────────────────────── */
 const COLS = {
   ci: [
-    "Submission Date","Submission ID","Problem Statements","Proposed Improvement",
-    "CI Approval","Status","Action Item Entry Date","Last Meeting Action Item's",
-    "Token Payout","Resourced","Paid"
+    "Submission Date",
+    "Submission ID",
+    "Problem Statements",
+    "Proposed Improvement",
+    "CI Approval",
+    "Assigned To (Primary)",   // <— new column (will label as “Assigned To”)
+    "Status",
+    "Action Item Entry Date",
+    "Last Meeting Action Item's",
+    "Token Payout",
+    "Paid"
   ],
+
   safety: [
     "Submit Date","Facility","Description","Resolution","Status"
   ],
@@ -58,7 +67,7 @@ async function loadCI(){
       sheet,
       containerId: 'ci-table',      // ← IMPORTANT: id only (no #)
       columnOrder:  COLS.ci,
-      checkmarkCols:['Resourced','Paid']
+      checkmarkCols:['Paid']
       // 'Status' / 'CI Approval' pills are handled in table.js as well
     });
     attachSort('ci'); filterTable('ci');
