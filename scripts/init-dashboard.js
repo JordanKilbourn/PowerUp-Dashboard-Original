@@ -2,7 +2,7 @@
 
 /* ── Imports ─────────────────────────────────────────────────── */
 import { fetchSheet, SHEET_IDS } from './api.js';   // your proxy
-import { renderTable }           from './table.js'; // helper we just edited
+import { renderTable }           from './table.js'; // renderer
 import './session.js';                              // provides initializeSession()
 
 /* ── Column order config ─────────────────────────────────────── */
@@ -56,12 +56,12 @@ async function loadCI(){
     const sheet = await fetchSheet(SHEET_IDS.ciSubmissions);
     renderTable({
       sheet,
-      containerId:'#ci-table',
-      columnOrder:COLS.ci,
-      checkmarkCols:['Resourced','Paid'],
-      formatters:  FORMATTERS
+      containerId: 'ci-table',      // ← IMPORTANT: id only (no #)
+      columnOrder:  COLS.ci,
+      checkmarkCols:['Resourced','Paid']
+      // 'Status' / 'CI Approval' pills are handled in table.js as well
     });
-    filterTable('ci'); attachSort('ci');
+    attachSort('ci'); filterTable('ci');
   }catch(e){console.error('CI load',e);}
 }
 
@@ -70,11 +70,10 @@ async function loadSafety(){
     const sheet = await fetchSheet(SHEET_IDS.safetyConcerns);
     renderTable({
       sheet,
-      containerId:'#safety-table',
-      columnOrder:COLS.safety,
-      formatters:  FORMATTERS
+      containerId: 'safety-table',
+      columnOrder:  COLS.safety
     });
-    filterTable('safety'); attachSort('safety');
+    attachSort('safety'); filterTable('safety');
   }catch(e){console.error('Safety load',e);}
 }
 
@@ -83,10 +82,9 @@ async function loadQuality(){
     const sheet = await fetchSheet(SHEET_IDS.qualityCatches);
     renderTable({
       sheet,
-      containerId:'#quality-table',
-      columnOrder:COLS.quality,
-      formatters:  FORMATTERS
+      containerId: 'quality-table',
+      columnOrder:  COLS.quality
     });
-    filterTable('quality'); attachSort('quality');
+    attachSort('quality'); filterTable('quality');
   }catch(e){console.error('Quality load',e);}
 }
