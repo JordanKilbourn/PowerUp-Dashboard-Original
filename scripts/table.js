@@ -47,6 +47,7 @@ export function renderTable({
   }
 
   const colHeaderMap = {
+    // ---- CI (existing) ----
     "submission date": "Date",
     "submission id": "ID",
     "problem statements": "Problem",
@@ -59,7 +60,20 @@ export function renderTable({
     "token payout": "Tokens",
     "resourced": "Resourced",
     "resourced date": "Resourced On",
-    "paid": "Paid"
+    "paid": "Paid",
+
+    // ---- SAFETY (NEW labels) ----
+    "date": "Date",
+    "facility": "Facility",
+    "department/area": "Department/Area",
+    "safety concern": "Safety Concern",
+    "describe the safety concern": "Description",
+    "recommendations to correct/improve safety issue": "Recommendations",
+    "resolution": "Resolution",
+    "maintenance work order number or type na if no w/o": "Work Order",
+    "who was the safety concern escalated to": "Escalated To",
+    "did you personally speak to the leadership": "Spoke to Leadership",
+    "leadership update": "Leadership Update"
   };
 
   const narrowCols = ["submission date", "submission id", "token payout", "action item entry date", "paid"];
@@ -69,9 +83,9 @@ export function renderTable({
 
   const visibleCols = columnOrder
     ? columnOrder.filter(c => !excludeCols.includes(c))
-    : sheet.columns.filter(c =>
-        !c.hidden && !excludeCols.includes(c.title.trim())
-      ).map(c => c.title);
+    : sheet.columns
+        .filter(c => !c.hidden && !excludeCols.includes(c.title.trim()))
+        .map(c => c.title);
 
   let html = `<div class="dashboard-table-container"><table class="dashboard-table">
     <thead><tr>`;
@@ -98,39 +112,39 @@ export function renderTable({
 
       let content = val;
       if (isCheck) {
-        if (val === true || val === '✓') {
+        if (val === true || val === '✓' || String(val).toLowerCase() === 'y' || String(val).toLowerCase() === 'yes') {
           content = `<span class="checkmark">&#10003;</span>`;
-        } else if (val === false || val === '✗' || val === 'X') {
+        } else if (val === false || val === '✗' || val === 'X' || String(val).toLowerCase() === 'n' || String(val).toLowerCase() === 'no') {
           content = `<span class="cross">&#10007;</span>`;
         }
       }
 
-if (normalizedCol === "status") {
-  const cls = ({
-    'completed': 'completed',
-    'done': 'completed',
-    'denied/cancelled': 'denied',
-    'cancelled': 'denied',
-    'needs researched': 'pending',
-    'needs research': 'pending',
-    'needs review': 'pending',
-    'in progress': 'pending',
-    'open': 'pending',
-    'not started': 'pending'
-  }[String(val).toLowerCase()] || 'pending');
-  content = `<span class="badge ${cls}">${val}</span>`;
-}
+      if (normalizedCol === "status") {
+        const cls = ({
+          'completed': 'completed',
+          'done': 'completed',
+          'denied/cancelled': 'denied',
+          'cancelled': 'denied',
+          'accepted safety concern': 'pending',   // keep yellow (change to 'approved' if you want green)
+          'needs researched': 'pending',
+          'needs research': 'pending',
+          'needs review': 'pending',
+          'in progress': 'pending',
+          'open': 'pending',
+          'not started': 'pending'
+        }[String(val).toLowerCase()] || 'pending');
+        content = `<span class="badge ${cls}">${val}</span>`;
+      }
 
-if (normalizedCol === "ci approval") {
-  const cls = ({
-    'approved': 'approved',
-    'pending': 'pending',
-    'denied': 'denied',
-    'rejected': 'denied'
-  }[String(val).toLowerCase()] || 'pending');
-  content = `<span class="badge ${cls}">${val}</span>`;
-}
-
+      if (normalizedCol === "ci approval") {
+        const cls = ({
+          'approved': 'approved',
+          'pending': 'pending',
+          'denied': 'denied',
+          'rejected': 'denied'
+        }[String(val).toLowerCase()] || 'pending');
+        content = `<span class="badge ${cls}">${val}</span>`;
+      }
 
       let widthClass = '';
       if (narrowCols.includes(normalizedCol)) widthClass = 'col-narrow';
