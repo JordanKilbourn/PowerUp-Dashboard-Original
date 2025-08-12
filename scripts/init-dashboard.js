@@ -13,7 +13,7 @@ const COLS = {
     "Problem Statements",
     "Proposed Improvement",
     "CI Approval",
-    "Assigned To (Primary)",   // <— new column (will label as “Assigned To”)
+    "Assigned To (Primary)",   // will display as "Assigned To" via table.js colHeaderMap
     "Status",
     "Action Item Entry Date",
     "Last Meeting Action Item's",
@@ -21,16 +21,29 @@ const COLS = {
     "Paid"
   ],
 
+  // EXACT safety columns (12) in the order you provided
   safety: [
-    "Submit Date","Facility","Description","Resolution","Status"
+    "Date",
+    "Facility",
+    "Department/Area",
+    "Safety Concern",
+    "Describe the safety concern",
+    "Recommendations to correct/improve safety issue",
+    "Resolution",
+    "Maintenance Work Order Number or type NA if no W/O",
+    "Who was the safety concern escalated to",
+    "Did you personally speak to the leadership",
+    "Leadership update",
+    "Status"
   ],
+
   quality: [
     "Catch ID","Entry Date","Submitted By","Area",
     "Quality Catch","Part Number","Description","Status"
   ]
 };
 
-/* ── Pill (badge) formatter ──────────────────────────────────── */
+/* ── Pill (badge) formatter (kept here for future use) ───────── */
 const PILL_CLASS = {
   approved:'approved', denied:'denied', rejected:'denied',
   pending:'pending','in progress':'pending', completed:'completed'
@@ -40,9 +53,6 @@ function pillify(txt){
   const cls = PILL_CLASS[String(txt).trim().toLowerCase()];
   return cls ? `<span class="badge ${cls}">${txt}</span>` : txt;
 }
-
-/* Common formatter map for all three tables */
-const FORMATTERS = { 'CI Approval': pillify, 'Status': pillify };
 
 /* ── Add sortable headers after renderTable() runs ────────────── */
 const attachSort = type => {
@@ -65,13 +75,13 @@ async function loadCI(){
     const sheet = await fetchSheet(SHEET_IDS.ciSubmissions);
     renderTable({
       sheet,
-      containerId: 'ci-table',      // ← IMPORTANT: id only (no #)
-      columnOrder:  COLS.ci,
-      checkmarkCols:['Paid']
-      // 'Status' / 'CI Approval' pills are handled in table.js as well
+      containerId: 'ci-table',          // id only (no #)
+      columnOrder: COLS.ci,
+      checkmarkCols: ['Paid']           // check ✓/✗ rendering for Paid
+      // Status/Approval pill styles handled inside table.js
     });
     attachSort('ci'); filterTable('ci');
-  }catch(e){console.error('CI load',e);}
+  }catch(e){console.error('CI load', e);}
 }
 
 async function loadSafety(){
@@ -80,10 +90,10 @@ async function loadSafety(){
     renderTable({
       sheet,
       containerId: 'safety-table',
-      columnOrder:  COLS.safety
+      columnOrder: COLS.safety
     });
     attachSort('safety'); filterTable('safety');
-  }catch(e){console.error('Safety load',e);}
+  }catch(e){console.error('Safety load', e);}
 }
 
 async function loadQuality(){
@@ -92,8 +102,8 @@ async function loadQuality(){
     renderTable({
       sheet,
       containerId: 'quality-table',
-      columnOrder:  COLS.quality
+      columnOrder: COLS.quality
     });
     attachSort('quality'); filterTable('quality');
-  }catch(e){console.error('Quality load',e);}
+  }catch(e){console.error('Quality load', e);}
 }
