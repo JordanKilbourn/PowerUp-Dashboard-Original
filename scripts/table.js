@@ -125,7 +125,7 @@ export function renderTable({
           'done': 'completed',
           'denied/cancelled': 'denied',
           'cancelled': 'denied',
-          'accepted safety concern': 'pending',   // keep yellow (change to 'approved' if you want green)
+          'accepted safety concern': 'approved', // ✅ now green
           'needs researched': 'pending',
           'needs research': 'pending',
           'needs review': 'pending',
