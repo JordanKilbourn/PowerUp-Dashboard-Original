@@ -740,3 +740,62 @@ body.notes .note-editor:empty:before {
   -webkit-line-clamp: unset;
   max-height: none;
 }
+
+/* ───────────────── Compact, readable tables (clamped lines, flexible widths) ─────────────── */
+
+:root { --table-clamp: 2; }                 /* default: 2 lines of body text */
+.rows-expanded { --table-clamp: 6; }        /* when toggled, show up to 6 lines */
+
+/* Keep column widths sane without hard-coding each one */
+.table-scroll table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;                      /* header defines the column width, no jumping */
+}
+
+/* Readability: slightly smaller body font and top-align multi-line cells */
+.table-scroll th, .table-scroll td {
+  vertical-align: top;
+  font-size: 0.95rem;
+  line-height: 1.25;
+}
+
+/* Soft wrap long words; don’t blow out columns */
+.table-scroll .cell-content {
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--table-clamp);   /* clamp lines (with … when truncated) */
+  overflow: hidden;
+}
+
+/* Give a little more headroom to "long text" columns only (still clamped) */
+.table-scroll td[data-col="problem"] .cell-content,
+.table-scroll td[data-col="proposed improvement"] .cell-content,
+.table-scroll td[data-col="last action"] .cell-content,
+.table-scroll td[data-col="description"] .cell-content,
+.table-scroll td[data-col="recommendations"] .cell-content,
+.table-scroll td[data-col="resolution"] .cell-content,
+.table-scroll td[data-col="leadership update"] .cell-content {
+  -webkit-line-clamp: calc(var(--table-clamp) + 1); /* e.g., 3 when default is 2 */
+}
+
+/* Center tiny/numeric columns and keep them single-line */
+.table-scroll td[data-col="date"] .cell-content,
+.table-scroll td[data-col="submission id"] .cell-content,
+.table-scroll td[data-col="id"] .cell-content,
+.table-scroll td[data-col="action date"] .cell-content,
+.table-scroll td[data-col="tokens"] .cell-content,
+.table-scroll td[data-col="paid"] .cell-content,
+.table-scroll td[data-col="work order"] .cell-content {
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* Subtle zebra striping helps scanning */
+.table-scroll tbody tr:nth-child(odd) { background: rgba(255,255,255,0.02); }
+
+/* Pills already look good; just ensure they don't stretch rows */
+.table-scroll .badge { white-space: nowrap; }
+
