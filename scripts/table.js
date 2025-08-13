@@ -13,22 +13,25 @@ export function renderTable({
   const container = document.getElementById(containerId);
   if (!sheet || !container) return;
 
+  // Map column title (lowercased) -> columnId
   const colMap = {};
   sheet.columns.forEach(c => {
     colMap[c.title.trim().toLowerCase()] = c.id;
   });
 
+  // Cell getter (formats dates as mm/dd/yy)
   const get = (row, title) => {
-    const colId = colMap[title.toLowerCase()];
-    const cell = row.cells.find(c => c.columnId === colId);
+    const colId = colMap[String(title).toLowerCase()];
+    const cell  = row.cells.find(c => c.columnId === colId);
     const value = cell?.displayValue ?? cell?.value ?? '';
-    if (title.toLowerCase().includes("date") && value && !isNaN(Date.parse(value))) {
-      const date = new Date(value);
-      return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear().toString().slice(-2)}`;
+    if (String(title).toLowerCase().includes("date") && value && !isNaN(Date.parse(value))) {
+      const d = new Date(value);
+      return `${d.getMonth()+1}/${d.getDate()}/${d.getFullYear().toString().slice(-2)}`;
     }
     return value;
   };
 
+  // Filter to current employee unless told otherwise
   let rows = sheet.rows;
   if (filterByEmpID) {
     rows = rows.filter(r => {
@@ -46,8 +49,9 @@ export function renderTable({
     return;
   }
 
+  // Header labels for friendlier column names
   const colHeaderMap = {
-    // ---- CI (existing) ----
+    // CI headers
     "submission date": "Date",
     "submission id": "ID",
     "problem statements": "Problem",
@@ -58,11 +62,9 @@ export function renderTable({
     "action item entry date": "Action Date",
     "last meeting action item's": "Last Action",
     "token payout": "Tokens",
-    "resourced": "Resourced",
-    "resourced date": "Resourced On",
     "paid": "Paid",
 
-    // ---- SAFETY (NEW labels) ----
+    // Safety headers (long originals → compact labels)
     "date": "Date",
     "facility": "Facility",
     "department/area": "Department/Area",
@@ -76,19 +78,31 @@ export function renderTable({
     "leadership update": "Leadership Update"
   };
 
-  const narrowCols = ["submission date", "submission id", "token payout", "action item entry date", "paid"];
-  const mediumCols = ["status", "assigned to (primary)", "ci approval"];
-  const wideCols = ["problem statements", "proposed improvement", "last meeting action item's"];
+  // Long-text columns (get clamped to 3 lines by CSS)
+  const LONG_TEXT = new Set([
+    "problem statements",
+    "proposed improvement",
+    "description",
+    "recommendations to correct/improve safety issue",
+    "resolution",
+    "leadership update"
+  ]);
+
+  // Legacy classes are harmless if present; they won't be styled
+  const narrowCols  = ["submission date", "submission id", "token payout", "action item entry date", "paid"];
+  const mediumCols  = ["status", "assigned to (primary)", "ci approval"];
+  const wideCols    = ["problem statements", "proposed improvement", "last meeting action item's"];
   const centeredCols = [...narrowCols];
 
+  // Visible column order
   const visibleCols = columnOrder
     ? columnOrder.filter(c => !excludeCols.includes(c))
-    : sheet.columns
-        .filter(c => !c.hidden && !excludeCols.includes(c.title.trim()))
-        .map(c => c.title);
+    : sheet.columns.filter(c => !c.hidden && !excludeCols.includes(c.title.trim())).map(c => c.title);
 
+  // Build table
   let html = `<div class="dashboard-table-container"><table class="dashboard-table">
     <thead><tr>`;
+
   visibleCols.forEach(c => {
     const normalizedCol = c.trim().toLowerCase();
     const label = colHeaderMap[normalizedCol] || c;
@@ -99,8 +113,11 @@ export function renderTable({
     else if (wideCols.includes(normalizedCol)) widthClass = 'col-wide';
 
     const centered = centeredCols.includes(normalizedCol) ? 'centered' : '';
-    html += `<th class="${widthClass} ${centered}" data-col="${normalizedCol}">${label}</th>`;
+    const longFlag = LONG_TEXT.has(normalizedCol) ? ' long' : '';
+
+    html += `<th class="${widthClass} ${centered}${longFlag}" data-col="${normalizedCol}">${label}</th>`;
   });
+
   html += `</tr></thead><tbody class="dashboard-table-body">`;
 
   rows.forEach(r => {
@@ -111,27 +128,32 @@ export function renderTable({
       const isCheck = checkmarkCols.map(c => c.toLowerCase()).includes(normalizedCol);
 
       let content = val;
+
+      // Checkmark columns (✓ / ✗ / X)
       if (isCheck) {
-        if (val === true || val === '✓' || String(val).toLowerCase() === 'y' || String(val).toLowerCase() === 'yes') {
+        if (val === true || val === '✓') {
           content = `<span class="checkmark">&#10003;</span>`;
-        } else if (val === false || val === '✗' || val === 'X' || String(val).toLowerCase() === 'n' || String(val).toLowerCase() === 'no') {
+        } else if (val === false || val === '✗' || val === 'X') {
           content = `<span class="cross">&#10007;</span>`;
         }
       }
 
+      // Pill badges for CI & Safety-like statuses
       if (normalizedCol === "status") {
         const cls = ({
+          // CI states
           'completed': 'completed',
           'done': 'completed',
           'denied/cancelled': 'denied',
           'cancelled': 'denied',
-          'accepted safety concern': 'approved', // ✅ now green
           'needs researched': 'pending',
           'needs research': 'pending',
           'needs review': 'pending',
           'in progress': 'pending',
           'open': 'pending',
-          'not started': 'pending'
+          'not started': 'pending',
+          // Safety (your request: make Accepted Safety Concern green)
+          'accepted safety concern': 'approved'
         }[String(val).toLowerCase()] || 'pending');
         content = `<span class="badge ${cls}">${val}</span>`;
       }
@@ -152,8 +174,9 @@ export function renderTable({
       else if (wideCols.includes(normalizedCol)) widthClass = 'col-wide';
 
       const centered = centeredCols.includes(normalizedCol) ? 'centered' : '';
+      const longFlag = LONG_TEXT.has(normalizedCol) ? ' long' : '';
 
-      html += `<td class="${widthClass} ${centered}" data-col="${normalizedCol}" title="${val}">
+      html += `<td class="${widthClass} ${centered}${longFlag}" data-col="${normalizedCol}" title="${val}">
         <div class="cell-content">${content}</div>
       </td>`;
     });
