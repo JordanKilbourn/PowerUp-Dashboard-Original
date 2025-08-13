@@ -10,28 +10,29 @@ export function renderTable({
   columnOrder = null
 }) {
   const empID = sessionStorage.getItem("empID");
-  const container = document.getElementById(containerId);
-  if (!sheet || !container) return;
+  const el = document.getElementById(containerId);
+  if (!sheet || !el) return;
 
-  // Map column title (lowercased) -> columnId
+  /* Build a quick title->columnId map */
   const colMap = {};
   sheet.columns.forEach(c => {
     colMap[c.title.trim().toLowerCase()] = c.id;
   });
 
-  // Cell getter (formats dates as mm/dd/yy)
   const get = (row, title) => {
-    const colId = colMap[String(title).toLowerCase()];
-    const cell  = row.cells.find(c => c.columnId === colId);
+    const colId = colMap[title.toLowerCase()];
+    const cell = row.cells.find(c => c.columnId === colId);
     const value = cell?.displayValue ?? cell?.value ?? '';
-    if (String(title).toLowerCase().includes("date") && value && !isNaN(Date.parse(value))) {
+
+    // Nice short dates (MM/DD/YY) for anything labeled like a date
+    if (title.toLowerCase().includes("date") && value && !isNaN(Date.parse(value))) {
       const d = new Date(value);
-      return `${d.getMonth()+1}/${d.getDate()}/${d.getFullYear().toString().slice(-2)}`;
+      return `${d.getMonth() + 1}/${d.getDate()}/${String(d.getFullYear()).slice(-2)}`;
     }
     return value;
   };
 
-  // Filter to current employee unless told otherwise
+  /* Filter rows by Employee ID if requested */
   let rows = sheet.rows;
   if (filterByEmpID) {
     rows = rows.filter(r => {
@@ -41,17 +42,21 @@ export function renderTable({
   }
 
   if (rows.length === 0) {
-    container.innerHTML = `
-      <h2>${title}</h2>
-      <div class="empty-state">
-        <p>You don’t have any records yet for <strong>${title}</strong>.</p>
-      </div>`;
+    // Render a tiny empty state if the container is a DIV, otherwise clear table
+    if (el.tagName.toLowerCase() !== 'table') {
+      el.innerHTML = `
+        <h2>${title}</h2>
+        <div class="empty-state">
+          <p>You don’t have any records yet for <strong>${title}</strong>.</p>
+        </div>`;
+    } else {
+      el.innerHTML = '';
+    }
     return;
   }
 
-  // Header labels for friendlier column names
+  /* Labels to show in headers */
   const colHeaderMap = {
-    // CI headers
     "submission date": "Date",
     "submission id": "ID",
     "problem statements": "Problem",
@@ -62,14 +67,15 @@ export function renderTable({
     "action item entry date": "Action Date",
     "last meeting action item's": "Last Action",
     "token payout": "Tokens",
+    "resourced": "Resourced",
+    "resourced date": "Resourced On",
     "paid": "Paid",
-
-    // Safety headers (long originals → compact labels)
-    "date": "Date",
+    // Safety labels (friendly)
+    "submit date": "Date",
     "facility": "Facility",
     "department/area": "Department/Area",
     "safety concern": "Safety Concern",
-    "describe the safety concern": "Description",
+    "description": "Description",
     "recommendations to correct/improve safety issue": "Recommendations",
     "resolution": "Resolution",
     "maintenance work order number or type na if no w/o": "Work Order",
@@ -78,111 +84,89 @@ export function renderTable({
     "leadership update": "Leadership Update"
   };
 
-  // Long-text columns (get clamped to 3 lines by CSS)
-  const LONG_TEXT = new Set([
-    "problem statements",
-    "proposed improvement",
-    "description",
-    "recommendations to correct/improve safety issue",
-    "resolution",
-    "leadership update"
-  ]);
-
-  // Legacy classes are harmless if present; they won't be styled
-  const narrowCols  = ["submission date", "submission id", "token payout", "action item entry date", "paid"];
-  const mediumCols  = ["status", "assigned to (primary)", "ci approval"];
-  const wideCols    = ["problem statements", "proposed improvement", "last meeting action item's"];
-  const centeredCols = [...narrowCols];
-
-  // Visible column order
+  /* Which columns to show */
   const visibleCols = columnOrder
     ? columnOrder.filter(c => !excludeCols.includes(c))
-    : sheet.columns.filter(c => !c.hidden && !excludeCols.includes(c.title.trim())).map(c => c.title);
+    : sheet.columns
+        .filter(c => !c.hidden && !excludeCols.includes(c.title.trim()))
+        .map(c => c.title);
 
-  // Build table
-  let html = `<div class="dashboard-table-container"><table class="dashboard-table">
-    <thead><tr>`;
+  /* If target is a <table>, write thead/tbody directly; if it's a DIV, build a table */
+  const isTableEl = el.tagName.toLowerCase() === 'table';
+  let html = '';
 
-  visibleCols.forEach(c => {
-    const normalizedCol = c.trim().toLowerCase();
-    const label = colHeaderMap[normalizedCol] || c;
-
-    let widthClass = '';
-    if (narrowCols.includes(normalizedCol)) widthClass = 'col-narrow';
-    else if (mediumCols.includes(normalizedCol)) widthClass = 'col-medium';
-    else if (wideCols.includes(normalizedCol)) widthClass = 'col-wide';
-
-    const centered = centeredCols.includes(normalizedCol) ? 'centered' : '';
-    const longFlag = LONG_TEXT.has(normalizedCol) ? ' long' : '';
-
-    html += `<th class="${widthClass} ${centered}${longFlag}" data-col="${normalizedCol}">${label}</th>`;
-  });
-
-  html += `</tr></thead><tbody class="dashboard-table-body">`;
-
-  rows.forEach(r => {
-    html += `<tr>`;
-    visibleCols.forEach(title => {
-      const val = get(r, title);
-      const normalizedCol = title.trim().toLowerCase();
-      const isCheck = checkmarkCols.map(c => c.toLowerCase()).includes(normalizedCol);
-
-      let content = val;
-
-      // Checkmark columns (✓ / ✗ / X)
-      if (isCheck) {
-        if (val === true || val === '✓') {
-          content = `<span class="checkmark">&#10003;</span>`;
-        } else if (val === false || val === '✗' || val === 'X') {
-          content = `<span class="cross">&#10007;</span>`;
-        }
-      }
-
-      // Pill badges for CI & Safety-like statuses
-      if (normalizedCol === "status") {
-        const cls = ({
-          // CI states
-          'completed': 'completed',
-          'done': 'completed',
-          'denied/cancelled': 'denied',
-          'cancelled': 'denied',
-          'needs researched': 'pending',
-          'needs research': 'pending',
-          'needs review': 'pending',
-          'in progress': 'pending',
-          'open': 'pending',
-          'not started': 'pending',
-          // Safety (your request: make Accepted Safety Concern green)
-          'accepted safety concern': 'approved'
-        }[String(val).toLowerCase()] || 'pending');
-        content = `<span class="badge ${cls}">${val}</span>`;
-      }
-
-      if (normalizedCol === "ci approval") {
-        const cls = ({
-          'approved': 'approved',
-          'pending': 'pending',
-          'denied': 'denied',
-          'rejected': 'denied'
-        }[String(val).toLowerCase()] || 'pending');
-        content = `<span class="badge ${cls}">${val}</span>`;
-      }
-
-      let widthClass = '';
-      if (narrowCols.includes(normalizedCol)) widthClass = 'col-narrow';
-      else if (mediumCols.includes(normalizedCol)) widthClass = 'col-medium';
-      else if (wideCols.includes(normalizedCol)) widthClass = 'col-wide';
-
-      const centered = centeredCols.includes(normalizedCol) ? 'centered' : '';
-      const longFlag = LONG_TEXT.has(normalizedCol) ? ' long' : '';
-
-      html += `<td class="${widthClass} ${centered}${longFlag}" data-col="${normalizedCol}" title="${val}">
-        <div class="cell-content">${content}</div>
-      </td>`;
+  const buildHead = () => {
+    let ths = '';
+    visibleCols.forEach(c => {
+      const key = c.trim().toLowerCase();
+      const label = colHeaderMap[key] || c;
+      ths += `<th data-col="${key}">${label}</th>`;
     });
-    html += `</tr>`;
-  });
+    return `<thead><tr>${ths}</tr></thead>`;
+  };
 
-  html += `</tbody></table></div>`;
-  container.innerHTML = html;
+  const pillFrom = (normalized, rawValue) => {
+    const v = String(rawValue ?? '').trim();
+    if (!v) return '';
+
+    if (normalized === 'ci approval') {
+      const cls = ({ approved: 'approved', pending:'pending', denied:'denied', rejected:'denied' }[v.toLowerCase()] || 'pending');
+      return `<span class="badge ${cls}">${v}</span>`;
+    }
+
+    if (normalized === 'status') {
+      // cross-table status mapping
+      const map = {
+        'completed':'completed', 'done':'completed',
+        'accepted safety concern':'approved',
+        'approved':'approved',
+        'denied/cancelled':'denied', 'cancelled':'denied', 'denied':'denied', 'rejected':'denied',
+        'needs researched':'pending', 'needs research':'pending', 'needs review':'pending',
+        'in progress':'pending', 'open':'pending', 'not started':'pending', 'pending':'pending'
+      };
+      const cls = map[v.toLowerCase()] || 'pending';
+      return `<span class="badge ${cls}">${v}</span>`;
+    }
+
+    return null;
+  };
+
+  const isCheckCol = (name) => checkmarkCols.map(s => s.toLowerCase()).includes(name);
+
+  const buildBody = () => {
+    let rowsHtml = '';
+    rows.forEach(r => {
+      let tds = '';
+      visibleCols.forEach(title => {
+        const raw = get(r, title);
+        const key  = title.trim().toLowerCase();
+
+        // Checkmarks for boolean-ish columns
+        let content = raw;
+        if (isCheckCol(key)) {
+          if (raw === true || raw === '✓')        content = `<span class="checkmark">&#10003;</span>`;
+          else if (raw === false || raw === '✗' || raw === 'X') content = `<span class="cross">&#10007;</span>`;
+        }
+
+        // Pill badges
+        const pill = pillFrom(key, raw);
+        if (pill) content = pill;
+
+        // Wrap everything in a .cell for clamping. Short columns won’t overflow anyway.
+        tds += `<td data-col="${key}" title="${typeof raw === 'string' ? raw.replace(/"/g,'&quot;') : raw}">
+                  <div class="cell">${content ?? ''}</div>
+                </td>`;
+      });
+      rowsHtml += `<tr>${tds}</tr>`;
+    });
+    return `<tbody class="dashboard-table-body">${rowsHtml}</tbody>`;
+  };
+
+  if (isTableEl) {
+    el.classList.add('dashboard-table');        // for future styling if needed
+    el.innerHTML = buildHead() + buildBody();   // write thead/tbody only
+  } else {
+    html = `<table class="dashboard-table">${buildHead()}${buildBody()}</table>`;
+    el.innerHTML = html;
+  }
 }
