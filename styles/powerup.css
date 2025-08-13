@@ -716,3 +716,27 @@ body.notes .note-editor:empty:before {
 .delete-icon:hover {
   opacity: 1;
 }
+
+
+/* ── Compact, readable tables: clamp long text to 3 lines by default ── */
+.table-scroll td .cell-content {
+  white-space: normal;                 /* allow wrapping (no ellipsis)   */
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;               /* show up to 3 lines             */
+  line-height: 1.35;                   /* comfortable density            */
+  word-break: break-word;              /* very long tokens can wrap      */
+}
+
+/* Columns tagged as "long" get a soft width cap so they don't sprawl */
+.table-scroll th.long,
+.table-scroll td.long {
+  max-width: 52ch;                     /* ~52 characters of width        */
+}
+
+/* When user clicks "Expand rows", remove the clamp on that table only */
+.table-scroll.expanded td .cell-content {
+  -webkit-line-clamp: unset;
+  max-height: none;
+}
