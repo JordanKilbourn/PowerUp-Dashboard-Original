@@ -8,32 +8,17 @@ import './session.js';
 /* ── Column order config ─────────────────────────────────────── */
 const COLS = {
   ci: [
-    "Submission Date",
-    "Submission ID",
-    "Problem Statements",
-    "Proposed Improvement",
-    "CI Approval",
-    "Assigned To (Primary)",   // shown as “Assigned To” via table.js header map
-    "Status",
-    "Action Item Entry Date",
-    "Last Meeting Action Item's",
-    "Token Payout",
-    "Paid"
+    "Submission Date","Submission ID","Problem Statements","Proposed Improvement",
+    "CI Approval","Assigned To (Primary)","Status","Action Item Entry Date",
+    "Last Meeting Action Item's","Token Payout","Paid"
   ],
   safety: [
-    // Full set you asked for (order can be tweaked anytime)
-    "Submit Date",
-    "Facility",
-    "Department/Area",
-    "Safety Concern",
-    "Description",
-    "Recommendations to correct/improve safety",
-    "Resolution",
+    "Submit Date","Facility","Department/Area","Safety Concern","Description",
+    "Recommendations to correct/improve safety issue","Resolution",
     "Maintenance Work Order Number or type NA if no W/O",
     "Who was the safety concern escalated to",
     "Did you personally speak to the leadership",
-    "Leadership update",
-    "Status"
+    "Leadership update","Status"
   ],
   quality: [
     "Catch ID","Entry Date","Submitted By","Area",
@@ -42,13 +27,33 @@ const COLS = {
 };
 
 /* ── Page bootstrap ──────────────────────────────────────────── */
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', ()=>{
   if (typeof initializeSession === 'function') initializeSession();
-
-  await Promise.all([loadCI(), loadSafety(), loadQuality()]);
-  wireSorting();
-  wireExpandRowsToggle();   // <— adds the Expand/Collapse rows behavior
+  loadCI(); loadSafety(); loadQuality();
 });
+
+/* Add a subtle expand/collapse control beside the filter/add buttons */
+function addClampToggle(tabKey) {
+  const header = document.querySelector(`#tab-${tabKey} .table-header-controls`);
+  const table  = document.getElementById(`${tabKey}-table`);
+  if (!header || !table) return;
+
+  let btn = header.querySelector('.table-toggle');
+  if (!btn) {
+    btn = document.createElement('button');
+    btn.className = 'table-toggle';
+    btn.type = 'button';
+    header.appendChild(btn);
+  }
+
+  const setLabel = () => btn.textContent = table.classList.contains('is-expanded') ? 'Collapse rows' : 'Expand rows';
+  setLabel();
+
+  btn.onclick = () => {
+    table.classList.toggle('is-expanded');
+    setLabel();
+  };
+}
 
 /* ── Loaders ─────────────────────────────────────────────────── */
 async function loadCI(){
@@ -60,7 +65,8 @@ async function loadCI(){
       columnOrder:  COLS.ci,
       checkmarkCols:['Paid']
     });
-  }catch(e){ console.error('CI load',e); }
+    addClampToggle('ci');
+  }catch(e){ console.error('CI load', e); }
 }
 
 async function loadSafety(){
@@ -71,7 +77,8 @@ async function loadSafety(){
       containerId: 'safety-table',
       columnOrder:  COLS.safety
     });
-  }catch(e){ console.error('Safety load',e); }
+    addClampToggle('safety');
+  }catch(e){ console.error('Safety load', e); }
 }
 
 async function loadQuality(){
@@ -82,35 +89,6 @@ async function loadQuality(){
       containerId: 'quality-table',
       columnOrder:  COLS.quality
     });
-  }catch(e){ console.error('Quality load',e); }
-}
-
-/* ── Sorting hook (adds click handlers to headers) ───────────── */
-function wireSorting(){
-  ['ci','safety','quality'].forEach(type => {
-    document.querySelectorAll(`#${type}-table thead th`).forEach((th, idx) => {
-      th.classList.add('sortable');
-      th.addEventListener('click', () => window.sortTable(type, idx));
-    });
-  });
-}
-
-/* ── Expand / Collapse rows (clamp control via CSS var) ──────── */
-function wireExpandRowsToggle(){
-  // Find or create a button in each tab’s header controls
-  document.querySelectorAll('.table-header-row .table-header-controls').forEach(group => {
-    let btn = group.querySelector('.expand-rows');
-    if (!btn) {
-      btn = document.createElement('button');
-      btn.className = 'add-btn expand-rows';
-      btn.textContent = 'Expand rows';
-      group.appendChild(btn);
-    }
-
-    btn.addEventListener('click', () => {
-      const root = document.documentElement;   // toggles .rows-expanded on <html>
-      const on   = root.classList.toggle('rows-expanded');
-      btn.textContent = on ? 'Collapse rows' : 'Expand rows';
-    });
-  });
+    addClampToggle('quality');
+  }catch(e){ console.error('Quality load', e); }
 }
