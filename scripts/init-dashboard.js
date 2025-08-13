@@ -1,11 +1,12 @@
 // Dynamic loader for refreshed dashboard (CI / Safety / Quality)
 
 /* ── Imports ─────────────────────────────────────────────────── */
-import { fetchSheet, SHEET_IDS } from './api.js';   // your proxy
-import { renderTable }           from './table.js'; // renderer
-import './session.js';                              // provides initializeSession()
+import { fetchSheet, SHEET_IDS } from './api.js';
+import { renderTable }           from './table.js';
+import './session.js';
 
-/* ── Column order config ─────────────────────────────────────── */
+/* ── Column order config ───────────────────────────────────────
+   NOTE: These must match your Smartsheet column titles. */
 const COLS = {
   ci: [
     "Submission Date",
@@ -13,7 +14,7 @@ const COLS = {
     "Problem Statements",
     "Proposed Improvement",
     "CI Approval",
-    "Assigned To (Primary)",   // will display as "Assigned To" via table.js colHeaderMap
+    "Assigned To (Primary)",      // will be labeled “Assigned To”
     "Status",
     "Action Item Entry Date",
     "Last Meeting Action Item's",
@@ -21,7 +22,6 @@ const COLS = {
     "Paid"
   ],
 
-  // EXACT safety columns (12) in the order you provided
   safety: [
     "Date",
     "Facility",
@@ -43,29 +43,38 @@ const COLS = {
   ]
 };
 
-/* ── Pill (badge) formatter (kept here for future use) ───────── */
-const PILL_CLASS = {
-  approved:'approved', denied:'denied', rejected:'denied',
-  pending:'pending','in progress':'pending', completed:'completed'
-};
-function pillify(txt){
-  if(!txt) return '';
-  const cls = PILL_CLASS[String(txt).trim().toLowerCase()];
-  return cls ? `<span class="badge ${cls}">${txt}</span>` : txt;
-}
-
 /* ── Add sortable headers after renderTable() runs ────────────── */
-const attachSort = type => {
+const attachSort = (type) => {
   document.querySelectorAll(`#${type}-table thead th`)
-    .forEach((th,idx)=>{
+    .forEach((th, idx) => {
       th.classList.add('sortable');
-      th.onclick = () => sortTable(type,idx);   // uses inline helper in HTML
+      th.onclick = () => sortTable(type, idx); // uses helper in HTML
     });
 };
 
+/* ── Optional: per-tab “Expand rows” toggle ───────────────────── */
+function addWrapToggle(tabId) {
+  const panel    = document.querySelector(`#tab-${tabId} .table-scroll`);
+  const controls = document.querySelector(`#tab-${tabId} .table-header-controls`);
+  if (!panel || !controls || controls.querySelector('.wrap-toggle')) return;
+
+  const btn = document.createElement('button');
+  btn.className = 'add-btn wrap-toggle';
+  btn.textContent = 'Expand rows';
+  let expanded = false;
+
+  btn.onclick = () => {
+    expanded = !expanded;
+    panel.classList.toggle('expanded', expanded);
+    btn.textContent = expanded ? 'Collapse rows' : 'Expand rows';
+  };
+
+  controls.appendChild(btn);
+}
+
 /* ── Page bootstrap ──────────────────────────────────────────── */
-document.addEventListener('DOMContentLoaded',()=>{
-  if(typeof initializeSession==='function') initializeSession();
+document.addEventListener('DOMContentLoaded', () => {
+  if (typeof initializeSession === 'function') initializeSession();
   loadCI(); loadSafety(); loadQuality();
 });
 
@@ -75,13 +84,12 @@ async function loadCI(){
     const sheet = await fetchSheet(SHEET_IDS.ciSubmissions);
     renderTable({
       sheet,
-      containerId: 'ci-table',          // id only (no #)
+      containerId: 'ci-table',
       columnOrder: COLS.ci,
-      checkmarkCols: ['Paid']           // check ✓/✗ rendering for Paid
-      // Status/Approval pill styles handled inside table.js
+      checkmarkCols: ['Paid']  // ✓ / ✗ rendering
     });
-    attachSort('ci'); filterTable('ci');
-  }catch(e){console.error('CI load', e);}
+    attachSort('ci'); filterTable('ci'); addWrapToggle('ci');
+  }catch(e){ console.error('CI load', e); }
 }
 
 async function loadSafety(){
@@ -92,8 +100,8 @@ async function loadSafety(){
       containerId: 'safety-table',
       columnOrder: COLS.safety
     });
-    attachSort('safety'); filterTable('safety');
-  }catch(e){console.error('Safety load', e);}
+    attachSort('safety'); filterTable('safety'); addWrapToggle('safety');
+  }catch(e){ console.error('Safety load', e); }
 }
 
 async function loadQuality(){
@@ -104,6 +112,6 @@ async function loadQuality(){
       containerId: 'quality-table',
       columnOrder: COLS.quality
     });
-    attachSort('quality'); filterTable('quality');
-  }catch(e){console.error('Quality load', e);}
+    attachSort('quality'); filterTable('quality'); addWrapToggle('quality');
+  }catch(e){ console.error('Quality load', e); }
 }
