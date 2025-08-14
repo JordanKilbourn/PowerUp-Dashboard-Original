@@ -237,14 +237,17 @@ body.power-hours .progress-bar-inner { background: var(--accent); height: 100%; 
   overflow-wrap: anywhere; /* allow long tokens to break */
   hyphens: auto;
 }
-/* Remove clamp when expanded */
+
+/* Remove clamp when expanded — also drop -webkit-box to avoid overlap */
 .table-scroll table.is-expanded .cell,
 .table-scroll table.is-expanded .cell-content {
+  display: block;            /* <— key change to prevent overlap */
   -webkit-line-clamp: unset;
   overflow: visible;
+  white-space: normal;       /* long text can wrap naturally */
 }
 
-/* Long-text columns get one extra line for readability */
+/* Long-text columns get one extra line for readability (still clamped) */
 .table-scroll td[data-col="problem"] .cell,
 .table-scroll td[data-col="proposed improvement"] .cell,
 .table-scroll td[data-col="last action"] .cell,
@@ -257,7 +260,7 @@ body.power-hours .progress-bar-inner { background: var(--accent); height: 100%; 
 }
 
 /* === 10a. Non-wrapping single-value columns (no weird breaks) === */
-/* Make these one line with ellipsis and a sensible max width. */
+/* Force block display + no clamp + ellipsis + no hyphenation */
 .table-scroll td[data-col="date"] .cell-content,
 .table-scroll td[data-col="submission date"] .cell-content,
 .table-scroll td[data-col="submit date"] .cell-content,
@@ -274,14 +277,17 @@ body.power-hours .progress-bar-inner { background: var(--accent); height: 100%; 
 .table-scroll td[data-col="work order"] .cell-content,
 .table-scroll td[data-col="spoke to leadership"] .cell-content,
 .table-scroll td[data-col="submitted by"] .cell-content {
+  display: block;                /* override -webkit-box */
+  -webkit-line-clamp: unset;     /* never clamp these */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   overflow-wrap: normal;
+  word-break: normal;
   hyphens: manual;
 }
 
-/* Keep them from stretching the table too far */
+/* Widths for the above (so they neither blow up nor vanish) */
 .table-scroll td[data-col="date"],
 .table-scroll td[data-col="submission date"],
 .table-scroll td[data-col="submit date"],
@@ -306,17 +312,17 @@ body.power-hours .progress-bar-inner { background: var(--accent); height: 100%; 
 /* === 10b. Badge columns (Status / CI Approval) — never clamp or hide === */
 .table-scroll td[data-col="status"] .cell-content,
 .table-scroll td[data-col="ci approval"] .cell-content {
+  display: inline-flex;          /* pills sit nicely */
+  align-items: center;
   -webkit-line-clamp: unset;
   white-space: nowrap;
   overflow: visible;
-  display: inline-flex;
-  align-items: center;
   gap: .25rem;
 }
 .table-scroll td[data-col="status"],
 .table-scroll td[data-col="ci approval"] {
   text-align: center;
-  min-width: 7.5rem; /* enough space for pills */
+  min-width: 8rem;               /* enough space for pills */
 }
 .table-scroll .badge { white-space: nowrap; }
 
