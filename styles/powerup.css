@@ -16,7 +16,7 @@
 
   /* tables */
   --table-font: 14px;
-  --table-clamp: 2;           /* default: 2 lines of body text */
+  --table-clamp: 2; /* default: 2 lines of body text */
 }
 
 /* === 2. Global reset === */
@@ -205,7 +205,7 @@ body.power-hours .progress-bar-inner { background: var(--accent); height: 100%; 
 .table-scroll table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: auto;                     /* let browser size columns */
+  table-layout: auto; /* let browser size columns */
   font-size: var(--table-font);
 }
 .table-scroll th,
@@ -226,9 +226,9 @@ body.power-hours .progress-bar-inner { background: var(--accent); height: 100%; 
 /* Sort affordance (JS adds .sortable) */
 .table-scroll th.sortable::after { content: ' ⇅'; font-size: 12px; color: #999; }
 
-/* Clamp long text; toggle via table.classList.toggle('is-expanded') */
+/* Clamp long text (single source of truth) */
 .table-scroll .cell,
-.table-scroll .cell-content {              /* support both names */
+.table-scroll .cell-content {
   display: -webkit-box;
   -webkit-line-clamp: var(--table-clamp);
   -webkit-box-orient: vertical;
@@ -236,11 +236,6 @@ body.power-hours .progress-bar-inner { background: var(--accent); height: 100%; 
   line-height: 1.35;
   overflow-wrap: anywhere;
   hyphens: auto;
-}
-.table-scroll table.is-expanded .cell,
-.table-scroll table.is-expanded .cell-content {
-  -webkit-line-clamp: unset;
-  overflow: visible;
 }
 
 /* Give common “long text” columns a touch more room (still clamped) */
@@ -287,10 +282,19 @@ body.power-hours .progress-bar-inner { background: var(--accent); height: 100%; 
 /* Zebra striping for readability */
 .table-scroll tbody tr:nth-child(odd) { background: rgba(255,255,255,0.02); }
 
-/* === 11. Scrollbar hiding (optional) === */
+/* Hide scrollbars (optional) */
 .table-scroll::-webkit-scrollbar { display: none; }
 .table-scroll { scrollbar-width: none; -ms-overflow-style: none; }
 body::-webkit-scrollbar, .main::-webkit-scrollbar { width: 0; height: 0; }
+
+/* Expand rows — MUST BE LAST so it overrides all prior clamps */
+.table-scroll.is-expanded .cell,
+.table-scroll.is-expanded .cell-content,
+.table-scroll table.is-expanded .cell,
+.table-scroll table.is-expanded .cell-content {
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
 
 /* === 12. Buttons & badges (shared) === */
 .load-more {
