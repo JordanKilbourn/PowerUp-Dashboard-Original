@@ -57,7 +57,6 @@ export function renderTable({
 
   /* Labels to show in headers */
   const colHeaderMap = {
-    // CI
     "submission date": "Date",
     "submission id": "ID",
     "problem statements": "Problem",
@@ -71,7 +70,8 @@ export function renderTable({
     "resourced": "Resourced",
     "resourced date": "Resourced On",
     "paid": "Paid",
-    // Safety (friendly)
+
+    // Safety
     "submit date": "Date",
     "facility": "Facility",
     "department/area": "Department/Area",
@@ -94,7 +94,6 @@ export function renderTable({
 
   /* If target is a <table>, write thead/tbody directly; if it's a DIV, build a table */
   const isTableEl = el.tagName.toLowerCase() === 'table';
-  let html = '';
 
   const buildHead = () => {
     let ths = '';
@@ -106,56 +105,33 @@ export function renderTable({
     return `<thead><tr>${ths}</tr></thead>`;
   };
 
-  /* Pill helper (Status / CI Approval) */
   const pillFrom = (normalized, rawValue) => {
-    const vRaw = String(rawValue ?? '').trim();
-    if (!vRaw) return null;
-
-    const v = vRaw.toLowerCase();
+    const v = String(rawValue ?? '').trim();
+    if (!v) return '';
 
     if (normalized === 'ci approval') {
-      const cls = (
-        { approved: 'approved', pending:'pending', denied:'denied', rejected:'denied' }[v] || 'pending'
-      );
-      return `<span class="badge ${cls}">${vRaw}</span>`;
+      const cls = ({ approved: 'approved', pending:'pending', denied:'denied', rejected:'denied' }[v.toLowerCase()] || 'pending');
+      return `<span class="badge ${cls}">${v}</span>`;
     }
 
     if (normalized === 'status') {
-      // Cross-table normalization
+      // cross-table status mapping
       const map = {
-        // common
-        'approved':'approved',
-        'completed':'completed',
-        'done':'completed',
-        'denied':'denied',
-        'rejected':'denied',
-        'cancelled':'denied',
-        'denied/cancelled':'denied',
-        'pending':'pending',
-        'in progress':'pending',
-        'needs review':'pending',
-        'needs researched':'pending',
-        'not started':'pending',
-        // safety variants
+        'completed':'completed', 'done':'completed',
         'accepted safety concern':'approved',
-        'accepted':'approved',
-        // quality variants
-        'open':'pending',
-        'closed':'completed'
+        'approved':'approved',
+        'denied/cancelled':'denied', 'cancelled':'denied', 'denied':'denied', 'rejected':'denied',
+        'needs researched':'pending', 'needs research':'pending', 'needs review':'pending',
+        'in progress':'pending', 'open':'pending', 'not started':'pending', 'pending':'pending'
       };
-      const cls = map[v];
-      if (cls) return `<span class="badge ${cls}">${vRaw}</span>`;
-      // If we have some text but no mapping, show the raw text (no pill)
-      return vRaw;
+      const cls = map[v.toLowerCase()] || 'pending';
+      return `<span class="badge ${cls}">${v}</span>`;
     }
 
     return null;
   };
 
   const isCheckCol = (name) => checkmarkCols.map(s => s.toLowerCase()).includes(name);
-
-  const escapeTitle = (val) =>
-    typeof val === 'string' ? val.replace(/"/g, '&quot;') : String(val ?? '');
 
   const buildBody = () => {
     let rowsHtml = '';
@@ -168,26 +144,35 @@ export function renderTable({
         // Checkmarks for boolean-ish columns
         let content = raw;
         if (isCheckCol(key)) {
-          if (raw === true || raw === '✓') {
-            content = `<span class="checkmark">&#10003;</span>`;
-          } else if (raw === false || raw === '✗' || raw === 'X' || raw === 'x') {
-            content = `<span class="cross">&#10007;</span>`;
-          }
+          if (raw === true || raw === '✓')        content = `<span class="checkmark">&#10003;</span>`;
+          else if (raw === false || raw === '✗' || raw === 'X') content = `<span class="cross">&#10007;</span>`;
         }
 
         // Pill badges
         const pill = pillFrom(key, raw);
-        if (pill !== null) content = pill;
-        // If status was empty, present a readable dash instead of nothing
-        if (key === 'status' && (content === '' || content == null)) content = '—';
+        if (pill) content = pill;
 
-        // Wrap everything in a .cell for CSS clamping; short fields are no-wrapped by CSS
-        tds += `<td data-col="${key}" title="${escapeTitle(raw)}">
+        // Wrap in .cell for clamping (CSS controls height/wrapping)
+        const titleAttr = (typeof raw === 'string')
+          ? raw.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+          : raw;
+
+        tds += `<td data-col="${key}" title="${titleAttr ?? ''}">
                   <div class="cell">${content ?? ''}</div>
                 </td>`;
       });
+
       rowsHtml += `<tr>${tds}</tr>`;
     });
+
+    // ⬇️ Add a clearly-visible spacer/end-cap so the final row never hugs the bottom
+    rowsHtml += `
+      <tr class="spacer-row" aria-hidden="true">
+        <td colspan="${visibleCols.length}">
+          <div class="end-cap">End of results</div>
+        </td>
+      </tr>`;
+
     return `<tbody class="dashboard-table-body">${rowsHtml}</tbody>`;
   };
 
@@ -195,7 +180,7 @@ export function renderTable({
     el.classList.add('dashboard-table');
     el.innerHTML = buildHead() + buildBody();
   } else {
-    html = `<table class="dashboard-table">${buildHead()}${buildBody()}</table>`;
+    const html = `<table class="dashboard-table">${buildHead()}${buildBody()}</table>`;
     el.innerHTML = html;
   }
 }
