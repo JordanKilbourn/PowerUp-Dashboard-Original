@@ -475,3 +475,53 @@ body.notes .notes-toolbar .toolbar button i { pointer-events: none; font-size: 1
 /* Delete icon */
 .delete-icon { background: none; border: none; color: #e74c3c; font-size: 14px; cursor: pointer; padding: 4px; opacity: 0.8; transition: 0.2s ease; }
 .delete-icon:hover { opacity: 1; }
+
+
+/* === Tables: viewport-fit scroller + visible last row + no-wrap on short fields === */
+
+/* How much vertical “chrome” sits above the table (header + cards + tabs) */
+:root { --table-chrome: 290px; }
+@media (min-width: 1280px) { :root { --table-chrome: 270px; } }
+@media (max-height: 800px) { :root { --table-chrome: 320px; } }
+
+/* Fit scroller to the viewport and give a little extra scroll room at the bottom */
+.table-scroll{
+  max-height: calc(100vh - var(--table-chrome));
+  padding-bottom: 14px;              /* lets you scroll past the last row a touch */
+}
+.table-scroll tbody tr:last-child td{
+  padding-bottom: 12px;              /* ensures the final row is never flush */
+}
+
+/* Short fields should never wrap; also cancel the clamping box */
+.table-scroll td[data-col="date"] .cell-content,
+.table-scroll td[data-col="submission date"] .cell-content,
+.table-scroll td[data-col="id"] .cell-content,
+.table-scroll td[data-col="submission id"] .cell-content,
+.table-scroll td[data-col="action date"] .cell-content,
+.table-scroll td[data-col="facility"] .cell-content,
+.table-scroll td[data-col="department/area"] .cell-content,
+.table-scroll td[data-col="assigned to"] .cell-content,
+.table-scroll td[data-col="work order"] .cell-content,
+.table-scroll td[data-col="escalated to"] .cell-content,
+.table-scroll td[data-col="spoke to leadership"] .cell-content,
+.table-scroll td[data-col="entry date"] .cell-content,
+.table-scroll td[data-col="submitted by"] .cell-content,
+.table-scroll td[data-col="area"] .cell-content,
+.table-scroll td[data-col="part number"] .cell-content{
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: initial;       /* stop the multi-line clamp for these */
+}
+
+/* Status/Approval columns: enough width for a pill but not huge */
+.table-scroll th[data-col="status"],
+.table-scroll td[data-col="status"],
+.table-scroll th[data-col="ci approval"],
+.table-scroll td[data-col="ci approval"] {
+  width: 9.5rem;
+}
+.table-scroll .badge { white-space: nowrap; }
+
