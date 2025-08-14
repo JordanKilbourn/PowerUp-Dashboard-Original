@@ -202,12 +202,15 @@ body.power-hours .progress-bar-inner { background: var(--accent); height: 100%; 
   border: 1px solid #2d3f3f;
   border-radius: 6px;
 }
+
+/* Let the browser size columns but keep things compact */
 .table-scroll table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: auto;               /* let browser size columns */
+  table-layout: auto;
   font-size: var(--table-font);
 }
+
 .table-scroll th,
 .table-scroll td {
   padding: 8px 10px;
@@ -215,39 +218,49 @@ body.power-hours .progress-bar-inner { background: var(--accent); height: 100%; 
   vertical-align: top;
   border-bottom: 1px solid #3a4e4e;
 }
+
 .table-scroll thead th {
   position: sticky; top: 0;
   background: #213331;
   z-index: 2;
   color: var(--accent);
 }
+
+/* Hover highlighting */
 .table-scroll tbody tr:hover { background-color: rgba(255,255,255,0.05); }
 
 /* Sort affordance (JS adds .sortable) */
 .table-scroll th.sortable::after { content: ' ⇅'; font-size: 12px; color: #999; }
 
-/* Base clamp for long text */
+/* ---- Text clamping (default) ------------------------------------------ */
 .table-scroll .cell,
 .table-scroll .cell-content {
   display: -webkit-box;
-  -webkit-line-clamp: var(--table-clamp);
   -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--table-clamp);
   overflow: hidden;
+
+  /* sensible wrapping that won't split single words like “Lewisburg” */
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: manual;
   line-height: 1.35;
-  overflow-wrap: anywhere; /* allow long tokens to break */
-  hyphens: auto;
 }
 
-/* Remove clamp when expanded — also drop -webkit-box to avoid overlap */
+/* When rows are expanded, turn clamping OFF safely (no overlapping)      */
+/* Works with any of these classes being toggled by your button           */
 .table-scroll table.is-expanded .cell,
-.table-scroll table.is-expanded .cell-content {
-  display: block;            /* <— key change to prevent overlap */
-  -webkit-line-clamp: unset;
+.table-scroll table.is-expanded .cell-content,
+.table-scroll.expanded .cell,
+.table-scroll.expanded .cell-content,
+.table-scroll.rows-expanded .cell,
+.table-scroll.rows-expanded .cell-content {
+  display: block;                /* switch away from -webkit-box        */
+  -webkit-line-clamp: initial;
   overflow: visible;
-  white-space: normal;       /* long text can wrap naturally */
 }
 
-/* Long-text columns get one extra line for readability (still clamped) */
+/* Give narrative columns a touch more room (still clamped by default)    */
 .table-scroll td[data-col="problem"] .cell,
 .table-scroll td[data-col="proposed improvement"] .cell,
 .table-scroll td[data-col="last action"] .cell,
@@ -259,82 +272,95 @@ body.power-hours .progress-bar-inner { background: var(--accent); height: 100%; 
   -webkit-line-clamp: calc(var(--table-clamp) + 1);
 }
 
-/* === 10a. Non-wrapping single-value columns (no weird breaks) === */
-/* Force block display + no clamp + ellipsis + no hyphenation */
-.table-scroll td[data-col="date"] .cell-content,
-.table-scroll td[data-col="submission date"] .cell-content,
-.table-scroll td[data-col="submit date"] .cell-content,
-.table-scroll td[data-col="entry date"] .cell-content,
-.table-scroll td[data-col="action date"] .cell-content,
-.table-scroll td[data-col="id"] .cell-content,
-.table-scroll td[data-col="submission id"] .cell-content,
-.table-scroll td[data-col="facility"] .cell-content,
-.table-scroll td[data-col="department/area"] .cell-content,
-.table-scroll td[data-col="area"] .cell-content,
-.table-scroll td[data-col="part number"] .cell-content,
-.table-scroll td[data-col="assigned to"] .cell-content,
-.table-scroll td[data-col="escalated to"] .cell-content,
-.table-scroll td[data-col="work order"] .cell-content,
-.table-scroll td[data-col="spoke to leadership"] .cell-content,
-.table-scroll td[data-col="submitted by"] .cell-content {
-  display: block;                /* override -webkit-box */
-  -webkit-line-clamp: unset;     /* never clamp these */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  overflow-wrap: normal;
-  word-break: normal;
-  hyphens: manual;
+/* ---- NO-WRAP columns (keep these on one line, always) ----------------- */
+:root {
+  /* tweak as you like, these are just sensible defaults */
+  --w-date: 6.6rem;         /* Date / Entry Date / Action Date */
+  --w-id: 6.2rem;           /* ID / Submission ID */
+  --w-facility: 8.5rem;
+  --w-assigned: 10rem;
+  --w-area: 8rem;
+  --w-partnum: 9rem;
+  --w-workorder: 9rem;
+  --w-badgecol: 9.5rem;     /* Status / CI Approval */
+  --w-tokens: 5.2rem;
 }
 
-/* Widths for the above (so they neither blow up nor vanish) */
+.table-scroll th[data-col="date"],
 .table-scroll td[data-col="date"],
+.table-scroll th[data-col="submission date"],
 .table-scroll td[data-col="submission date"],
-.table-scroll td[data-col="submit date"],
+.table-scroll th[data-col="entry date"],
 .table-scroll td[data-col="entry date"],
-.table-scroll td[data-col="action date"] { width: 7rem; }            /* ~112px */
-
+.table-scroll th[data-col="action date"],
+.table-scroll td[data-col="action date"],
+.table-scroll th[data-col="id"],
 .table-scroll td[data-col="id"],
-.table-scroll td[data-col="submission id"] { width: 6.25rem; }       /* ~100px */
-
+.table-scroll th[data-col="submission id"],
+.table-scroll td[data-col="submission id"],
+.table-scroll th[data-col="facility"],
 .table-scroll td[data-col="facility"],
-.table-scroll td[data-col="area"],
-.table-scroll td[data-col="department/area"] { max-width: 9rem; }
-
-.table-scroll td[data-col="part number"] { max-width: 10rem; }
-
+.table-scroll th[data-col="assigned to"],
 .table-scroll td[data-col="assigned to"],
+.table-scroll th[data-col="escalated to"],
 .table-scroll td[data-col="escalated to"],
+.table-scroll th[data-col="spoke to leadership"],
 .table-scroll td[data-col="spoke to leadership"],
+.table-scroll th[data-col="area"],
+.table-scroll td[data-col="area"],
+.table-scroll th[data-col="part number"],
+.table-scroll td[data-col="part number"],
+.table-scroll th[data-col="work order"],
+.table-scroll td[data-col="work order"],
+.table-scroll th[data-col="maintenance work order number or type na if no w/o"],
+.table-scroll td[data-col="maintenance work order number or type na if no w/o"],
+.table-scroll th[data-col="submitted by"],
 .table-scroll td[data-col="submitted by"],
-.table-scroll td[data-col="work order"] { max-width: 12rem; }
-
-/* === 10b. Badge columns (Status / CI Approval) — never clamp or hide === */
-.table-scroll td[data-col="status"] .cell-content,
-.table-scroll td[data-col="ci approval"] .cell-content {
-  display: inline-flex;          /* pills sit nicely */
-  align-items: center;
-  -webkit-line-clamp: unset;
-  white-space: nowrap;
-  overflow: visible;
-  gap: .25rem;
-}
-.table-scroll td[data-col="status"],
-.table-scroll td[data-col="ci approval"] {
-  text-align: center;
-  min-width: 8rem;               /* enough space for pills */
-}
-.table-scroll .badge { white-space: nowrap; }
-
-/* Keep tiny numeric columns tidy */
+.table-scroll th[data-col="tokens"],
 .table-scroll td[data-col="tokens"],
+.table-scroll th[data-col="paid"],
 .table-scroll td[data-col="paid"] {
-  width: 5.2rem;
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  word-break: keep-all !important;
+  hyphens: none !important;
+}
+
+/* Minimal width hints for the no-wrap columns */
+.table-scroll th[data-col="date"], .table-scroll td[data-col="date"],
+.table-scroll th[data-col="submission date"], .table-scroll td[data-col="submission date"],
+.table-scroll th[data-col="entry date"], .table-scroll td[data-col="entry date"],
+.table-scroll th[data-col="action date"], .table-scroll td[data-col="action date"] { width: var(--w-date); }
+
+.table-scroll th[data-col="id"], .table-scroll td[data-col="id"],
+.table-scroll th[data-col="submission id"], .table-scroll td[data-col="submission id"] { width: var(--w-id); }
+
+.table-scroll th[data-col="facility"], .table-scroll td[data-col="facility"] { width: var(--w-facility); }
+.table-scroll th[data-col="assigned to"], .table-scroll td[data-col="assigned to"] { width: var(--w-assigned); }
+.table-scroll th[data-col="area"], .table-scroll td[data-col="area"] { width: var(--w-area); }
+.table-scroll th[data-col="part number"], .table-scroll td[data-col="part number"] { width: var(--w-partnum); }
+
+.table-scroll th[data-col="work order"], .table-scroll td[data-col="work order"],
+.table-scroll th[data-col="maintenance work order number or type na if no w/o"],
+.table-scroll td[data-col="maintenance work order number or type na if no w/o"] { width: var(--w-workorder); }
+
+/* Status & Approval columns: allow a badge to show fully, but don't sprawl */
+.table-scroll th[data-col="status"], .table-scroll td[data-col="status"],
+.table-scroll th[data-col="ci approval"], .table-scroll td[data-col="ci approval"] { width: var(--w-badgecol); }
+
+/* Tokens / Paid centered and compact */
+.table-scroll th[data-col="tokens"], .table-scroll td[data-col="tokens"],
+.table-scroll th[data-col="paid"], .table-scroll td[data-col="paid"] {
+  width: var(--w-tokens);
   text-align: center;
 }
+
+/* Pills shouldn't wrap */
+.table-scroll .badge { white-space: nowrap; }
 
 /* Zebra striping for readability */
 .table-scroll tbody tr:nth-child(odd) { background: rgba(255,255,255,0.02); }
+
 
 /* === 11. Scrollbar hiding (optional) === */
 .table-scroll::-webkit-scrollbar { display: none; }
