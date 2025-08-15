@@ -430,3 +430,32 @@ body.notes .notes-toolbar .toolbar button i { pointer-events: none; font-size: 1
 /* Delete icon */
 .delete-icon { background: none; border: none; color: #e74c3c; font-size: 14px; cursor: pointer; padding: 4px; opacity: 0.8; transition: 0.2s ease; }
 .delete-icon:hover { opacity: 1; }
+
+/* === Bounded table frame (scrolls internally, page chrome stays fixed) === */
+.table-frame {
+  background: var(--card-bg);
+  border: 1px solid #2d3f3f;
+  border-radius: 8px;
+}
+
+.table-window {
+  /* height of the scrolling window (controlled by --table-window-h from JS) */
+  max-height: var(--table-window-h, 560px);
+  overflow: auto;
+  border-radius: 8px 8px 0 0;
+}
+
+/* thin footer so the bottom is always clearly visible */
+.table-footer {
+  border-top: 1px solid #2d3f3f;
+  padding: 10px 12px;
+  border-radius: 0 0 8px 8px;
+  background: var(--card-bg);
+  color: var(--info);
+  font-size: 12px;
+}
+
+/* optional: hide the vertical scrollbar track for a cleaner look (your choice) */
+.table-window::-webkit-scrollbar { width: 0; height: 0; }
+.table-window { scrollbar-width: none; -ms-overflow-style: none; }
+
