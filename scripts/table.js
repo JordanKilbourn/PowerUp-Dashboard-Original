@@ -1,5 +1,13 @@
 // /scripts/table.js
 
+/**
+ * Renders a table into containerId.
+ * - Keeps your existing pill/nowrap/clamp behavior.
+ * - Automatically wraps the table in a fixed-height "frame" that
+ *   scrolls internally (so the page chrome stays put).
+ * - Shows a small footer area inside the frame so the bottom is always visible.
+ */
+
 export function renderTable({
   sheet,
   containerId,
@@ -7,13 +15,14 @@ export function renderTable({
   filterByEmpID = true,
   checkmarkCols = [],
   excludeCols = [],
-  columnOrder = null
+  columnOrder = null,
+  frameHeight = 560   // <- height of the scroll window (px). Match your screenshot.
 }) {
   const empID = sessionStorage.getItem("empID");
-  const el = document.getElementById(containerId);
-  if (!sheet || !el) return;
+  const host = document.getElementById(containerId);
+  if (!sheet || !host) return;
 
-  /* Build a quick title->columnId map */
+  // ---- 0) Build title -> columnId map
   const colMap = {};
   sheet.columns.forEach(c => {
     colMap[c.title.trim().toLowerCase()] = c.id;
@@ -24,7 +33,7 @@ export function renderTable({
     const cell = row.cells.find(c => c.columnId === colId);
     const value = cell?.displayValue ?? cell?.value ?? '';
 
-    // Nice short dates (MM/DD/YY) for anything labeled like a date
+    // short dates for anything that looks like a date column
     if (title.toLowerCase().includes("date") && value && !isNaN(Date.parse(value))) {
       const d = new Date(value);
       return `${d.getMonth() + 1}/${d.getDate()}/${String(d.getFullYear()).slice(-2)}`;
@@ -32,7 +41,7 @@ export function renderTable({
     return value;
   };
 
-  /* Filter rows by Employee ID if requested */
+  // ---- 1) Filter by Employee ID (optional)
   let rows = sheet.rows;
   if (filterByEmpID) {
     rows = rows.filter(r => {
@@ -41,23 +50,22 @@ export function renderTable({
     });
   }
 
-  // If nothing to show, render a lightweight empty state (if container is a DIV)
+  // ---- 2) Early empty state
   if (rows.length === 0) {
-    if (el.tagName.toLowerCase() !== 'table') {
-      el.innerHTML = `
-        <h2>${title}</h2>
-        <div class="empty-state">
-          <p>You don’t have any records yet for <strong>${title}</strong>.</p>
-        </div>`;
-      ensureFooter(el); // still attach footer to the scroll window if present
-    } else {
-      el.innerHTML = '';
-      ensureFooter(el);
-    }
+    host.innerHTML = `
+      <div class="table-frame">
+        <div class="table-header-row">
+          <h3>${title}</h3>
+        </div>
+        <div class="table-window" style="--table-window-h:${frameHeight}px">
+          <div class="empty-state"><p>No records yet.</p></div>
+        </div>
+        <div class="table-footer"></div>
+      </div>`;
     return;
   }
 
-  /* Header label remaps for readability */
+  // ---- 3) Friendly header labels
   const colHeaderMap = {
     // CI
     "submission date": "Date",
@@ -74,7 +82,7 @@ export function renderTable({
     "resourced date": "Resourced On",
     "paid": "Paid",
     // Safety
-    "submit date": "Date",
+    "submit date": "Submit Date",
     "facility": "Facility",
     "department/area": "Department/Area",
     "safety concern": "Safety Concern",
@@ -85,36 +93,23 @@ export function renderTable({
     "who was the safety concern escalated to": "Escalated To",
     "did you personally speak to the leadership": "Spoke to Leadership",
     "leadership update": "Leadership Update",
-    // Quality (labels come through fine, but listed here for clarity)
+    // Quality
     "catch id": "Catch ID",
     "entry date": "Entry Date",
     "submitted by": "Submitted By",
     "area": "Area",
     "quality catch": "Quality Catch",
-    "part number": "Part Number",
-    "description": "Description",
-    "status": "Status"
+    "part number": "Part Number"
   };
 
-  /* Which columns to show (respect columnOrder if provided) */
+  // ---- 4) Which columns to render
   const visibleCols = columnOrder
     ? columnOrder.filter(c => !excludeCols.includes(c))
     : sheet.columns
         .filter(c => !c.hidden && !excludeCols.includes(c.title.trim()))
         .map(c => c.title);
 
-  /* Build <thead> */
-  const buildHead = () => {
-    let ths = '';
-    visibleCols.forEach(c => {
-      const key = c.trim().toLowerCase();
-      const label = colHeaderMap[key] || c;
-      ths += `<th data-col="${key}">${label}</th>`;
-    });
-    return `<thead><tr>${ths}</tr></thead>`;
-  };
-
-  /* Pill badges */
+  // ---- 5) Badge pills
   const pillFrom = (normalized, rawValue) => {
     const v = String(rawValue ?? '').trim();
     if (!v) return '';
@@ -125,10 +120,9 @@ export function renderTable({
     }
 
     if (normalized === 'status') {
-      // Cross-table mapping so Quality/Safety/CI all render consistently
       const map = {
         'completed':'completed', 'done':'completed',
-        'accepted safety concern':'approved', 'accepted':'approved',
+        'accepted safety concern':'approved',
         'approved':'approved',
         'denied/cancelled':'denied', 'cancelled':'denied', 'denied':'denied', 'rejected':'denied',
         'needs researched':'pending', 'needs research':'pending', 'needs review':'pending',
@@ -137,13 +131,23 @@ export function renderTable({
       const cls = map[v.toLowerCase()] || 'pending';
       return `<span class="badge ${cls}">${v}</span>`;
     }
-
     return null;
   };
 
   const isCheckCol = (name) => checkmarkCols.map(s => s.toLowerCase()).includes(name);
 
-  /* Build <tbody> */
+  // ---- 6) Build THEAD
+  const buildHead = () => {
+    let ths = '';
+    visibleCols.forEach(c => {
+      const key = c.trim().toLowerCase();
+      const label = colHeaderMap[key] || c;
+      ths += `<th data-col="${key}">${label}</th>`;
+    });
+    return `<thead><tr>${ths}</tr></thead>`;
+  };
+
+  // ---- 7) Build TBODY
   const buildBody = () => {
     let rowsHtml = '';
     rows.forEach(r => {
@@ -152,22 +156,20 @@ export function renderTable({
         const raw = get(r, title);
         const key  = title.trim().toLowerCase();
 
-        // Checkmarks for boolean-ish columns
+        // checkmark columns
         let content = raw;
         if (isCheckCol(key)) {
-          if (raw === true || raw === '✓') content = `<span class="checkmark">&#10003;</span>`;
+          if (raw === true || raw === '✓')        content = `<span class="checkmark">&#10003;</span>`;
           else if (raw === false || raw === '✗' || raw === 'X') content = `<span class="cross">&#10007;</span>`;
         }
 
-        // Pill badges
+        // pills
         const pill = pillFrom(key, raw);
         if (pill) content = pill;
 
-        const safeTitle = (typeof raw === 'string')
-          ? raw.replace(/"/g,'&quot;')
-          : String(raw ?? '');
-
-        tds += `<td data-col="${key}" title="${safeTitle}">
+        // wrap cell for clamp/nowrap rules in CSS
+        const safeTitle = typeof raw === 'string' ? raw.replace(/"/g,'&quot;') : raw;
+        tds += `<td data-col="${key}" title="${safeTitle ?? ''}">
                   <div class="cell">${content ?? ''}</div>
                 </td>`;
       });
@@ -176,33 +178,34 @@ export function renderTable({
     return `<tbody class="dashboard-table-body">${rowsHtml}</tbody>`;
   };
 
-  /* Render into either a <table> or a <div> */
-  const isTableEl = el.tagName.toLowerCase() === 'table';
-  if (isTableEl) {
-    el.classList.add('dashboard-table');
-    el.innerHTML = buildHead() + buildBody();
-    ensureFooter(el);       // << attach sticky footer to the .table-scroll wrapper
-  } else {
-    const html = `<table class="dashboard-table">${buildHead()}${buildBody()}</table>`;
-    el.innerHTML = html;
-    ensureFooter(el);       // << attach sticky footer to this element if it's the scroll window, or to its wrapper
-  }
-}
+  // ---- 8) Ensure we have a frame that scrolls internally
+  // Structure we want inside host:
+  // <div class="table-frame">
+  //   (your filter/add/expand controls are *outside*, already present)
+  //   <div class="table-window" style="--table-window-h:560px">
+  //     <table class="dashboard-table"> ... </table>
+  //   </div>
+  //   <div class="table-footer">End of results</div>
+  // </div>
 
-/* --- Helper: append a sticky footer INSIDE the nearest `.table-scroll` wrapper --- */
-function ensureFooter(targetEl) {
-  // Find the scroll window to receive the footer
-  const scrollWin =
-    (targetEl.closest && targetEl.closest('.table-scroll')) ||
-    (targetEl.classList && targetEl.classList.contains('table-scroll') ? targetEl : null);
+  // Wipe and rebuild the frame fresh each render
+  const frame = document.createElement('div');
+  frame.className = 'table-frame';
 
-  if (!scrollWin) return;
-
-  // Prevent duplicates if renderTable runs again
-  if (scrollWin.querySelector('.table-window-footer')) return;
+  const windowDiv = document.createElement('div');
+  windowDiv.className = 'table-window';
+  windowDiv.style.setProperty('--table-window-h', `${frameHeight}px`);
 
   const footer = document.createElement('div');
-  footer.className = 'table-window-footer';
-  footer.textContent = 'End of results';
-  scrollWin.appendChild(footer);
+  footer.className = 'table-footer';
+  footer.innerHTML = `<span class="end-text">End of results</span>`;
+
+  const tableHTML = `<table class="dashboard-table">${buildHead()}${buildBody()}</table>`;
+  windowDiv.innerHTML = tableHTML;
+
+  frame.appendChild(windowDiv);
+  frame.appendChild(footer);
+
+  host.innerHTML = '';
+  host.appendChild(frame);
 }
