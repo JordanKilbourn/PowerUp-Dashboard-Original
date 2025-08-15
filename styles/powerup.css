@@ -14,9 +14,11 @@
   --accent-fade: rgba(0, 255, 190, 0.1);
   --highlight: #00ffc3;
 
-  /* tables */
+  /* Tables */
   --table-font: 14px;
-  --table-clamp: 2; /* default body lines when collapsed */
+  --table-clamp: 2;                 /* default: 2 lines in clamped cells */
+  --table-viewport-offset: 320px;   /* header + cards + tabs height budget */
+  --table-bottom-pad: 56px;         /* breathing room at end of table */
 }
 
 /* === 2. Global reset === */
@@ -39,12 +41,8 @@ html, body {
 }
 .sidebar.expanded { width: 220px; }
 .sidebar .item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 15px;
-  cursor: pointer;
-  color: var(--text);
+  display: flex; align-items: center; gap: 12px;
+  padding: 15px; cursor: pointer; color: var(--text);
   transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 .sidebar .item:hover {
@@ -55,11 +53,8 @@ html, body {
 .sidebar .item i {
   font-size: 20px;
   width: 24px; height: 24px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-style: normal;
-  color: rgba(255,255,255,0.7);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-style: normal; color: rgba(255,255,255,0.7);
 }
 .sidebar .item:hover i { color: var(--accent); }
 .sidebar .item span { font-size: 16px; display: none; }
@@ -68,11 +63,11 @@ html, body {
 .sidebar .item.active i { color: var(--accent); }
 
 /* === 4. Main & header === */
-.main {
+.main{
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto;   /* <— allow page to scroll (was hidden) */
   width: 100%;
 }
 .header {
@@ -90,8 +85,7 @@ html, body {
 
 /* === 5. Dashboard cards === */
 body.dashboard .top-cards {
-  display: flex;
-  gap: 20px;
+  display: flex; gap: 20px;
   padding: 15px 20px 35px 20px;
   background: var(--bg);
   position: sticky; top: 75px; z-index: 9;
@@ -108,8 +102,12 @@ body.dashboard .power-card { flex: 1; max-width: 500px; border: 2px solid var(--
 body.dashboard .power-card h3 { font-size: 16px; margin-bottom: 5px; color: var(--accent); font-weight: 600; }
 
 /* Progress bars */
-.progress-bar { height: 8px; background: #2d3f3f; border-radius: 4px; overflow: hidden; margin: 6px 0 10px; }
-.progress-bar-inner { height: 100%; background: var(--accent); width: 18.5%; transition: width 0.3s ease-in-out; }
+.progress-bar {
+  height: 8px; background: #2d3f3f; border-radius: 4px; overflow: hidden; margin: 6px 0 10px;
+}
+.progress-bar-inner {
+  height: 100%; background: var(--accent); width: 18.5%; transition: width 0.3s ease-in-out;
+}
 
 /* Token card */
 .token-card {
@@ -137,7 +135,7 @@ body.dashboard .power-card h3 { font-size: 16px; margin-bottom: 5px; color: var(
   border-color: var(--accent) var(--accent) transparent var(--accent);
   font-weight: 700; position: relative; top: 2px; z-index: 9;
 }
-.tab-panel { display: none; padding: 20px; }
+.tab-panel { display: none; padding: 20px; padding-bottom: var(--table-bottom-pad); }
 .tab-panel.active { display: block; }
 
 /* === 7. Table headers / controls === */
@@ -158,16 +156,10 @@ body.dashboard .power-card h3 { font-size: 16px; margin-bottom: 5px; color: var(
 .add-btn:hover { background: #ffa364; transform: scale(1.05); }
 .row-count { font-size: 14px; color: var(--accent); }
 
-/* Distinct expand/collapse control (not the same style as Add Submission) */
+/* Subtle expand/collapse toggle (distinct from Add Submission) */
 .table-toggle {
-  background: transparent;
-  border: 1px dashed var(--accent);
-  color: var(--accent);
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 12px;
-  cursor: pointer;
-  opacity: 0.85;
+  background: transparent; border: 1px dashed var(--accent); color: var(--accent);
+  border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer; opacity: 0.85;
 }
 .table-toggle:hover { opacity: 1; background: var(--card-bg-hover); }
 
@@ -195,72 +187,62 @@ body.power-hours .summary-details select {
 body.power-hours .progress-bar { background: #2b4d4e; height: 8px; margin: 8px 0; border-radius: 10px; overflow: hidden; }
 body.power-hours .progress-bar-inner { background: var(--accent); height: 100%; width: 0%; transition: width 0.3s; }
 
-/* === 10. Tables (clean, compact, browser-driven widths) === */
-.table-scroll {
-  max-height: 600px;
+/* === 10. Tables (clean, compact, viewport-sized) === */
+.table-scroll{
+  max-height: calc(100vh - var(--table-viewport-offset));
   overflow: auto;
   border: 1px solid #2d3f3f;
   border-radius: 6px;
+  padding-bottom: var(--table-bottom-pad);   /* ensures last row is never jammed at the bottom */
+}
+.table-scroll::after{
+  content: '';
+  display: block;
+  height: var(--table-bottom-pad);          /* “guard rail” beyond the last row */
 }
 
-/* Let the browser size columns but keep things compact */
-.table-scroll table {
+.table-scroll table{
   width: 100%;
   border-collapse: collapse;
-  table-layout: auto;
+  table-layout: auto;                        /* let browser size columns */
   font-size: var(--table-font);
 }
-
 .table-scroll th,
-.table-scroll td {
+.table-scroll td{
   padding: 8px 10px;
   text-align: left;
   vertical-align: top;
   border-bottom: 1px solid #3a4e4e;
 }
-
-.table-scroll thead th {
+.table-scroll thead th{
   position: sticky; top: 0;
-  background: #213331;
-  z-index: 2;
-  color: var(--accent);
+  background: #213331; z-index: 2; color: var(--accent);
 }
-
-/* Hover highlighting */
 .table-scroll tbody tr:hover { background-color: rgba(255,255,255,0.05); }
 
-/* Sort affordance (JS adds .sortable) */
+/* Sort affordance (JS adds .sortable / .sorted-asc / .sorted-desc) */
 .table-scroll th.sortable::after { content: ' ⇅'; font-size: 12px; color: #999; }
+.table-scroll th.sorted-asc::after { content: ' ↑'; color: var(--accent); }
+.table-scroll th.sorted-desc::after { content: ' ↓'; color: var(--accent); }
 
-/* ---- Text clamping (default) ------------------------------------------ */
+/* Clamp long text; toggle via table.is-expanded */
 .table-scroll .cell,
-.table-scroll .cell-content {
+.table-scroll .cell-content{
   display: -webkit-box;
-  -webkit-box-orient: vertical;
   -webkit-line-clamp: var(--table-clamp);
+  -webkit-box-orient: vertical;
   overflow: hidden;
-
-  /* sensible wrapping that won't split single words like “Lewisburg” */
-  overflow-wrap: break-word;
-  word-break: normal;
-  hyphens: manual;
   line-height: 1.35;
+  overflow-wrap: anywhere;
+  hyphens: auto;
 }
-
-/* When rows are expanded, turn clamping OFF safely (no overlapping)      */
-/* Works with any of these classes being toggled by your button           */
 .table-scroll table.is-expanded .cell,
-.table-scroll table.is-expanded .cell-content,
-.table-scroll.expanded .cell,
-.table-scroll.expanded .cell-content,
-.table-scroll.rows-expanded .cell,
-.table-scroll.rows-expanded .cell-content {
-  display: block;                /* switch away from -webkit-box        */
-  -webkit-line-clamp: initial;
+.table-scroll table.is-expanded .cell-content{
+  -webkit-line-clamp: unset;
   overflow: visible;
 }
 
-/* Give narrative columns a touch more room (still clamped by default)    */
+/* Slightly more headroom for known “long text” columns */
 .table-scroll td[data-col="problem"] .cell,
 .table-scroll td[data-col="proposed improvement"] .cell,
 .table-scroll td[data-col="last action"] .cell,
@@ -268,117 +250,58 @@ body.power-hours .progress-bar-inner { background: var(--accent); height: 100%; 
 .table-scroll td[data-col="recommendations"] .cell,
 .table-scroll td[data-col="recommendations to correct/improve safety issue"] .cell,
 .table-scroll td[data-col="resolution"] .cell,
-.table-scroll td[data-col="leadership update"] .cell {
+.table-scroll td[data-col="leadership update"] .cell{
   -webkit-line-clamp: calc(var(--table-clamp) + 1);
 }
 
-/* ---- NO-WRAP columns (keep these on one line, always) ----------------- */
-:root {
-  /* tweak as you like, these are just sensible defaults */
-  --w-date: 6.6rem;         /* Date / Entry Date / Action Date */
-  --w-id: 6.2rem;           /* ID / Submission ID */
-  --w-facility: 8.5rem;
-  --w-assigned: 10rem;
-  --w-area: 8rem;
-  --w-partnum: 9rem;
-  --w-workorder: 9rem;
-  --w-badgecol: 9.5rem;     /* Status / CI Approval */
-  --w-tokens: 5.2rem;
-}
-
-.table-scroll th[data-col="date"],
-.table-scroll td[data-col="date"],
+/* Keep obvious short columns tight */
 .table-scroll th[data-col="submission date"],
 .table-scroll td[data-col="submission date"],
-.table-scroll th[data-col="entry date"],
-.table-scroll td[data-col="entry date"],
-.table-scroll th[data-col="action date"],
-.table-scroll td[data-col="action date"],
-.table-scroll th[data-col="id"],
-.table-scroll td[data-col="id"],
+.table-scroll th[data-col="date"],
+.table-scroll td[data-col="date"]           { width: 8.2rem; }   /* ~132px */
+
 .table-scroll th[data-col="submission id"],
 .table-scroll td[data-col="submission id"],
-.table-scroll th[data-col="facility"],
-.table-scroll td[data-col="facility"],
-.table-scroll th[data-col="assigned to"],
-.table-scroll td[data-col="assigned to"],
-.table-scroll th[data-col="escalated to"],
-.table-scroll td[data-col="escalated to"],
-.table-scroll th[data-col="spoke to leadership"],
-.table-scroll td[data-col="spoke to leadership"],
-.table-scroll th[data-col="area"],
-.table-scroll td[data-col="area"],
-.table-scroll th[data-col="part number"],
-.table-scroll td[data-col="part number"],
-.table-scroll th[data-col="work order"],
-.table-scroll td[data-col="work order"],
-.table-scroll th[data-col="maintenance work order number or type na if no w/o"],
-.table-scroll td[data-col="maintenance work order number or type na if no w/o"],
-.table-scroll th[data-col="submitted by"],
-.table-scroll td[data-col="submitted by"],
+.table-scroll th[data-col="id"],
+.table-scroll td[data-col="id"]             { width: 6.5rem; }   /* ~104px */
+
 .table-scroll th[data-col="tokens"],
 .table-scroll td[data-col="tokens"],
 .table-scroll th[data-col="paid"],
-.table-scroll td[data-col="paid"] {
-  white-space: nowrap !important;
-  overflow-wrap: normal !important;
-  word-break: keep-all !important;
-  hyphens: none !important;
-}
+.table-scroll td[data-col="paid"]           { width: 5.2rem; text-align: center; }
 
-/* Minimal width hints for the no-wrap columns */
-.table-scroll th[data-col="date"], .table-scroll td[data-col="date"],
-.table-scroll th[data-col="submission date"], .table-scroll td[data-col="submission date"],
-.table-scroll th[data-col="entry date"], .table-scroll td[data-col="entry date"],
-.table-scroll th[data-col="action date"], .table-scroll td[data-col="action date"] { width: var(--w-date); }
-
-.table-scroll th[data-col="id"], .table-scroll td[data-col="id"],
-.table-scroll th[data-col="submission id"], .table-scroll td[data-col="submission id"] { width: var(--w-id); }
-
-.table-scroll th[data-col="facility"], .table-scroll td[data-col="facility"] { width: var(--w-facility); }
-.table-scroll th[data-col="assigned to"], .table-scroll td[data-col="assigned to"] { width: var(--w-assigned); }
-.table-scroll th[data-col="area"], .table-scroll td[data-col="area"] { width: var(--w-area); }
-.table-scroll th[data-col="part number"], .table-scroll td[data-col="part number"] { width: var(--w-partnum); }
-
-.table-scroll th[data-col="work order"], .table-scroll td[data-col="work order"],
+.table-scroll th[data-col="work order"],
+.table-scroll td[data-col="work order"],
 .table-scroll th[data-col="maintenance work order number or type na if no w/o"],
-.table-scroll td[data-col="maintenance work order number or type na if no w/o"] { width: var(--w-workorder); }
+.table-scroll td[data-col="maintenance work order number or type na if no w/o"] { width: 9rem; }
 
-/* Status & Approval columns: allow a badge to show fully, but don't sprawl */
-.table-scroll th[data-col="status"], .table-scroll td[data-col="status"],
-.table-scroll th[data-col="ci approval"], .table-scroll td[data-col="ci approval"] { width: var(--w-badgecol); }
+.table-scroll th[data-col="status"],
+.table-scroll td[data-col="status"],
+.table-scroll th[data-col="ci approval"],
+.table-scroll td[data-col="ci approval"]    { width: 9.5rem; }
 
-/* Tokens / Paid centered and compact */
-.table-scroll th[data-col="tokens"], .table-scroll td[data-col="tokens"],
-.table-scroll th[data-col="paid"], .table-scroll td[data-col="paid"] {
-  width: var(--w-tokens);
-  text-align: center;
+/* Non-wrapping for known short columns (table.js adds .nowrap to these tds) */
+.table-scroll td.nowrap .cell{
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+.table-scroll th.nowrap { white-space: nowrap; }
 
-/* Pills shouldn't wrap */
+/* Pills never stretch rows */
 .table-scroll .badge { white-space: nowrap; }
 
-/* Zebra striping for readability */
-.table-scroll tbody tr:nth-child(odd) { background: rgba(255,255,255,0.02); }
+/* Zebra striping */
+.table-scroll tbody tr:nth-child(odd){ background: rgba(255,255,255,0.02); }
 
-/* Ensure there's always breathing room under the last row */
-.table-scroll { padding-bottom: 28px; }
-
-/* Make the synthetic spacer row obvious but subtle */
-.table-scroll tr.spacer-row td {
-  border-top: 1px dashed rgba(0, 255, 198, 0.25);
-  background: #152323;
-  padding: 10px 0 14px;   /* adds visible space under the last real row */
-}
-
-/* Center the "End of results" hint and keep it small */
-.table-scroll .end-cap {
+/* “End of results” row (tfoot) */
+.table-scroll tfoot .table-end td{
   text-align: center;
-  font-size: 12px;
-  color: rgba(156, 207, 216, 0.9);
-  opacity: 0.8;
+  color: #8aa3a3;
+  padding: 10px;
+  background: rgba(255,255,255,0.03);
+  border-top: 1px solid #3a4e4e;
 }
-
 
 /* === 11. Scrollbar hiding (optional) === */
 .table-scroll::-webkit-scrollbar { display: none; }
@@ -472,6 +395,7 @@ body.notes #notesList li {
 body.notes #notesList li:hover, body.notes #notesList li.active { background: var(--accent-fade); }
 body.notes .note-meta { font-size: 12px; color: var(--info); margin-top: 2px; }
 
+/* Editor */
 body.notes .notes-editor { flex: 1; display: flex; flex-direction: column; padding: 0 20px; }
 body.notes .notes-toolbar {
   display: flex; justify-content: space-between; align-items: center;
@@ -493,53 +417,3 @@ body.notes .notes-toolbar .toolbar button i { pointer-events: none; font-size: 1
 /* Delete icon */
 .delete-icon { background: none; border: none; color: #e74c3c; font-size: 14px; cursor: pointer; padding: 4px; opacity: 0.8; transition: 0.2s ease; }
 .delete-icon:hover { opacity: 1; }
-
-
-/* === Tables: viewport-fit scroller + visible last row + no-wrap on short fields === */
-
-/* How much vertical “chrome” sits above the table (header + cards + tabs) */
-:root { --table-chrome: 290px; }
-@media (min-width: 1280px) { :root { --table-chrome: 270px; } }
-@media (max-height: 800px) { :root { --table-chrome: 320px; } }
-
-/* Fit scroller to the viewport and give a little extra scroll room at the bottom */
-.table-scroll{
-  max-height: calc(100vh - var(--table-chrome));
-  padding-bottom: 14px;              /* lets you scroll past the last row a touch */
-}
-.table-scroll tbody tr:last-child td{
-  padding-bottom: 12px;              /* ensures the final row is never flush */
-}
-
-/* Short fields should never wrap; also cancel the clamping box */
-.table-scroll td[data-col="date"] .cell-content,
-.table-scroll td[data-col="submission date"] .cell-content,
-.table-scroll td[data-col="id"] .cell-content,
-.table-scroll td[data-col="submission id"] .cell-content,
-.table-scroll td[data-col="action date"] .cell-content,
-.table-scroll td[data-col="facility"] .cell-content,
-.table-scroll td[data-col="department/area"] .cell-content,
-.table-scroll td[data-col="assigned to"] .cell-content,
-.table-scroll td[data-col="work order"] .cell-content,
-.table-scroll td[data-col="escalated to"] .cell-content,
-.table-scroll td[data-col="spoke to leadership"] .cell-content,
-.table-scroll td[data-col="entry date"] .cell-content,
-.table-scroll td[data-col="submitted by"] .cell-content,
-.table-scroll td[data-col="area"] .cell-content,
-.table-scroll td[data-col="part number"] .cell-content{
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  -webkit-line-clamp: initial;       /* stop the multi-line clamp for these */
-}
-
-/* Status/Approval columns: enough width for a pill but not huge */
-.table-scroll th[data-col="status"],
-.table-scroll td[data-col="status"],
-.table-scroll th[data-col="ci approval"],
-.table-scroll td[data-col="ci approval"] {
-  width: 9.5rem;
-}
-.table-scroll .badge { white-space: nowrap; }
-
