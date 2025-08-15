@@ -41,22 +41,25 @@ export function renderTable({
     });
   }
 
+  // If nothing to show, render a lightweight empty state (if container is a DIV)
   if (rows.length === 0) {
-    // Render a tiny empty state if the container is a DIV, otherwise clear table
     if (el.tagName.toLowerCase() !== 'table') {
       el.innerHTML = `
         <h2>${title}</h2>
         <div class="empty-state">
           <p>You don’t have any records yet for <strong>${title}</strong>.</p>
         </div>`;
+      ensureFooter(el); // still attach footer to the scroll window if present
     } else {
       el.innerHTML = '';
+      ensureFooter(el);
     }
     return;
   }
 
-  /* Labels to show in headers */
+  /* Header label remaps for readability */
   const colHeaderMap = {
+    // CI
     "submission date": "Date",
     "submission id": "ID",
     "problem statements": "Problem",
@@ -70,7 +73,6 @@ export function renderTable({
     "resourced": "Resourced",
     "resourced date": "Resourced On",
     "paid": "Paid",
-
     // Safety
     "submit date": "Date",
     "facility": "Facility",
@@ -82,19 +84,26 @@ export function renderTable({
     "maintenance work order number or type na if no w/o": "Work Order",
     "who was the safety concern escalated to": "Escalated To",
     "did you personally speak to the leadership": "Spoke to Leadership",
-    "leadership update": "Leadership Update"
+    "leadership update": "Leadership Update",
+    // Quality (labels come through fine, but listed here for clarity)
+    "catch id": "Catch ID",
+    "entry date": "Entry Date",
+    "submitted by": "Submitted By",
+    "area": "Area",
+    "quality catch": "Quality Catch",
+    "part number": "Part Number",
+    "description": "Description",
+    "status": "Status"
   };
 
-  /* Which columns to show */
+  /* Which columns to show (respect columnOrder if provided) */
   const visibleCols = columnOrder
     ? columnOrder.filter(c => !excludeCols.includes(c))
     : sheet.columns
         .filter(c => !c.hidden && !excludeCols.includes(c.title.trim()))
         .map(c => c.title);
 
-  /* If target is a <table>, write thead/tbody directly; if it's a DIV, build a table */
-  const isTableEl = el.tagName.toLowerCase() === 'table';
-
+  /* Build <thead> */
   const buildHead = () => {
     let ths = '';
     visibleCols.forEach(c => {
@@ -105,6 +114,7 @@ export function renderTable({
     return `<thead><tr>${ths}</tr></thead>`;
   };
 
+  /* Pill badges */
   const pillFrom = (normalized, rawValue) => {
     const v = String(rawValue ?? '').trim();
     if (!v) return '';
@@ -115,10 +125,10 @@ export function renderTable({
     }
 
     if (normalized === 'status') {
-      // cross-table status mapping
+      // Cross-table mapping so Quality/Safety/CI all render consistently
       const map = {
         'completed':'completed', 'done':'completed',
-        'accepted safety concern':'approved',
+        'accepted safety concern':'approved', 'accepted':'approved',
         'approved':'approved',
         'denied/cancelled':'denied', 'cancelled':'denied', 'denied':'denied', 'rejected':'denied',
         'needs researched':'pending', 'needs research':'pending', 'needs review':'pending',
@@ -133,6 +143,7 @@ export function renderTable({
 
   const isCheckCol = (name) => checkmarkCols.map(s => s.toLowerCase()).includes(name);
 
+  /* Build <tbody> */
   const buildBody = () => {
     let rowsHtml = '';
     rows.forEach(r => {
@@ -144,7 +155,7 @@ export function renderTable({
         // Checkmarks for boolean-ish columns
         let content = raw;
         if (isCheckCol(key)) {
-          if (raw === true || raw === '✓')        content = `<span class="checkmark">&#10003;</span>`;
+          if (raw === true || raw === '✓') content = `<span class="checkmark">&#10003;</span>`;
           else if (raw === false || raw === '✗' || raw === 'X') content = `<span class="cross">&#10007;</span>`;
         }
 
@@ -152,35 +163,46 @@ export function renderTable({
         const pill = pillFrom(key, raw);
         if (pill) content = pill;
 
-        // Wrap in .cell for clamping (CSS controls height/wrapping)
-        const titleAttr = (typeof raw === 'string')
-          ? raw.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-          : raw;
+        const safeTitle = (typeof raw === 'string')
+          ? raw.replace(/"/g,'&quot;')
+          : String(raw ?? '');
 
-        tds += `<td data-col="${key}" title="${titleAttr ?? ''}">
+        tds += `<td data-col="${key}" title="${safeTitle}">
                   <div class="cell">${content ?? ''}</div>
                 </td>`;
       });
-
       rowsHtml += `<tr>${tds}</tr>`;
     });
-
-    // ⬇️ Add a clearly-visible spacer/end-cap so the final row never hugs the bottom
-    rowsHtml += `
-      <tr class="spacer-row" aria-hidden="true">
-        <td colspan="${visibleCols.length}">
-          <div class="end-cap">End of results</div>
-        </td>
-      </tr>`;
-
     return `<tbody class="dashboard-table-body">${rowsHtml}</tbody>`;
   };
 
+  /* Render into either a <table> or a <div> */
+  const isTableEl = el.tagName.toLowerCase() === 'table';
   if (isTableEl) {
     el.classList.add('dashboard-table');
     el.innerHTML = buildHead() + buildBody();
+    ensureFooter(el);       // << attach sticky footer to the .table-scroll wrapper
   } else {
     const html = `<table class="dashboard-table">${buildHead()}${buildBody()}</table>`;
     el.innerHTML = html;
+    ensureFooter(el);       // << attach sticky footer to this element if it's the scroll window, or to its wrapper
   }
+}
+
+/* --- Helper: append a sticky footer INSIDE the nearest `.table-scroll` wrapper --- */
+function ensureFooter(targetEl) {
+  // Find the scroll window to receive the footer
+  const scrollWin =
+    (targetEl.closest && targetEl.closest('.table-scroll')) ||
+    (targetEl.classList && targetEl.classList.contains('table-scroll') ? targetEl : null);
+
+  if (!scrollWin) return;
+
+  // Prevent duplicates if renderTable runs again
+  if (scrollWin.querySelector('.table-window-footer')) return;
+
+  const footer = document.createElement('div');
+  footer.className = 'table-window-footer';
+  footer.textContent = 'End of results';
+  scrollWin.appendChild(footer);
 }
