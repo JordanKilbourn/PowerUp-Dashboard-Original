@@ -18,7 +18,7 @@
   --table-font: 14px;
   --table-clamp: 2;                 /* default: 2 lines in clamped cells */
   --table-viewport-offset: 320px;   /* header + cards + tabs height budget */
-  --table-bottom-pad: 56px;         /* breathing room at end of table */
+  --table-bottom-pad: 20px;         /* breathing room at end of table */
 }
 
 /* === 2. Global reset === */
