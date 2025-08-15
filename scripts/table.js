@@ -1,211 +1,181 @@
-// /scripts/table.js
+import React, { useMemo, useRef } from 'react'
+import { Stage, Layer, Line, Text, Circle, Arrow } from 'react-konva'
+import PartNode from './PartNode'
+import HookNode from './HookNode'
+import { buildSnapTargets } from '@/lib/snapping'
+import { rotatePoint } from '@/lib/geometry'
+import type { Instruction } from '@/types'
 
-/**
- * Renders a table into containerId.
- * - Keeps your existing pill/nowrap/clamp behavior.
- * - Automatically wraps the table in a fixed-height "frame" that
- *   scrolls internally (so the page chrome stays put).
- * - Shows a small footer area inside the frame so the bottom is always visible.
- */
+type Props = {
+  instruction: Instruction
+  updateInstruction: (u: Partial<Instruction>) => void
+  onSelectHook: (id: string | null) => void
+  selectedHookId: string | null
+  stageRef: React.MutableRefObject<any>
+  editSnaps: boolean
+  onRequestPdf?: () => void
+  onRequestImage?: () => void
+}
 
-export function renderTable({
-  sheet,
-  containerId,
-  title = '',
-  filterByEmpID = true,
-  checkmarkCols = [],
-  excludeCols = [],
-  columnOrder = null,
-  frameHeight = 560   // <- height of the scroll window (px). Match your screenshot.
-}) {
-  const empID = sessionStorage.getItem("empID");
-  const host = document.getElementById(containerId);
-  if (!sheet || !host) return;
+const HOOK_META: Record<string, { name: string; lengthIn: number }> = {
+  HOOK_4: { name: 'S-Hook 4"', lengthIn: 4 },
+  HOOK_8: { name: 'S-Hook 8"', lengthIn: 8 },
+  HOOK_12: { name: 'S-Hook 12"', lengthIn: 12 },
+}
 
-  // ---- 0) Build title -> columnId map
-  const colMap = {};
-  sheet.columns.forEach(c => {
-    colMap[c.title.trim().toLowerCase()] = c.id;
-  });
+export default function CanvasView({
+  instruction, updateInstruction, onSelectHook, selectedHookId, stageRef, editSnaps,
+  onRequestPdf, onRequestImage
+}: Props) {
+  const width = 1400, height = 760
+  const { part, hooks, settings } = instruction
 
-  const get = (row, title) => {
-    const colId = colMap[title.toLowerCase()];
-    const cell = row.cells.find(c => c.columnId === colId);
-    const value = cell?.displayValue ?? cell?.value ?? '';
-
-    // short dates for anything that looks like a date column
-    if (title.toLowerCase().includes("date") && value && !isNaN(Date.parse(value))) {
-      const d = new Date(value);
-      return `${d.getMonth() + 1}/${d.getDate()}/${String(d.getFullYear()).slice(-2)}`;
+  // --- Part snap points in world space (rotate w/ part)
+  const partWorldSnaps = useMemo(() => {
+    const out: { id: string; x: number; y: number }[] = []
+    const cx = part.x + part.width / 2, cy = part.y + part.height / 2
+    for (const s of part.snapPoints) {
+      const px = part.x + s.u * part.width
+      const py = part.y + s.v * part.height
+      out.push({ id: s.id, ...rotatePoint(px, py, cx, cy, part.rotation) })
     }
-    return value;
-  };
+    return out
+  }, [part])
 
-  // ---- 1) Filter by Employee ID (optional)
-  let rows = sheet.rows;
-  if (filterByEmpID) {
-    rows = rows.filter(r => {
-      const idVal = get(r, "Employee ID");
-      return idVal && idVal.toString().toUpperCase() === empID;
-    });
+  // --- Overhead line geometry
+  const pad = 140
+  const pointerLen = 14
+  const lineX0 = pad
+  const lineX1 = width - pad
+  const lineY = settings.lineY
+  const lastSnapX = lineX1 - (pointerLen + 12)
+
+  // --- Eyelets (use pxPerInch * eyeletSpacingIn; stop before arrow head)
+  const eyelets = useMemo(() => {
+    const step = Math.max(4, settings.pxPerInch * settings.eyeletSpacingIn)
+    const xs: number[] = []
+    for (let x = lineX0; x <= lastSnapX; x += step) xs.push(x)
+    return xs.map((x, i) => ({ id: `eyelet-${i}`, x, y: lineY }))
+  }, [settings.pxPerInch, settings.eyeletSpacingIn, lineY])
+
+  // --- Snap targets for hooks (STRICT: only eyelets + part points)
+  const snapTargets = useMemo(
+    () => buildSnapTargets(eyelets, partWorldSnaps),
+    [eyelets, partWorldSnaps]
+  )
+
+  // --- Helper to patch a single hook
+  function updateHook(hid: string, patch: any) {
+    updateInstruction({
+      hooks: hooks.map(h => (h.id === hid ? { ...h, ...patch } : h)),
+    })
   }
 
-  // ---- 2) Early empty state
-  if (rows.length === 0) {
-    host.innerHTML = `
-      <div class="table-frame">
-        <div class="table-header-row">
-          <h3>${title}</h3>
+  const showEmpty = !part.imageSrc
+
+  return (
+    <div className="flex-1 min-w-0 overflow-hidden relative">
+      {/* Empty state overlay */}
+      {showEmpty && (
+        <div className="absolute inset-0 z-10 grid place-items-center pointer-events-none">
+          <div className="pointer-events-auto text-center">
+            <div className="text-lg mb-3 opacity-80">No part loaded</div>
+            <div className="flex gap-2 justify-center">
+              {onRequestPdf && <button className="btn btn-primary" onClick={onRequestPdf}>Add Part from PDF</button>}
+              {onRequestImage && (
+                <label className="btn">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0]
+                      if (f) onRequestImage(f as any)
+                    }}
+                  />
+                  Image…
+                </label>
+              )}
+            </div>
+          </div>
         </div>
-        <div class="table-window" style="--table-window-h:${frameHeight}px">
-          <div class="empty-state"><p>No records yet.</p></div>
-        </div>
-        <div class="table-footer"></div>
-      </div>`;
-    return;
-  }
+      )}
 
-  // ---- 3) Friendly header labels
-  const colHeaderMap = {
-    // CI
-    "submission date": "Date",
-    "submission id": "ID",
-    "problem statements": "Problem",
-    "proposed improvement": "Improvement",
-    "ci approval": "Approval",
-    "assigned to (primary)": "Assigned To",
-    "status": "Status",
-    "action item entry date": "Action Date",
-    "last meeting action item's": "Last Action",
-    "token payout": "Tokens",
-    "resourced": "Resourced",
-    "resourced date": "Resourced On",
-    "paid": "Paid",
-    // Safety
-    "submit date": "Submit Date",
-    "facility": "Facility",
-    "department/area": "Department/Area",
-    "safety concern": "Safety Concern",
-    "description": "Description",
-    "recommendations to correct/improve safety issue": "Recommendations",
-    "resolution": "Resolution",
-    "maintenance work order number or type na if no w/o": "Work Order",
-    "who was the safety concern escalated to": "Escalated To",
-    "did you personally speak to the leadership": "Spoke to Leadership",
-    "leadership update": "Leadership Update",
-    // Quality
-    "catch id": "Catch ID",
-    "entry date": "Entry Date",
-    "submitted by": "Submitted By",
-    "area": "Area",
-    "quality catch": "Quality Catch",
-    "part number": "Part Number"
-  };
+      <Stage width={width} height={height} ref={stageRef}>
+        <Layer>
+          {/* Overhead line */}
+          <Line points={[lineX0, lineY, lineX1, lineY]} stroke="#78cdd1" strokeWidth={3} />
+          {settings.showEyelets && eyelets.map(e => (
+            <Circle key={e.id} x={e.x} y={e.y} radius={6} fill="#78cdd1" />
+          ))}
+          <Text
+            x={lineX0}
+            y={lineY - 24}
+            text="Overhead line"
+            fontSize={16}
+            fill="#a3b9bf"
+          />
+          {settings.lineDirection === 'LTR' ? (
+            <Arrow
+              points={[lineX1 - pointerLen, lineY, lineX1, lineY]}
+              pointerLength={pointerLen}
+              pointerWidth={10}
+              stroke="#78cdd1"
+              fill="#78cdd1"
+              strokeWidth={3}
+            />
+          ) : (
+            <Arrow
+              points={[lineX0 + pointerLen, lineY, lineX0, lineY]}
+              pointerLength={pointerLen}
+              pointerWidth={10}
+              stroke="#78cdd1"
+              fill="#78cdd1"
+              strokeWidth={3}
+            />
+          )}
 
-  // ---- 4) Which columns to render
-  const visibleCols = columnOrder
-    ? columnOrder.filter(c => !excludeCols.includes(c))
-    : sheet.columns
-        .filter(c => !c.hidden && !excludeCols.includes(c.title.trim()))
-        .map(c => c.title);
+          {/* Part (only if an image is present) */}
+          {part.imageSrc && (
+            <PartNode
+              x={part.x} y={part.y} width={part.width} height={part.height}
+              rotation={part.rotation} showSnaps={part.showSnaps}
+              imgSrc={part.imageSrc} snaps={part.snapPoints}
+              onDragEnd={(x, y) => updateInstruction({ part: { ...part, x, y } })}
+              onTransform={(w, h, r) => updateInstruction({ part: { ...part, width: w, height: h, rotation: r } })}
+              onSnapDrag={(id, u, v) =>
+                updateInstruction({
+                  part: {
+                    ...part,
+                    snapPoints: part.snapPoints.map(s => (s.id === id ? { ...s, u, v } : s)),
+                  },
+                })
+              }
+              editSnaps={editSnaps}
+            />
+          )}
 
-  // ---- 5) Badge pills
-  const pillFrom = (normalized, rawValue) => {
-    const v = String(rawValue ?? '').trim();
-    if (!v) return '';
+          {/* Hooks (NEW API: pass a single `hook` + pxPerInch + snapTargets) */}
+          {hooks.map(h => {
+            // adapt your stored hook (typeId) to the new HookNode shape that
+            // expects `hook.hookType.lengthIn`
+            const meta = HOOK_META[h.typeId] ?? { name: h.typeId, lengthIn: 8 }
+            const hookForNode: any = { ...h, hookType: meta }
 
-    if (normalized === 'ci approval') {
-      const cls = ({ approved: 'approved', pending:'pending', denied:'denied', rejected:'denied' }[v.toLowerCase()] || 'pending');
-      return `<span class="badge ${cls}">${v}</span>`;
-    }
-
-    if (normalized === 'status') {
-      const map = {
-        'completed':'completed', 'done':'completed',
-        'accepted safety concern':'approved',
-        'approved':'approved',
-        'denied/cancelled':'denied', 'cancelled':'denied', 'denied':'denied', 'rejected':'denied',
-        'needs researched':'pending', 'needs research':'pending', 'needs review':'pending',
-        'in progress':'pending', 'open':'pending', 'not started':'pending', 'pending':'pending'
-      };
-      const cls = map[v.toLowerCase()] || 'pending';
-      return `<span class="badge ${cls}">${v}</span>`;
-    }
-    return null;
-  };
-
-  const isCheckCol = (name) => checkmarkCols.map(s => s.toLowerCase()).includes(name);
-
-  // ---- 6) Build THEAD
-  const buildHead = () => {
-    let ths = '';
-    visibleCols.forEach(c => {
-      const key = c.trim().toLowerCase();
-      const label = colHeaderMap[key] || c;
-      ths += `<th data-col="${key}">${label}</th>`;
-    });
-    return `<thead><tr>${ths}</tr></thead>`;
-  };
-
-  // ---- 7) Build TBODY
-  const buildBody = () => {
-    let rowsHtml = '';
-    rows.forEach(r => {
-      let tds = '';
-      visibleCols.forEach(title => {
-        const raw = get(r, title);
-        const key  = title.trim().toLowerCase();
-
-        // checkmark columns
-        let content = raw;
-        if (isCheckCol(key)) {
-          if (raw === true || raw === '✓')        content = `<span class="checkmark">&#10003;</span>`;
-          else if (raw === false || raw === '✗' || raw === 'X') content = `<span class="cross">&#10007;</span>`;
-        }
-
-        // pills
-        const pill = pillFrom(key, raw);
-        if (pill) content = pill;
-
-        // wrap cell for clamp/nowrap rules in CSS
-        const safeTitle = typeof raw === 'string' ? raw.replace(/"/g,'&quot;') : raw;
-        tds += `<td data-col="${key}" title="${safeTitle ?? ''}">
-                  <div class="cell">${content ?? ''}</div>
-                </td>`;
-      });
-      rowsHtml += `<tr>${tds}</tr>`;
-    });
-    return `<tbody class="dashboard-table-body">${rowsHtml}</tbody>`;
-  };
-
-  // ---- 8) Ensure we have a frame that scrolls internally
-  // Structure we want inside host:
-  // <div class="table-frame">
-  //   (your filter/add/expand controls are *outside*, already present)
-  //   <div class="table-window" style="--table-window-h:560px">
-  //     <table class="dashboard-table"> ... </table>
-  //   </div>
-  //   <div class="table-footer">End of results</div>
-  // </div>
-
-  // Wipe and rebuild the frame fresh each render
-  const frame = document.createElement('div');
-  frame.className = 'table-frame';
-
-  const windowDiv = document.createElement('div');
-  windowDiv.className = 'table-window';
-  windowDiv.style.setProperty('--table-window-h', `${frameHeight}px`);
-
-  const footer = document.createElement('div');
-  footer.className = 'table-footer';
-  footer.innerHTML = `<span class="end-text">End of results</span>`;
-
-  const tableHTML = `<table class="dashboard-table">${buildHead()}${buildBody()}</table>`;
-  windowDiv.innerHTML = tableHTML;
-
-  frame.appendChild(windowDiv);
-  frame.appendChild(footer);
-
-  host.innerHTML = '';
-  host.appendChild(frame);
+            return (
+              <HookNode
+                key={h.id}
+                hook={hookForNode}
+                pxPerInch={settings.pxPerInch}
+                editSnaps={editSnaps}
+                snapTargets={snapTargets.map(t => ({ ...t, kind: t.kind as 'eyelet' | 'part' }))}
+                updateHook={(id, u) => updateHook(id, u)}
+                onSelect={(id) => onSelectHook(id)}
+              />
+            )
+          })}
+        </Layer>
+      </Stage>
+    </div>
+  )
 }
