@@ -188,14 +188,18 @@ body.power-hours .progress-bar { background: #2b4d4e; height: 8px; margin: 8px 0
 body.power-hours .progress-bar-inner { background: var(--accent); height: 100%; width: 0%; transition: width 0.3s; }
 
 /* === 10. Tables (clean, compact, viewport-sized) === */
+/* A fixed-height “window” for the table body */
 .table-scroll{
-  max-height: calc(100vh - var(--table-viewport-offset));  /* ✅ only the table scrolls */
+  height: calc(100vh - var(--table-viewport-offset)); /* fixed viewport-sized window */
   overflow: auto;
+  background: var(--card-bg);
   border: 1px solid #2d3f3f;
-  border-radius: 6px;
-  padding-bottom: 0;                /* ✅ no big internal gap */
-  margin-bottom: var(--table-bottom-pad); /* tiny breathing room outside */
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  margin-bottom: var(--table-bottom-pad); /* subtle breathing room below the window */
+  padding-bottom: 0;                       /* no big internal gap */
 }
+
 .table-scroll table{
   width: 100%;
   border-collapse: collapse;
@@ -302,6 +306,20 @@ body.power-hours .progress-bar-inner { background: var(--accent); height: 100%; 
 .table-scroll::-webkit-scrollbar { display: none; }
 .table-scroll { scrollbar-width: none; -ms-overflow-style: none; }
 body::-webkit-scrollbar, .main::-webkit-scrollbar { width: 0; height: 0; }
+
+/* Sticky footer that sits at the bottom of the table window */
+.table-window-footer{
+  position: sticky;
+  bottom: 0;
+  text-align: center;
+  color: #8aa3a3;
+  padding: 10px 12px;
+  background: #162424;              /* slightly darker than table */
+  border-top: 1px solid #3a4e4e;
+  z-index: 3;                        /* sits above rows */
+  user-select: none;
+}
+
 
 /* === 12. Buttons & badges (shared) === */
 .load-more {
