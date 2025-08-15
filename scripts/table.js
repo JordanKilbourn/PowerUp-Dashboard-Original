@@ -1,181 +1,186 @@
-import React, { useMemo, useRef } from 'react'
-import { Stage, Layer, Line, Text, Circle, Arrow } from 'react-konva'
-import PartNode from './PartNode'
-import HookNode from './HookNode'
-import { buildSnapTargets } from '@/lib/snapping'
-import { rotatePoint } from '@/lib/geometry'
-import type { Instruction } from '@/types'
+// /scripts/table.js
 
-type Props = {
-  instruction: Instruction
-  updateInstruction: (u: Partial<Instruction>) => void
-  onSelectHook: (id: string | null) => void
-  selectedHookId: string | null
-  stageRef: React.MutableRefObject<any>
-  editSnaps: boolean
-  onRequestPdf?: () => void
-  onRequestImage?: () => void
-}
+export function renderTable({
+  sheet,
+  containerId,
+  title = '',
+  filterByEmpID = true,
+  checkmarkCols = [],
+  excludeCols = [],
+  columnOrder = null
+}) {
+  const empID = sessionStorage.getItem("empID");
+  const el = document.getElementById(containerId);
+  if (!sheet || !el) return;
 
-const HOOK_META: Record<string, { name: string; lengthIn: number }> = {
-  HOOK_4: { name: 'S-Hook 4"', lengthIn: 4 },
-  HOOK_8: { name: 'S-Hook 8"', lengthIn: 8 },
-  HOOK_12: { name: 'S-Hook 12"', lengthIn: 12 },
-}
+  /* Build a quick title->columnId map */
+  const colMap = {};
+  sheet.columns.forEach(c => {
+    colMap[c.title.trim().toLowerCase()] = c.id;
+  });
 
-export default function CanvasView({
-  instruction, updateInstruction, onSelectHook, selectedHookId, stageRef, editSnaps,
-  onRequestPdf, onRequestImage
-}: Props) {
-  const width = 1400, height = 760
-  const { part, hooks, settings } = instruction
+  const get = (row, title) => {
+    const colId = colMap[title.toLowerCase()];
+    const cell = row.cells.find(c => c.columnId === colId);
+    const value = cell?.displayValue ?? cell?.value ?? '';
 
-  // --- Part snap points in world space (rotate w/ part)
-  const partWorldSnaps = useMemo(() => {
-    const out: { id: string; x: number; y: number }[] = []
-    const cx = part.x + part.width / 2, cy = part.y + part.height / 2
-    for (const s of part.snapPoints) {
-      const px = part.x + s.u * part.width
-      const py = part.y + s.v * part.height
-      out.push({ id: s.id, ...rotatePoint(px, py, cx, cy, part.rotation) })
+    // Nice short dates (MM/DD/YY) for anything labeled like a date
+    if (title.toLowerCase().includes("date") && value && !isNaN(Date.parse(value))) {
+      const d = new Date(value);
+      return `${d.getMonth() + 1}/${d.getDate()}/${String(d.getFullYear()).slice(-2)}`;
     }
-    return out
-  }, [part])
+    return value;
+  };
 
-  // --- Overhead line geometry
-  const pad = 140
-  const pointerLen = 14
-  const lineX0 = pad
-  const lineX1 = width - pad
-  const lineY = settings.lineY
-  const lastSnapX = lineX1 - (pointerLen + 12)
-
-  // --- Eyelets (use pxPerInch * eyeletSpacingIn; stop before arrow head)
-  const eyelets = useMemo(() => {
-    const step = Math.max(4, settings.pxPerInch * settings.eyeletSpacingIn)
-    const xs: number[] = []
-    for (let x = lineX0; x <= lastSnapX; x += step) xs.push(x)
-    return xs.map((x, i) => ({ id: `eyelet-${i}`, x, y: lineY }))
-  }, [settings.pxPerInch, settings.eyeletSpacingIn, lineY])
-
-  // --- Snap targets for hooks (STRICT: only eyelets + part points)
-  const snapTargets = useMemo(
-    () => buildSnapTargets(eyelets, partWorldSnaps),
-    [eyelets, partWorldSnaps]
-  )
-
-  // --- Helper to patch a single hook
-  function updateHook(hid: string, patch: any) {
-    updateInstruction({
-      hooks: hooks.map(h => (h.id === hid ? { ...h, ...patch } : h)),
-    })
+  /* Filter rows by Employee ID if requested */
+  let rows = sheet.rows;
+  if (filterByEmpID) {
+    rows = rows.filter(r => {
+      const idVal = get(r, "Employee ID");
+      return idVal && idVal.toString().toUpperCase() === empID;
+    });
   }
 
-  const showEmpty = !part.imageSrc
+  if (rows.length === 0) {
+    // Render a tiny empty state if the container is a DIV, otherwise clear table
+    if (el.tagName.toLowerCase() !== 'table') {
+      el.innerHTML = `
+        <h2>${title}</h2>
+        <div class="empty-state">
+          <p>You don’t have any records yet for <strong>${title}</strong>.</p>
+        </div>`;
+    } else {
+      el.innerHTML = '';
+    }
+    return;
+  }
 
-  return (
-    <div className="flex-1 min-w-0 overflow-hidden relative">
-      {/* Empty state overlay */}
-      {showEmpty && (
-        <div className="absolute inset-0 z-10 grid place-items-center pointer-events-none">
-          <div className="pointer-events-auto text-center">
-            <div className="text-lg mb-3 opacity-80">No part loaded</div>
-            <div className="flex gap-2 justify-center">
-              {onRequestPdf && <button className="btn btn-primary" onClick={onRequestPdf}>Add Part from PDF</button>}
-              {onRequestImage && (
-                <label className="btn">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0]
-                      if (f) onRequestImage(f as any)
-                    }}
-                  />
-                  Image…
-                </label>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+  /* Labels to show in headers */
+  const colHeaderMap = {
+    "submission date": "Date",
+    "submission id": "ID",
+    "problem statements": "Problem",
+    "proposed improvement": "Improvement",
+    "ci approval": "Approval",
+    "assigned to (primary)": "Assigned To",
+    "status": "Status",
+    "action item entry date": "Action Date",
+    "last meeting action item's": "Last Action",
+    "token payout": "Tokens",
+    "resourced": "Resourced",
+    "resourced date": "Resourced On",
+    "paid": "Paid",
 
-      <Stage width={width} height={height} ref={stageRef}>
-        <Layer>
-          {/* Overhead line */}
-          <Line points={[lineX0, lineY, lineX1, lineY]} stroke="#78cdd1" strokeWidth={3} />
-          {settings.showEyelets && eyelets.map(e => (
-            <Circle key={e.id} x={e.x} y={e.y} radius={6} fill="#78cdd1" />
-          ))}
-          <Text
-            x={lineX0}
-            y={lineY - 24}
-            text="Overhead line"
-            fontSize={16}
-            fill="#a3b9bf"
-          />
-          {settings.lineDirection === 'LTR' ? (
-            <Arrow
-              points={[lineX1 - pointerLen, lineY, lineX1, lineY]}
-              pointerLength={pointerLen}
-              pointerWidth={10}
-              stroke="#78cdd1"
-              fill="#78cdd1"
-              strokeWidth={3}
-            />
-          ) : (
-            <Arrow
-              points={[lineX0 + pointerLen, lineY, lineX0, lineY]}
-              pointerLength={pointerLen}
-              pointerWidth={10}
-              stroke="#78cdd1"
-              fill="#78cdd1"
-              strokeWidth={3}
-            />
-          )}
+    // Safety
+    "submit date": "Date",
+    "facility": "Facility",
+    "department/area": "Department/Area",
+    "safety concern": "Safety Concern",
+    "description": "Description",
+    "recommendations to correct/improve safety issue": "Recommendations",
+    "resolution": "Resolution",
+    "maintenance work order number or type na if no w/o": "Work Order",
+    "who was the safety concern escalated to": "Escalated To",
+    "did you personally speak to the leadership": "Spoke to Leadership",
+    "leadership update": "Leadership Update"
+  };
 
-          {/* Part (only if an image is present) */}
-          {part.imageSrc && (
-            <PartNode
-              x={part.x} y={part.y} width={part.width} height={part.height}
-              rotation={part.rotation} showSnaps={part.showSnaps}
-              imgSrc={part.imageSrc} snaps={part.snapPoints}
-              onDragEnd={(x, y) => updateInstruction({ part: { ...part, x, y } })}
-              onTransform={(w, h, r) => updateInstruction({ part: { ...part, width: w, height: h, rotation: r } })}
-              onSnapDrag={(id, u, v) =>
-                updateInstruction({
-                  part: {
-                    ...part,
-                    snapPoints: part.snapPoints.map(s => (s.id === id ? { ...s, u, v } : s)),
-                  },
-                })
-              }
-              editSnaps={editSnaps}
-            />
-          )}
+  /* Which columns to show */
+  const visibleCols = columnOrder
+    ? columnOrder.filter(c => !excludeCols.includes(c))
+    : sheet.columns
+        .filter(c => !c.hidden && !excludeCols.includes(c.title.trim()))
+        .map(c => c.title);
 
-          {/* Hooks (NEW API: pass a single `hook` + pxPerInch + snapTargets) */}
-          {hooks.map(h => {
-            // adapt your stored hook (typeId) to the new HookNode shape that
-            // expects `hook.hookType.lengthIn`
-            const meta = HOOK_META[h.typeId] ?? { name: h.typeId, lengthIn: 8 }
-            const hookForNode: any = { ...h, hookType: meta }
+  /* If target is a <table>, write thead/tbody directly; if it's a DIV, build a table */
+  const isTableEl = el.tagName.toLowerCase() === 'table';
 
-            return (
-              <HookNode
-                key={h.id}
-                hook={hookForNode}
-                pxPerInch={settings.pxPerInch}
-                editSnaps={editSnaps}
-                snapTargets={snapTargets.map(t => ({ ...t, kind: t.kind as 'eyelet' | 'part' }))}
-                updateHook={(id, u) => updateHook(id, u)}
-                onSelect={(id) => onSelectHook(id)}
-              />
-            )
-          })}
-        </Layer>
-      </Stage>
-    </div>
-  )
+  const buildHead = () => {
+    let ths = '';
+    visibleCols.forEach(c => {
+      const key = c.trim().toLowerCase();
+      const label = colHeaderMap[key] || c;
+      ths += `<th data-col="${key}">${label}</th>`;
+    });
+    return `<thead><tr>${ths}</tr></thead>`;
+  };
+
+  const pillFrom = (normalized, rawValue) => {
+    const v = String(rawValue ?? '').trim();
+    if (!v) return '';
+
+    if (normalized === 'ci approval') {
+      const cls = ({ approved: 'approved', pending:'pending', denied:'denied', rejected:'denied' }[v.toLowerCase()] || 'pending');
+      return `<span class="badge ${cls}">${v}</span>`;
+    }
+
+    if (normalized === 'status') {
+      // cross-table status mapping
+      const map = {
+        'completed':'completed', 'done':'completed',
+        'accepted safety concern':'approved',
+        'approved':'approved',
+        'denied/cancelled':'denied', 'cancelled':'denied', 'denied':'denied', 'rejected':'denied',
+        'needs researched':'pending', 'needs research':'pending', 'needs review':'pending',
+        'in progress':'pending', 'open':'pending', 'not started':'pending', 'pending':'pending'
+      };
+      const cls = map[v.toLowerCase()] || 'pending';
+      return `<span class="badge ${cls}">${v}</span>`;
+    }
+
+    return null;
+  };
+
+  const isCheckCol = (name) => checkmarkCols.map(s => s.toLowerCase()).includes(name);
+
+  const buildBody = () => {
+    let rowsHtml = '';
+    rows.forEach(r => {
+      let tds = '';
+      visibleCols.forEach(title => {
+        const raw = get(r, title);
+        const key  = title.trim().toLowerCase();
+
+        // Checkmarks for boolean-ish columns
+        let content = raw;
+        if (isCheckCol(key)) {
+          if (raw === true || raw === '✓')        content = `<span class="checkmark">&#10003;</span>`;
+          else if (raw === false || raw === '✗' || raw === 'X') content = `<span class="cross">&#10007;</span>`;
+        }
+
+        // Pill badges
+        const pill = pillFrom(key, raw);
+        if (pill) content = pill;
+
+        // Wrap in .cell for clamping (CSS controls height/wrapping)
+        const titleAttr = (typeof raw === 'string')
+          ? raw.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+          : raw;
+
+        tds += `<td data-col="${key}" title="${titleAttr ?? ''}">
+                  <div class="cell">${content ?? ''}</div>
+                </td>`;
+      });
+
+      rowsHtml += `<tr>${tds}</tr>`;
+    });
+
+    // ⬇️ Add a clearly-visible spacer/end-cap so the final row never hugs the bottom
+    rowsHtml += `
+      <tr class="spacer-row" aria-hidden="true">
+        <td colspan="${visibleCols.length}">
+          <div class="end-cap">End of results</div>
+        </td>
+      </tr>`;
+
+    return `<tbody class="dashboard-table-body">${rowsHtml}</tbody>`;
+  };
+
+  if (isTableEl) {
+    el.classList.add('dashboard-table');
+    el.innerHTML = buildHead() + buildBody();
+  } else {
+    const html = `<table class="dashboard-table">${buildHead()}${buildBody()}</table>`;
+    el.innerHTML = html;
+  }
 }
