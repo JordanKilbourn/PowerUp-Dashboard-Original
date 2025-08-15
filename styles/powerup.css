@@ -17,8 +17,8 @@
   /* Tables */
   --table-font: 14px;
   --table-clamp: 2;                 /* default: 2 lines in clamped cells */
-  --table-viewport-offset: 320px;   /* header + cards + tabs height budget */
-  --table-bottom-pad: 56px;         /* breathing room at end of table */
+  --table-viewport-offset: 320px;   /* header + cards + tabs + header row */
+  --table-bottom-pad: 16px;         /* tiny breathing room under last row */
 }
 
 /* === 2. Global reset === */
@@ -67,7 +67,7 @@ html, body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;   /* <— allow page to scroll (was hidden) */
+  overflow: hidden;   /* ✅ page itself doesn’t scroll; only table bodies do */
   width: 100%;
 }
 .header {
@@ -135,7 +135,7 @@ body.dashboard .power-card h3 { font-size: 16px; margin-bottom: 5px; color: var(
   border-color: var(--accent) var(--accent) transparent var(--accent);
   font-weight: 700; position: relative; top: 2px; z-index: 9;
 }
-.tab-panel { display: none; padding: 20px; padding-bottom: var(--table-bottom-pad); }
+.tab-panel { display: none; padding: 20px; }
 .tab-panel.active { display: block; }
 
 /* === 7. Table headers / controls === */
@@ -189,18 +189,13 @@ body.power-hours .progress-bar-inner { background: var(--accent); height: 100%; 
 
 /* === 10. Tables (clean, compact, viewport-sized) === */
 .table-scroll{
-  max-height: calc(100vh - var(--table-viewport-offset));
+  max-height: calc(100vh - var(--table-viewport-offset));  /* ✅ only the table scrolls */
   overflow: auto;
   border: 1px solid #2d3f3f;
   border-radius: 6px;
-  padding-bottom: var(--table-bottom-pad);   /* ensures last row is never jammed at the bottom */
+  padding-bottom: 0;                /* ✅ no big internal gap */
+  margin-bottom: var(--table-bottom-pad); /* tiny breathing room outside */
 }
-.table-scroll::after{
-  content: '';
-  display: block;
-  height: var(--table-bottom-pad);          /* “guard rail” beyond the last row */
-}
-
 .table-scroll table{
   width: 100%;
   border-collapse: collapse;
@@ -393,7 +388,7 @@ body.notes #notesList li {
   margin-bottom: 10px; cursor: pointer; transition: background 0.2s ease;
 }
 body.notes #notesList li:hover, body.notes #notesList li.active { background: var(--accent-fade); }
-body.notes .note-meta { font-size: 12px; color: var(--info); margin-top: 2px; }
+body.notes .note-meta { font-size: 12px; color: var(--info); }
 
 /* Editor */
 body.notes .notes-editor { flex: 1; display: flex; flex-direction: column; padding: 0 20px; }
