@@ -1,13 +1,13 @@
-<script>
-// Minimal config you can tweak later
+// widgets-config.js
+// Edit baseUrl if needed; adjust column titles only if your Smartsheet uses different names.
 window.PU_WIDGETS_CFG = {
-  // 1) Your proxy base URL
+  // Your proxy base URL
   baseUrl: 'https://YOUR-RENDER-APP.onrender.com', // <-- EDIT
 
-  // 2) Smartsheet sheet IDs
+  // Smartsheet sheet IDs
   sheets: {
     employeeMaster: '2195459817820036',
-    levelTracker:   '8346763116105604',   // used for Power Hour goals mapping
+    levelTracker:   '8346763116105604',   // used to derive numeric level for goals
     powerHours:     '1240392906264452',
     dynamicGoals:   '3542697273937796',
     ciSubmissions:  '6584024920182660',
@@ -15,31 +15,35 @@ window.PU_WIDGETS_CFG = {
     qcCatches:      '1431258165890948'
   },
 
-  // 3) Column names (exact Smartsheet titles)
-columns: {
-  // Identity
-  employeeId:   'Position ID',
-  employeeName: 'Display Name',
+  // Column titles (exact match to Smartsheet)
+  columns: {
+    // Identity
+    employeeId:   'Position ID',
+    employeeName: 'Display Name',
 
-  // Header Level (fast path from Employee Master)
-  headerLevelSourceSheetKey: 'employeeMaster',
-  headerLevelColumn: 'PowerUp Level (Select)',
+    // Header Level (fast path from Employee Master)
+    headerLevelSourceSheetKey: 'employeeMaster',
+    headerLevelColumn:         'PowerUp Level (Select)',
 
-  // Power Hours (match old app)
-  phEmpCol:              'Position ID',       // <-- set to how PH sheet stores the person
-  phCompletedFlagCol:    'Completed',         // <-- NEW
-  phCompletedHoursCol:   'Completed Hours',   // <-- NEW
-  phMonthCol:            'Month',             // supports 'YYYY-MM' or date text
-  phDateCol:             'Date',              // fallback
+    // Power Hours (align with the old app behavior)
+    // If your PH sheet stores employee by Employee ID, change to 'Employee ID'.
+    phEmpCol:            'Position ID',
+    phCompletedFlagCol:  'Completed',         // truthy values: true/yes/completed/1/x
+    phCompletedHoursCol: 'Completed Hours',   // preferred; falls back to phHoursCol if absent
+    phHoursCol:          'Hours',
+    phMonthCol:          'Month',             // accepts 'YYYY-MM' or any date-like text
+    phDateCol:           'Date',              // fallback when Month missing
 
-  // Goals & generic
-  goalsLevelCol: 'Level',
-  goalsMinCol:   'Min',
-  goalsMaxCol:   'Max',
-  dateColGeneric: 'Created Date'
-},
+    // Dynamic goals (level → min/max)
+    goalsLevelCol: 'Level',
+    goalsMinCol:   'Min',
+    goalsMaxCol:   'Max',
 
-  // 4) DOM targets (you already added these in your HTML)
+    // Generic date name used by tokens if a source doesn’t specify one
+    dateColGeneric: 'Created Date'
+  },
+
+  // DOM targets already added to your HTML
   selectors: {
     headerName:  '#js-header-name',
     headerLevel: '#js-header-level',
@@ -54,16 +58,18 @@ columns: {
     tokenMsg:    '#js-token-msg'
   },
 
-  // 5) Token sources (adjust points/date/status columns if yours differ)
+  // Token aggregation
   tokens: {
     enabled: true,
     sources: [
-      { sheetKey: 'ciSubmissions',  empCol: 'Employee ID', pointsCol: 'Points', statusCol: 'Status', approvedValue: 'Approved', dateCol: 'Created Date' },
-      { sheetKey: 'safetyConcerns', empCol: 'Employee ID', pointsCol: 'Points', statusCol: 'Status', approvedValue: 'Approved', dateCol: 'Created Date' },
-      { sheetKey: 'qcCatches',      empCol: 'Employee ID', pointsCol: 'Points', statusCol: 'Status', approvedValue: 'Approved', dateCol: 'Created Date' }
+      // CI uses "Token Payout" (old app behavior)
+      { sheetKey: 'ciSubmissions',  empCol: 'Employee ID', pointsCol: 'Token Payout', statusCol: 'Status', approvedValue: 'Approved', dateCol: 'Created Date' },
+      // Keep/remove these depending on your program rules
+      { sheetKey: 'safetyConcerns', empCol: 'Employee ID', pointsCol: 'Points',       statusCol: 'Status', approvedValue: 'Approved', dateCol: 'Created Date' },
+      { sheetKey: 'qcCatches',      empCol: 'Employee ID', pointsCol: 'Points',       statusCol: 'Status', approvedValue: 'Approved', dateCol: 'Created Date' }
     ]
   },
 
+  // Defaults if no goal row matches a level
   defaults: { minHours: 8, maxHours: 8 }
 };
-</script>
