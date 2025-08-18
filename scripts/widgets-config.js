@@ -16,29 +16,28 @@ window.PU_WIDGETS_CFG = {
   },
 
   // 3) Column names (exact Smartsheet titles)
-  columns: {
-    // Identity
-    employeeId:   'Position ID',          // your canonical key
-    employeeName: 'Display Name',
+columns: {
+  // Identity
+  employeeId:   'Position ID',
+  employeeName: 'Display Name',
 
-    // Header Level — FAST PATH
-    headerLevelSourceSheetKey: 'employeeMaster',
-    headerLevelColumn:         'PowerUp Level (Select)',
+  // Header Level (fast path from Employee Master)
+  headerLevelSourceSheetKey: 'employeeMaster',
+  headerLevelColumn: 'PowerUp Level (Select)',
 
-    // Power Hours
-    phEmpCol:    'Employee ID',           // change to 'Position ID' if that’s how PH sheet stores it
-    phHoursCol:  'Hours',
-    phMonthCol:  'Month',                 // 'YYYY-MM' or a parseable date text
-    phDateCol:   'Date',                  // fallback if Month missing
+  // Power Hours (match old app)
+  phEmpCol:              'Position ID',       // <-- set to how PH sheet stores the person
+  phCompletedFlagCol:    'Completed',         // <-- NEW
+  phCompletedHoursCol:   'Completed Hours',   // <-- NEW
+  phMonthCol:            'Month',             // supports 'YYYY-MM' or date text
+  phDateCol:             'Date',              // fallback
 
-    // Dynamic goals (per-level)
-    goalsLevelCol: 'Level',
-    goalsMinCol:   'Min',
-    goalsMaxCol:   'Max',
-
-    // Generic date column for tokens when no specific one is present
-    dateColGeneric: 'Created Date'
-  },
+  // Goals & generic
+  goalsLevelCol: 'Level',
+  goalsMinCol:   'Min',
+  goalsMaxCol:   'Max',
+  dateColGeneric: 'Created Date'
+},
 
   // 4) DOM targets (you already added these in your HTML)
   selectors: {
