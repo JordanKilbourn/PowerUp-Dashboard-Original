@@ -31,14 +31,17 @@
   const monthEnd = (d) => new Date(d.getFullYear(), d.getMonth()+1, 0, 23,59,59,999);
 
   // ---- storage / identity ----
-  function ensureEmp(){
-    if (EMP_ID) return EMP_ID;
-    EMP_ID = new URLSearchParams(location.search).get('emp')
-          || localStorage.getItem('PU_EMP_ID')
-          || prompt('Enter Employee ID:');
-    if (EMP_ID) localStorage.setItem('PU_EMP_ID', EMP_ID);
-    return EMP_ID;
-  }
+function ensureEmp(){
+  if (EMP_ID) return EMP_ID;
+  // read from URL → localStorage → sessionStorage → prompt
+  EMP_ID =
+      new URLSearchParams(location.search).get('emp')
+   || localStorage.getItem('PU_EMP_ID')
+   || sessionStorage.getItem('empID')         // <-- your login’s key
+   || prompt('Enter Employee ID:');
+  if (EMP_ID) localStorage.setItem('PU_EMP_ID', EMP_ID);
+  return EMP_ID;
+}
 
   // ---- transport (flatten-aware) ----
   async function fetchSheetFlat(sheetId){
