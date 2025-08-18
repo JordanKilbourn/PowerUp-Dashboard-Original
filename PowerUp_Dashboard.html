@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>PowerUp Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- Fonts / Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -45,23 +46,35 @@
       <div class="header">
         <h1>PowerUp Dashboard</h1>
         <p>
-          Welcome: <span>Chris Weikel</span> 
-          Month: <span>July 2025</span> 
-          Level: <span>Lv 2</span>
+          Welcome: <span id="js-header-name">Loading…</span>
+          &emsp; Level: <span id="js-header-level">No Level</span>
         </p>
       </div>
 
       <div class="top-cards">
+        <!-- Power Hours -->
         <div class="card power-card">
           <h3>Power Hours Logged</h3>
-          <p>1.0 / 8</p>
-          <div class="progress-bar"><div class="progress-bar-inner"></div></div>
-          <small>You’re 7 hour(s) away from your goal. 30 day(s) left this month.</small>
+          <p id="js-ph-hours">— / —</p>
+          <div class="progress-bar">
+            <div id="js-ph-bar" class="progress-bar-inner" style="width:0%"></div>
+          </div>
+          <small id="js-ph-msg">Loading…</small>
+          <!-- Optional: show goal range like “8–12 hrs” if you want -->
+          <small id="js-ph-goal" class="muted" style="display:block;margin-top:4px;"></small>
         </div>
 
+        <!-- Tokens -->
         <div class="card token-card">
           <h3>Tokens</h3>
-          <div class="token-tracker"><i class="fas fa-coins"></i><span>20</span></div>
+          <div class="token-tracker">
+            <i class="fas fa-coins"></i>
+            <span id="js-token-total">0</span>
+          </div>
+          <div class="muted" style="margin-top:6px;">
+            <span id="js-token-msg">—</span>
+            <span class="token-month" style="margin-left:8px;">This month: <strong id="js-token-month">0</strong></span>
+          </div>
         </div>
       </div>
 
@@ -139,7 +152,7 @@
 
   <!-- ── Inline helpers ───────────────────────────────────────── -->
   <script>
-    // Extra safety: bind a real listener too (works even without inline onclick)
+    // Sidebar toggle
     document.addEventListener('DOMContentLoaded', () => {
       const btn = document.getElementById('sidebar-toggle');
       const bar = document.getElementById('sidebar');
@@ -200,7 +213,21 @@
     };
   </script>
 
-  <!-- Module loader (cache-busted) -->
+  <!-- Existing table wiring (leave as-is) -->
   <script type="module" src="/scripts/init-dashboard.js?v=2025-08-07-1"></script>
+
+  <!-- NEW: live widgets for header, power hours, tokens -->
+  <script src="/scripts/widgets-config.js"></script>
+  <script src="/scripts/widgets-live.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.PUWidgets) {
+        PUWidgets.init();              // uses ?emp= or localStorage prompt
+        PUWidgets.renderHeader();      // Name + Level ("PowerUp Level (Select)" or "No Level")
+        PUWidgets.renderPowerHours();  // total/goal, progress width, smart message
+        PUWidgets.renderTokens();      // total + this month
+      }
+    });
+  </script>
 </body>
 </html>
