@@ -52,28 +52,35 @@
       </div>
 
       <div class="top-cards">
-        <!-- Power Hours -->
+        <!-- Power Hours (keeps refreshed look; adds legacy IDs for logic) -->
         <div class="card power-card">
           <h3>Power Hours Logged</h3>
-          <p id="js-ph-hours">— / —</p>
+
+          <!-- original logic writes here -->
+          <p id="phProgress">— / —</p>
+
           <div class="progress-bar">
-            <div id="js-ph-bar" class="progress-bar-inner" style="width:0%"></div>
+            <div class="progress-bar-inner"
+                 id="progressBar"
+                 role="progressbar"
+                 aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
+                 style="width:0%"></div>
           </div>
-          <small id="js-ph-msg">Loading…</small>
-          <!-- Optional: show goal range like “8–12 hrs” if you want -->
+
+          <!-- smart message -->
+          <small id="powerTips">Loading…</small>
+          <!-- optional: will show “8–12 hrs” -->
           <small id="js-ph-goal" class="muted" style="display:block;margin-top:4px;"></small>
+          <!-- optional: add YTD line (script will set it if present) -->
+          <small id="js-ph-ytd" class="muted" style="display:block;margin-top:2px;"></small>
         </div>
 
-        <!-- Tokens -->
+        <!-- Tokens (title + icon + number, legacy id for logic) -->
         <div class="card token-card">
           <h3>Tokens</h3>
           <div class="token-tracker">
             <i class="fas fa-coins"></i>
-            <span id="js-token-total">0</span>
-          </div>
-          <div class="muted" style="margin-top:6px;">
-            <span id="js-token-msg">—</span>
-            <span class="token-month" style="margin-left:8px;">This month: <strong id="js-token-month">0</strong></span>
+            <span id="tokenTotal">0</span>
           </div>
         </div>
       </div>
@@ -102,7 +109,7 @@
         </div>
 
         <div class="table-scroll">
-          <table id="ci-table"></table>
+          <table id="ci-table" class="dashboard-table"></table>
         </div>
       </div>
 
@@ -123,7 +130,7 @@
         </div>
 
         <div class="table-scroll">
-          <table id="safety-table"></table>
+          <table id="safety-table" class="dashboard-table"></table>
         </div>
       </div>
 
@@ -143,7 +150,7 @@
         </div>
 
         <div class="table-scroll">
-          <table id="quality-table"></table>
+          <table id="quality-table" class="dashboard-table"></table>
         </div>
       </div>
 
@@ -156,26 +163,17 @@
     document.addEventListener('DOMContentLoaded', () => {
       const btn = document.getElementById('sidebar-toggle');
       const bar = document.getElementById('sidebar');
-      if (btn && bar) {
-        btn.addEventListener('click', () => {
-          bar.classList.toggle('expanded');
-        });
-      }
+      if (btn && bar) btn.addEventListener('click', () => bar.classList.toggle('expanded'));
     });
+    window.toggleSidebar = () => document.getElementById('sidebar').classList.toggle('expanded');
 
-    // Global so inline onclick can call it
-    window.toggleSidebar = function () {
-      document.getElementById('sidebar').classList.toggle('expanded');
-    };
-
-    // Tabs / filtering / sorting (unchanged)
+    // Tabs / filtering / sorting
     window.showTab = function (id) {
       document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
       document.getElementById(`tab-${id}`)?.classList.add('active');
-      const btn =
-        (window.event && window.event.currentTarget) ||
-        document.querySelector(`.tab-buttons .tab-button[onclick*="'${id}'"]`);
+      const btn = (window.event && window.event.currentTarget)
+        || document.querySelector(`.tab-buttons .tab-button[onclick*="'${id}'"]`);
       if (btn) btn.classList.add('active');
       filterTable(id);
       if (currentSort.tabId === id) sortTable(id, currentSort.colIndex);
@@ -213,21 +211,9 @@
     };
   </script>
 
-  <!-- Existing table wiring (leave as-is) -->
+  <!-- Existing table wiring -->
   <script type="module" src="/scripts/init-dashboard.js?v=2025-08-07-1"></script>
-
-  <!-- NEW: live widgets for header, power hours, tokens -->
-  <script src="/scripts/widgets-config.js"></script>
-  <script src="/scripts/widgets-live.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      if (window.PUWidgets) {
-        PUWidgets.init();              // uses ?emp= or localStorage prompt
-        PUWidgets.renderHeader();      // Name + Level ("PowerUp Level (Select)" or "No Level")
-        PUWidgets.renderPowerHours();  // total/goal, progress width, smart message
-        PUWidgets.renderTokens();      // total + this month
-      }
-    });
-  </script>
+  <!-- Bridge that drives header/PH/tokens with your original logic mapped to new IDs -->
+  <script type="module" src="/scripts/init-bridge.js?v=2025-08-19-1"></script>
 </body>
 </html>
