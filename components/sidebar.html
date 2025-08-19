@@ -1,28 +1,20 @@
-<div class="sidebar">
-  <a id="sidebarToggle" href="#" title="Toggle Sidebar Menu">
-    <i class="fas fa-bars"></i><span class="link-text">Toggle Menu</span>
-  </a>
-
-  <a href="PowerUp_Dashboard.html" title="Dashboard">
-    <i class="fas fa-home"></i><span class="link-text">Dashboard</span>
-  </a>
-
-  <div class="sidebar-section">Submission Forms</div>
-  <a href="https://app.smartsheet.com/b/form/e60862d9ae0b44358d6f85dcd1c81d2b" target="_blank">
-    <i class="fas fa-lightbulb"></i><span class="link-text">CI Suggestion</span>
-  </a>
-  <a href="https://app.smartsheet.com/b/form/162129580c03440f88cc5f284627b52f" target="_blank">
-    <i class="fas fa-hard-hat"></i><span class="link-text">Safety Concern</span>
-  </a>
-  <a href="https://app.smartsheet.com/b/form/2ba4ff03861d4d068ee5a0bff46308c3" target="_blank">
-    <i class="fas fa-bug"></i><span class="link-text">Quality Catch</span>
-  </a>
-
-  <div class="sidebar-section">Other</div>
-  <a href="view-power-hours.html"><i class="fas fa-clock"></i><span class="link-text">Power Hours</span></a>
-  <a href="https://app.smartsheet.com/b/form/165de2f61d2a4c5bb7855df59f70a1db" target="_blank">
-    <i class="fas fa-coins"></i><span class="link-text">Redeem Tokens</span>
-  </a>
-  <a href="level-tracker.html"><i class="fas fa-chart-line"></i><span class="link-text">Level Tracker</span></a>
-  <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span class="link-text">Logout</span></a>
+<div class="sidebar" id="sidebar">
+  <div class="item" onclick="toggleSidebar()">
+    <i class="fas fa-bars"></i><span>Menu</span>
+  </div>
+  <div class="item active" onclick="location.href='duh 2.0.html'">
+    <i class="fas fa-home"></i><span>Dashboard</span>
+  </div>
+  <div class="item" onclick="location.href='level-tracker.html'">
+    <i class="fas fa-layer-group"></i><span>Level Tracker</span>
+  </div>
+  <div class="item" onclick="location.href='power-hours.html'">
+    <i class="fas fa-clock"></i><span>Power Hours</span>
+  </div>
+  <div class="item" onclick="location.href='notes.html'">
+    <i class="fas fa-sticky-note"></i><span>Notes</span>
+  </div>
+  <div class="item" onclick="location.href='squads.html'">
+    <i class="fas fa-users"></i><span>Squads</span>
+  </div>
 </div>
