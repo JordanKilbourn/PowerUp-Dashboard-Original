@@ -3,8 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PowerUp Dashboard</title>
-
   <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -12,13 +10,14 @@
   <!-- Styles -->
   <link rel="stylesheet" href="/styles/powerup.css" />
 </head>
-<body>
 
-  <!-- 👇 New invisible background layer to block scroll bleed-through -->
-  <div id="topOverlayBg" class="top-overlay-bg"></div>
+  <body class="dashboard">
+  <div class="container">
 
   <div id="sidebar" class="sidebar"></div>
-  <div id="header"></div>
+  <div class="main">
+    <div id="header"></div>
+    
 
   <div id="container" class="container">
     <!-- Progress + Token Container -->
@@ -105,3 +104,4 @@
   <script type="module" src="/scripts/init-dashboard.js"></script>
 </body>
 </html>
+
