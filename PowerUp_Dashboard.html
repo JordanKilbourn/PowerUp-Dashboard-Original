@@ -3,56 +3,48 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PowerUp Dashboard (Refreshed, Live)</title>
+  <title>PowerUp Dashboard</title>
 
-  <!-- Fonts & Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-
-  <!-- Styles -->
-  <!-- Existing app styles -->
+  <!-- Load legacy CSS first, then refreshed CSS so it wins -->
   <link rel="stylesheet" href="/styles/powerup.css" />
-  <!-- Refreshed UI styles (copy your refreshed style.css into /styles/style.css) -->
   <link rel="stylesheet" href="/styles/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
-<body class="dashboard">
 
-  <!-- Required overlay for sidebar open state -->
+<body class="dashboard">
+  <!-- overlay for sidebar -->
   <div id="topOverlayBg"></div>
 
-  <!-- Container wraps sidebar + main content -->
-  <div id="container" class="container">
-
-    <!-- Sidebar/header are injected by /scripts/layout.js -->
-    <aside id="sidebar" class="sidebar"></aside>
+  <div class="container" id="container">
+    <!-- injected via /scripts/layout.js -->
+    <div class="sidebar" id="sidebar"></div>
 
     <div class="main">
-      <header id="header" class="header"></header>
-
-      <!-- Page Title / Greeting (display text can be filled by your app if desired) -->
-      <div class="page-title">
-        <h1>PowerUp Dashboard</h1>
+      <!-- header is injected; we still provide a container with the expected id -->
+      <div class="header" id="header">
+        <!-- The injected header.html will populate here -->
       </div>
 
-      <!-- Top Cards: Power Hours (separate card), Tokens (separate card) -->
+      <!-- Top cards -->
       <div class="top-cards">
-        <!-- Power Hours Card -->
+        <!-- Power Hours card -->
         <div class="card power-card">
           <h3>Power Hours Logged</h3>
 
-          <!-- optional simple number text line; total is live-bound below -->
-          <p><span id="powerHoursTotal">0</span></p>
+          <!-- TEXT display: JS sets this to "HOURS / TARGET" -->
+          <div><strong id="phProgress">0 / 8</strong></div>
 
-          <!-- Progress track/fill (IDs your JS expects) -->
-          <div id="progressBar" class="progress-bar">
-            <div id="phProgress" class="progress-bar-inner"></div>
+          <!-- PROGRESS BAR: inner fill div gets width set by JS via #progressBar -->
+          <div class="progress-bar">
+            <div class="progress-bar-fill" id="progressBar"></div>
           </div>
 
-          <!-- Smart guidance message (your JS writes here) -->
-          <p id="powerTips" class="smart-message"></p>
+          <!-- Smart guidance message -->
+          <p id="powerTips"></p>
         </div>
 
-        <!-- Token Card -->
+        <!-- Tokens card -->
         <div class="card token-card">
           <h3>Tokens</h3>
           <div class="token-tracker">
@@ -62,121 +54,77 @@
         </div>
       </div>
 
-      <!-- Tab Controls -->
+      <!-- Tabs -->
       <div class="tabs">
         <button class="tab-btn active" data-tab="ci">CI</button>
         <button class="tab-btn" data-tab="safety">Safety</button>
         <button class="tab-btn" data-tab="quality">Quality</button>
       </div>
 
-      <!-- Tab Panels -->
       <div class="tab-panels">
-
         <!-- CI Tab -->
-        <section id="tab-ci" class="tab-panel active" aria-labelledby="tab-ci-btn">
+        <div class="tab-panel active" id="tab-ci">
           <div class="table-header-row">
             <h3>Continuous Improvement (CI)</h3>
-
             <div class="table-header-controls">
-              <!-- Filter select (ID expected by your JS) -->
               <select id="ciStatusFilter">
                 <option value="all">All Statuses</option>
                 <option value="approved">Approved</option>
                 <option value="pending">Pending</option>
                 <option value="denied">Denied</option>
               </select>
-
-              <!-- Your submission button stays exactly as you designed it -->
+              <!-- your existing submission button placement -->
               <a class="add-btn" href="https://app.smartsheet.com/b/form/e60862d9ae0b44358d6f85dcd1c81d2b" target="_blank" rel="noopener">+ Add Submission</a>
-
-              <!-- Row count (ID expected by your JS) -->
               <span id="ciSubmissionCount" class="row-count">0 submissions</span>
             </div>
           </div>
-
           <div class="table-scroll">
-            <!-- Table mount (ID expected by your JS) -->
             <table id="ciSubmissionsTable" class="dashboard-table"></table>
           </div>
-        </section>
+        </div>
 
         <!-- Safety Tab -->
-        <section id="tab-safety" class="tab-panel" aria-labelledby="tab-safety-btn" hidden>
+        <div class="tab-panel" id="tab-safety">
           <div class="table-header-row">
             <h3>Safety Concerns</h3>
-
             <div class="table-header-controls">
               <select id="safetyStatusFilter">
                 <option value="all">All Statuses</option>
                 <option value="open">Open</option>
                 <option value="closed">Closed</option>
               </select>
-
               <a class="add-btn" href="https://app.smartsheet.com/b/form/162129580c03440f88cc5f284627b52f" target="_blank" rel="noopener">+ Report Safety</a>
-
               <span id="safetySubmissionCount" class="row-count">0 submissions</span>
             </div>
           </div>
-
           <div class="table-scroll">
             <table id="safetyTable" class="dashboard-table"></table>
           </div>
-        </section>
+        </div>
 
         <!-- Quality Tab -->
-        <section id="tab-quality" class="tab-panel" aria-labelledby="tab-quality-btn" hidden>
+        <div class="tab-panel" id="tab-quality">
           <div class="table-header-row">
             <h3>Quality Catches</h3>
-
             <div class="table-header-controls">
               <select id="qcStatusFilter">
                 <option value="all">All Statuses</option>
                 <option value="open">Open</option>
                 <option value="closed">Closed</option>
               </select>
-
               <a class="add-btn" href="https://app.smartsheet.com/b/form/2ba4ff03861d4d068ee5a0bff46308c3" target="_blank" rel="noopener">+ Log QC Catch</a>
-
               <span id="qcSubmissionCount" class="row-count">0 submissions</span>
             </div>
           </div>
-
           <div class="table-scroll">
             <table id="qcTable" class="dashboard-table"></table>
           </div>
-        </section>
+        </div>
+      </div>
+    </div>
+  </div>
 
-      </div> <!-- /.tab-panels -->
-
-    </div> <!-- /.main -->
-  </div> <!-- /#container -->
-
-  <!-- Minimal, non-conflicting tab switcher (no dependency on app JS) -->
-  <script>
-    (function () {
-      const btns = Array.from(document.querySelectorAll('.tab-btn'));
-      const panels = {
-        ci: document.getElementById('tab-ci'),
-        safety: document.getElementById('tab-safety'),
-        quality: document.getElementById('tab-quality')
-      };
-
-      function activate(tab) {
-        btns.forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-        Object.entries(panels).forEach(([k, el]) => {
-          const on = k === tab;
-          el.classList.toggle('active', on);
-          if (on) el.removeAttribute('hidden'); else el.setAttribute('hidden','');
-        });
-      }
-
-      btns.forEach(b => b.addEventListener('click', () => activate(b.dataset.tab)));
-      // Default
-      activate('ci');
-    })();
-  </script>
-
-  <!-- Your normal app bootstrap (injects header/sidebar, loads data, renders tables/cards) -->
+  <!-- App init -->
   <script type="module" src="/scripts/init-dashboard.js"></script>
 </body>
 </html>
