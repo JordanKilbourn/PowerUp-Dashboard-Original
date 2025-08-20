@@ -5,50 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PowerUp Dashboard</title>
 
-  <!-- Legacy CSS first (kept for existing app styles) -->
-  <link rel="stylesheet" href="/styles/powerup.css" />
-
-  <!-- Your refreshed CSS (unchanged from your refresh repo) -->
+  <!-- Only the refreshed CSS -->
   <link rel="stylesheet" href="/styles/style.css" />
-
-  <!-- Small, high-specificity overrides so refreshed visuals always win -->
-  <link rel="stylesheet" href="/styles/refresh-overrides.css" />
-
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 
 <body class="dashboard">
-  <!-- overlay for sidebar (legacy app expects this) -->
   <div id="topOverlayBg"></div>
 
   <div class="container" id="container">
-    <!-- injected via /scripts/layout.js -->
+    <!-- Injected by /scripts/layout.js -->
     <div class="sidebar" id="sidebar"></div>
 
     <div class="main">
-      <!-- header is injected by layout.js; keep container with expected id -->
       <div class="header" id="header"></div>
 
-      <!-- Top cards -->
+      <!-- Cards -->
       <div class="top-cards">
-        <!-- Power Hours card -->
         <div class="card power-card">
           <h3>Power Hours Logged</h3>
-
-          <!-- TEXT (JS sets this to "HOURS / TARGET") -->
           <div><strong id="phProgress">0 / 8</strong></div>
-
-          <!-- PROGRESS BAR: inner fill element gets width set by JS via #progressBar -->
           <div class="progress-bar">
             <div class="progress-bar-fill" id="progressBar"></div>
           </div>
-
-          <!-- Smart guidance line -->
           <p id="powerTips"></p>
         </div>
 
-        <!-- Tokens card -->
         <div class="card token-card">
           <h3>Tokens</h3>
           <div class="token-tracker">
@@ -66,7 +49,7 @@
       </div>
 
       <div class="tab-panels">
-        <!-- CI Tab -->
+        <!-- CI -->
         <div class="tab-panel active" id="tab-ci">
           <div class="table-header-row">
             <h3>Continuous Improvement (CI)</h3>
@@ -86,7 +69,7 @@
           </div>
         </div>
 
-        <!-- Safety Tab -->
+        <!-- Safety -->
         <div class="tab-panel" id="tab-safety">
           <div class="table-header-row">
             <h3>Safety Concerns</h3>
@@ -105,7 +88,7 @@
           </div>
         </div>
 
-        <!-- Quality Tab -->
+        <!-- Quality -->
         <div class="tab-panel" id="tab-quality">
           <div class="table-header-row">
             <h3>Quality Catches</h3>
@@ -127,9 +110,8 @@
     </div>
   </div>
 
-  <!-- App init -->
+  <!-- App init (your existing modules drive the data) -->
   <script type="module" src="/scripts/init-dashboard.js"></script>
-  <!-- Tab logic (simple, self-contained) -->
   <script src="/scripts/dashboard-ui.js"></script>
 </body>
 </html>
