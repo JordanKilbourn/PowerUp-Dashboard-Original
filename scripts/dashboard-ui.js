@@ -36,3 +36,20 @@ function initializeAccordions() {
 }
 
 export { initializeAccordions };
+
+// Simple tab switcher: expects .tab-btn[data-tab="<name>"] and #tab-<name>
+(function wireTabs(){
+  const buttons = Array.from(document.querySelectorAll('.tab-btn'));
+  const panels  = Array.from(document.querySelectorAll('.tab-panel'));
+  if (!buttons.length || !panels.length) return;
+
+  function activate(name){
+    buttons.forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+    panels.forEach(p => p.classList.toggle('active', p.id === `tab-${name}`));
+  }
+  buttons.forEach(b => b.addEventListener('click', () => activate(b.dataset.tab)));
+  // Ensure a default
+  const defaultTab = buttons.find(b => b.classList.contains('active'))?.dataset.tab || 'ci';
+  activate(defaultTab);
+})();
+
