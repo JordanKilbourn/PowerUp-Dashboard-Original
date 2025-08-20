@@ -1,59 +1,4 @@
-// /scripts/dashboard-ui.js
-
-/**
- * Initialize accordion click toggling behavior
- */
-function initializeAccordions() {
-  const headers = document.querySelectorAll(".accordion-header");
-
-  if (headers.length === 0) return;
-
-  headers.forEach(header => {
-    header.addEventListener("click", () => {
-      const item = header.closest(".accordion-item");
-      const content = item?.querySelector(".accordion-content");
-      const icon = header.querySelector(".rotate-icon");
-
-      const isOpen = item.classList.contains("open");
-
-      // Collapse all items
-      document.querySelectorAll(".accordion-item").forEach(i => {
-        i.classList.remove("open");
-        const c = i.querySelector(".accordion-content");
-        const ic = i.querySelector(".rotate-icon");
-        if (c) c.style.maxHeight = null;
-        if (ic) ic.classList.remove("open");
-      });
-
-      // Expand clicked item
-      if (!isOpen && content) {
-        item.classList.add("open");
-        content.style.maxHeight = content.scrollHeight + "px";
-        if (icon) icon.classList.add("open");
-      }
-    });
-  });
-}
-
-export { initializeAccordions };
-
-// Simple tab switcher: expects .tab-btn[data-tab="<name>"] and #tab-<name>
-(function wireTabs(){
-  const buttons = Array.from(document.querySelectorAll('.tab-btn'));
-  const panels  = Array.from(document.querySelectorAll('.tab-panel'));
-  if (!buttons.length || !panels.length) return;
-
-  function activate(name){
-    buttons.forEach(b => b.classList.toggle('active', b.dataset.tab === name));
-    panels.forEach(p => p.classList.toggle('active', p.id === `tab-${name}`));
-  }
-  buttons.forEach(b => b.addEventListener('click', () => activate(b.dataset.tab)));
-  // Ensure a default
-  const defaultTab = buttons.find(b => b.classList.contains('active'))?.dataset.tab || 'ci';
-  activate(defaultTab);
-})();
-
-// ---- Tabs: simple switcher that uses .tab-btn[data-tab="<name>"] and #tab-<name> ----
+// scripts/dashboard-ui.js
 (function wireTabs(){
   const buttons = Array.from(document.querySelectorAll('.tab-btn'));
   const panels  = Array.from(document.querySelectorAll('.tab-panel'));
@@ -67,23 +12,3 @@ export { initializeAccordions };
   const defaultTab = buttons.find(b => b.classList.contains('active'))?.dataset.tab || 'ci';
   activate(defaultTab);
 })();
-
-// ---- Filters: dispatch a single event your loaders can listen to ----
-(function wireFilters(){
-  const map = [
-    { id: 'ciStatusFilter',     table: 'ci'     },
-    { id: 'safetyStatusFilter', table: 'safety' },
-    { id: 'qcStatusFilter',     table: 'quality'}
-  ];
-  map.forEach(m => {
-    const el = document.getElementById(m.id);
-    if (!el) return;
-    el.addEventListener('change', () => {
-      document.dispatchEvent(new CustomEvent('status-filter-changed', {
-        detail: { table: m.table, value: el.value }
-      }));
-    });
-  });
-})();
-
-
