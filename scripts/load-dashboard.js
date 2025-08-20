@@ -1,6 +1,20 @@
 import { renderTable } from '/scripts/table.js';
 import { SHEET_IDS, fetchSheet } from './api.js';
 
+
+// Filter a Smartsheet-like "sheet" object by Status (case-insensitive).
+function filterSheetByStatus(sheet, selected) {
+  if (!sheet || !Array.isArray(sheet.rows) || !selected || selected === 'all') return sheet;
+  const statusCol = sheet.columns.find(c => c.title && c.title.trim().toLowerCase() === 'status');
+  if (!statusCol) return sheet;
+  const rows = sheet.rows.filter(row => {
+    const cell = row.cells.find(c => c.columnId === statusCol.id);
+    const val = (cell?.displayValue ?? cell?.value ?? '').toString().trim().toLowerCase();
+    return val === selected.toLowerCase();
+  });
+  return { ...sheet, rows };
+}
+
 function loadDashboard() {
   const empID = sessionStorage.getItem("empID");
   if (!empID) return;
@@ -17,62 +31,29 @@ function loadDashboard() {
     updatePowerHours(hours);
 
     // ✅ CI Submissions
-    renderTable({
-      sheet: ci,
-      containerId: "ciSubmissionsTable", // updated
-      title: "CI Submissions",
-      checkmarkCols: ["Resourced", "Paid"],
-      columnOrder: [
-        "Submission Date",
-        "Submission ID",
-        "Problem Statements",
-        "Proposed Improvement",
-        "CI Approval",
-        "Assigned to (Primary)",
-        "Status",
-        "Action Item Entry Date",
-        "Last Meeting Action Item's",
-        "Token Payout",
-        "Resourced",
-        "Resourced Date",
-        "Paid"
-      ]
-    });
-
-    // ✅ Token Calculation
-    const tokenCol = ci.columns.find(c => c.title.trim().toLowerCase() === "token payout");
-    const empCol = ci.columns.find(c => c.title.trim().toLowerCase() === "employee id");
-    let totalTokens = 0;
-
-    ci.rows.forEach(row => {
-      const empCell = row.cells.find(c => c.columnId === empCol?.id);
-      const tokenCell = row.cells.find(c => c.columnId === tokenCol?.id);
-      const matchesEmp = empCell?.value?.toString().toUpperCase() === empID;
-      const tokenVal = parseFloat(tokenCell?.value || 0);
-      if (matchesEmp && !isNaN(tokenVal)) {
-        totalTokens += tokenVal;
-      }
-    });
-
-    const tokenDisplay = document.getElementById("tokenTotal");
-    if (tokenDisplay) tokenDisplay.textContent = totalTokens.toFixed(0);
-
-    // ✅ Safety Concerns
-    renderTable({
-      sheet: safety,
-      containerId: "safetyTable", // updated
-      title: "Safety Concerns",
-      excludeCols: ["Employee ID"]
-    });
-
-    // ✅ Quality Catches
-    renderTable({
-      sheet: qc,
-      containerId: "qcTable", // updated
-      title: "Quality Catches",
-      excludeCols: ["Employee ID"]
-    });
-  })
+    const renderCI = () => {
+  const selected = document.getElementById('ciStatusFilter')?.value || 'all';
+  const ciFiltered = filterSheetByStatus(ci, selected);
+  const renderSafety = () => {
+  const selected = document.getElementById('safetyStatusFilter')?.value || 'all';
+  const safetyFiltered = filterSheetByStatus(safety, selected);
+  const renderQuality = () => {
+  const selected = document.getElementById('qcStatusFilter')?.value || 'all';
+  const qcFiltered = filterSheetByStatus(qc, selected);
+  renderTable({
+    sheet: qcFiltered,
+    containerId: "qcTable",
+    title: "Quality Catches",
+    excludeCols: ["Employee ID"]
+  });
+  const qCount = document.getElementById('qcSubmissionCount');
+  if (qCount) qCount.textContent = `${qcFiltered.rows.length} submissions`;
+};
+renderQuality();
+document.getElementById('ciStatusFilter')?.addEventListener('change', renderCI);
+document.getElementById('safetyStatusFilter')?.addEventListener('change', renderSafety);
+document.getElementById('qcStatusFilter')?.addEventListener('change', renderQuality);
+})
   .catch(err => {
     console.error("Failed to load dashboard data:", err);
   });
@@ -188,23 +169,3 @@ async function updatePowerHours(sheet) {
 }
 
 export { loadDashboard };
-
-// Filter a Smartsheet-like "sheet" object by Status (case-insensitive).
-function filterSheetByStatus(sheet, selected) {
-  if (!sheet || !Array.isArray(sheet.rows) || !selected || selected === 'all') return sheet;
-
-  const statusCol = sheet.columns.find(
-    c => c.title && c.title.trim().toLowerCase() === 'status'
-  );
-  if (!statusCol) return sheet;
-
-  const rows = sheet.rows.filter(row => {
-    const cell = row.cells.find(c => c.columnId === statusCol.id);
-    const val = (cell?.displayValue ?? cell?.value ?? '').toString().trim().toLowerCase();
-    return val === selected.toLowerCase();
-  });
-
-  // return a sheet-like object with filtered rows
-  return { ...sheet, rows };
-}
-
