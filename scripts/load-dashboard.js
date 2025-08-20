@@ -188,3 +188,23 @@ async function updatePowerHours(sheet) {
 }
 
 export { loadDashboard };
+
+// Filter a Smartsheet-like "sheet" object by Status (case-insensitive).
+function filterSheetByStatus(sheet, selected) {
+  if (!sheet || !Array.isArray(sheet.rows) || !selected || selected === 'all') return sheet;
+
+  const statusCol = sheet.columns.find(
+    c => c.title && c.title.trim().toLowerCase() === 'status'
+  );
+  if (!statusCol) return sheet;
+
+  const rows = sheet.rows.filter(row => {
+    const cell = row.cells.find(c => c.columnId === statusCol.id);
+    const val = (cell?.displayValue ?? cell?.value ?? '').toString().trim().toLowerCase();
+    return val === selected.toLowerCase();
+  });
+
+  // return a sheet-like object with filtered rows
+  return { ...sheet, rows };
+}
+
