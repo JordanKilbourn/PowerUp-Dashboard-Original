@@ -3,105 +3,180 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PowerUp Dashboard (Refreshed, Live)</title>
+
   <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
   <!-- Styles -->
+  <!-- Existing app styles -->
   <link rel="stylesheet" href="/styles/powerup.css" />
+  <!-- Refreshed UI styles (copy your refreshed style.css into /styles/style.css) -->
+  <link rel="stylesheet" href="/styles/style.css" />
 </head>
+<body class="dashboard">
 
-  <body class="dashboard">
-  <div class="container">
+  <!-- Required overlay for sidebar open state -->
+  <div id="topOverlayBg"></div>
 
-  <div id="sidebar" class="sidebar"></div>
-  <div class="main">
-    <div id="header"></div>
-    
-
+  <!-- Container wraps sidebar + main content -->
   <div id="container" class="container">
-    <!-- Progress + Token Container -->
-    <div class="card progress-token-section">
-      <div class="goal-pill-group" id="pillSummary"></div>
-      <div class="progress-container">
-        <div class="progress-label">Power Hours Logged: <strong id="phProgress">0 / 8</strong></div>
-        <div class="progress-bar">
-          <div class="progress-bar-fill" id="progressBar"></div>
+
+    <!-- Sidebar/header are injected by /scripts/layout.js -->
+    <aside id="sidebar" class="sidebar"></aside>
+
+    <div class="main">
+      <header id="header" class="header"></header>
+
+      <!-- Page Title / Greeting (display text can be filled by your app if desired) -->
+      <div class="page-title">
+        <h1>PowerUp Dashboard</h1>
+      </div>
+
+      <!-- Top Cards: Power Hours (separate card), Tokens (separate card) -->
+      <div class="top-cards">
+        <!-- Power Hours Card -->
+        <div class="card power-card">
+          <h3>Power Hours Logged</h3>
+
+          <!-- optional simple number text line; total is live-bound below -->
+          <p><span id="powerHoursTotal">0</span></p>
+
+          <!-- Progress track/fill (IDs your JS expects) -->
+          <div id="progressBar" class="progress-bar">
+            <div id="phProgress" class="progress-bar-inner"></div>
+          </div>
+
+          <!-- Smart guidance message (your JS writes here) -->
+          <p id="powerTips" class="smart-message"></p>
         </div>
-        <p id="powerTips" style="font-size: 14px; color: #93c5fd; margin-top: 8px;"></p>
-      </div>
-      <div class="token-tracker improved-token-display">
-        <i class="fas fa-coins"></i>
-        <span id="tokenTotal">0</span>
-      </div>
-    </div>
 
-    <!-- CI Submissions Table -->
-    <div class="card table-section">
-      <div class="filter-bar">
-        <label for="ciStatusFilter">CI Status:</label>
-        <select id="ciStatusFilter" onchange="filterCITable();">
-          <option value="All">All</option>
-          <option value="Approved">Approved</option>
-          <option value="Denied">Denied</option>
-          <option value="Pending">Pending</option>
-          <option value="Needs Researched">Needs Researched</option>
-          <option value="Completed">Completed</option>
-          <option value="Not Started">Not Started</option>
-        </select>
-        <button class="add-btn" onclick="openCISubmissionForm()">+ Add CI Submission</button>
-        <span class="submission-count" id="ciSubmissionCount">0 Submissions</span>
+        <!-- Token Card -->
+        <div class="card token-card">
+          <h3>Tokens</h3>
+          <div class="token-tracker">
+            <i class="fas fa-coins"></i>
+            <span id="tokenTotal">0</span>
+          </div>
+        </div>
       </div>
-      <h3>Continuous Improvement (CI)</h3>
-      <div class="table-wrapper">
-        <table class="dashboard-table" id="ciSubmissionsTable">
-          <!-- CI table content goes here -->
-        </table>
-      </div>
-    </div>
 
-    <!-- Safety Concerns Table -->
-    <div class="card table-section">
-      <div class="filter-bar">
-        <label for="safetyStatusFilter">Safety Status:</label>
-        <select id="safetyStatusFilter" onchange="filterSafetyTable();">
-          <option value="All">All</option>
-          <option value="Pending">Pending</option>
-          <option value="Resolved">Resolved</option>
-        </select>
-        <button class="add-btn" onclick="openSafetyForm()">+ Add Safety Concern</button>
-        <span class="submission-count" id="safetySubmissionCount">0 Submissions</span>
+      <!-- Tab Controls -->
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="ci">CI</button>
+        <button class="tab-btn" data-tab="safety">Safety</button>
+        <button class="tab-btn" data-tab="quality">Quality</button>
       </div>
-      <h3>Safety Concerns</h3>
-      <div class="table-wrapper">
-        <table class="dashboard-table" id="safetyTable">
-          <!-- Safety table content goes here -->
-        </table>
-      </div>
-    </div>
 
-    <!-- Quality Catches Table -->
-    <div class="card table-section">
-      <div class="filter-bar">
-        <label for="qcStatusFilter">Quality Status:</label>
-        <select id="qcStatusFilter" onchange="filterQCTable();">
-          <option value="All">All</option>
-          <option value="In Review">In Review</option>
-          <option value="Resolved">Resolved</option>
-        </select>
-        <button class="add-btn" onclick="openQCForm()">+ Add Quality Catch</button>
-        <span class="submission-count" id="qcSubmissionCount">0 Submissions</span>
-      </div>
-      <h3>Quality Catches</h3>
-      <div class="table-wrapper">
-        <table class="dashboard-table" id="qcTable">
-          <!-- QC table content goes here -->
-        </table>
-      </div>
-    </div>
-  </div>
+      <!-- Tab Panels -->
+      <div class="tab-panels">
 
+        <!-- CI Tab -->
+        <section id="tab-ci" class="tab-panel active" aria-labelledby="tab-ci-btn">
+          <div class="table-header-row">
+            <h3>Continuous Improvement (CI)</h3>
+
+            <div class="table-header-controls">
+              <!-- Filter select (ID expected by your JS) -->
+              <select id="ciStatusFilter">
+                <option value="all">All Statuses</option>
+                <option value="approved">Approved</option>
+                <option value="pending">Pending</option>
+                <option value="denied">Denied</option>
+              </select>
+
+              <!-- Your submission button stays exactly as you designed it -->
+              <a class="add-btn" href="https://app.smartsheet.com/b/form/e60862d9ae0b44358d6f85dcd1c81d2b" target="_blank" rel="noopener">+ Add Submission</a>
+
+              <!-- Row count (ID expected by your JS) -->
+              <span id="ciSubmissionCount" class="row-count">0 submissions</span>
+            </div>
+          </div>
+
+          <div class="table-scroll">
+            <!-- Table mount (ID expected by your JS) -->
+            <table id="ciSubmissionsTable" class="dashboard-table"></table>
+          </div>
+        </section>
+
+        <!-- Safety Tab -->
+        <section id="tab-safety" class="tab-panel" aria-labelledby="tab-safety-btn" hidden>
+          <div class="table-header-row">
+            <h3>Safety Concerns</h3>
+
+            <div class="table-header-controls">
+              <select id="safetyStatusFilter">
+                <option value="all">All Statuses</option>
+                <option value="open">Open</option>
+                <option value="closed">Closed</option>
+              </select>
+
+              <a class="add-btn" href="https://app.smartsheet.com/b/form/162129580c03440f88cc5f284627b52f" target="_blank" rel="noopener">+ Report Safety</a>
+
+              <span id="safetySubmissionCount" class="row-count">0 submissions</span>
+            </div>
+          </div>
+
+          <div class="table-scroll">
+            <table id="safetyTable" class="dashboard-table"></table>
+          </div>
+        </section>
+
+        <!-- Quality Tab -->
+        <section id="tab-quality" class="tab-panel" aria-labelledby="tab-quality-btn" hidden>
+          <div class="table-header-row">
+            <h3>Quality Catches</h3>
+
+            <div class="table-header-controls">
+              <select id="qcStatusFilter">
+                <option value="all">All Statuses</option>
+                <option value="open">Open</option>
+                <option value="closed">Closed</option>
+              </select>
+
+              <a class="add-btn" href="https://app.smartsheet.com/b/form/2ba4ff03861d4d068ee5a0bff46308c3" target="_blank" rel="noopener">+ Log QC Catch</a>
+
+              <span id="qcSubmissionCount" class="row-count">0 submissions</span>
+            </div>
+          </div>
+
+          <div class="table-scroll">
+            <table id="qcTable" class="dashboard-table"></table>
+          </div>
+        </section>
+
+      </div> <!-- /.tab-panels -->
+
+    </div> <!-- /.main -->
+  </div> <!-- /#container -->
+
+  <!-- Minimal, non-conflicting tab switcher (no dependency on app JS) -->
+  <script>
+    (function () {
+      const btns = Array.from(document.querySelectorAll('.tab-btn'));
+      const panels = {
+        ci: document.getElementById('tab-ci'),
+        safety: document.getElementById('tab-safety'),
+        quality: document.getElementById('tab-quality')
+      };
+
+      function activate(tab) {
+        btns.forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+        Object.entries(panels).forEach(([k, el]) => {
+          const on = k === tab;
+          el.classList.toggle('active', on);
+          if (on) el.removeAttribute('hidden'); else el.setAttribute('hidden','');
+        });
+      }
+
+      btns.forEach(b => b.addEventListener('click', () => activate(b.dataset.tab)));
+      // Default
+      activate('ci');
+    })();
+  </script>
+
+  <!-- Your normal app bootstrap (injects header/sidebar, loads data, renders tables/cards) -->
   <script type="module" src="/scripts/init-dashboard.js"></script>
 </body>
 </html>
-
