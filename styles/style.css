@@ -717,3 +717,45 @@ body.notes .note-editor:empty:before {
   opacity: 1;
 }
 
+
+/* --- Refresh overrides (placed LAST in /styles/style.css) --- */
+
+/* Tabs */
+.main .tabs { display:flex; gap:10px; align-items:flex-end; border-bottom:2px solid var(--accent-600, #00d4aa); margin:18px 0 12px; }
+.main .tab-btn { appearance:none; border:0; background:transparent; padding:10px 16px; font-weight:600; border-bottom:3px solid transparent; cursor:pointer; border-radius:6px 6px 0 0; }
+.main .tab-btn.active { color: var(--accent-600, #00d4aa); border-color: var(--accent-600, #00d4aa); }
+
+/* Panels */
+.main .tab-panel { display:none; }
+.main .tab-panel.active { display:block; }
+
+/* “Add Submission” / header controls */
+.table-header-row { display:flex; align-items:center; justify-content:space-between; gap:16px; margin:10px 0 6px; }
+.table-header-controls { display:flex; align-items:center; gap:10px; }
+
+/* Force refreshed button look (avoid legacy .btn height/line-height) */
+.add-btn {
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:8px 14px; line-height:1; height:auto; border-radius:8px;
+  font-weight:600; background:#0aa; color:#0b1b1b; border:1px solid #0aa;
+}
+.add-btn:hover { filter:brightness(1.05); }
+
+/* Normalize selects in header controls */
+.table-header-controls select {
+  height:auto; padding:8px 10px; border-radius:8px; line-height:1; border:1px solid rgba(255,255,255,.15);
+  background:rgba(255,255,255,.06); color:inherit;
+}
+
+/* Progress bar (ensure inner fill is the only element that gets width) */
+.power-card .progress-bar { position:relative; width:100%; height:10px; border-radius:8px;
+  background:rgba(255,255,255,.12); overflow:hidden; margin-top:8px;
+}
+.power-card #progressBar.progress-bar-fill {
+  height:100%; width:0%; background:linear-gradient(90deg, #00d4aa, #7cf2d9);
+  transition:width .25s ease; border-radius:8px;
+}
+
+/* Count pill */
+.row-count { opacity:0.8; font-size:0.9rem; }
+
