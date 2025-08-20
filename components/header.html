@@ -1,8 +1,17 @@
-<header id="header">
+<header class="header">
   <div class="header-left">
-    <span><strong>Welcome:</strong> <span id="userGreeting">User</span></span>
-    <span><strong>Month:</strong> <span id="currentMonth"></span></span>
-    <span><strong>Current Level:</strong> <span class="level-tag" id="userLevel">Loading...</span></span>
+    <h1 class="app-title">PowerUp Dashboard</h1>
   </div>
-  <h1>PowerUp Dashboard</h1>
+  <div class="header-right">
+    <span class="user-info">Welcome, <span id="userName">Employee</span></span>
+    <button class="logout-btn" onclick="handleLogout()">Logout</button>
+  </div>
 </header>
+
+<script>
+  // Simple placeholder, tie into your login/session later
+  function handleLogout() {
+    alert("Logging out… (replace with real logout logic)");
+    window.location.href = "login.html";
+  }
+</script>
