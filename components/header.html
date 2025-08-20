@@ -1,17 +1,10 @@
-<header class="header">
-  <div class="header-left">
-    <h1 class="app-title">PowerUp Dashboard</h1>
-  </div>
-  <div class="header-right">
-    <span class="user-info">Welcome, <span id="userName">Employee</span></span>
-    <button class="logout-btn" onclick="handleLogout()">Logout</button>
-  </div>
-</header>
+<!-- Header (matches refreshed style; no month) -->
+<div class="header" id="header">
+  <h1>PowerUp Dashboard</h1>
+  <p>
+    Welcome: <span id="userGreeting">—</span>
+    &emsp;Level: <span id="userLevel">Lv 0</span>
+  </p>
+</div>
 
-<script>
-  // Simple placeholder, tie into your login/session later
-  function handleLogout() {
-    alert("Logging out… (replace with real logout logic)");
-    window.location.href = "login.html";
-  }
-</script>
+<!-- No extra CSS needed; your refreshed style.css already styles .header h1/p/span -->
