@@ -1,28 +1,51 @@
-<div class="sidebar">
-  <a id="sidebarToggle" href="#" title="Toggle Sidebar Menu">
-    <i class="fas fa-bars"></i><span class="link-text">Toggle Menu</span>
+<!-- Sidebar (refreshed structure) -->
+<div class="sidebar" id="sidebar">
+  <div class="item" onclick="toggleSidebar()">
+    <i class="fas fa-bars"></i><span>Menu</span>
+  </div>
+
+  <!-- Use <a> for navigation so right-click/open-in-new-tab works -->
+  <a class="item" href="PowerUp_Dashboard.html" data-route="dashboard">
+    <i class="fas fa-home"></i><span>Dashboard</span>
   </a>
 
-  <a href="PowerUp_Dashboard.html" title="Dashboard">
-    <i class="fas fa-home"></i><span class="link-text">Dashboard</span>
+  <a class="item" href="level-tracker.html" data-route="level">
+    <i class="fas fa-layer-group"></i><span>Level Tracker</span>
   </a>
 
-  <div class="sidebar-section">Submission Forms</div>
-  <a href="https://app.smartsheet.com/b/form/e60862d9ae0b44358d6f85dcd1c81d2b" target="_blank">
-    <i class="fas fa-lightbulb"></i><span class="link-text">CI Suggestion</span>
-  </a>
-  <a href="https://app.smartsheet.com/b/form/162129580c03440f88cc5f284627b52f" target="_blank">
-    <i class="fas fa-hard-hat"></i><span class="link-text">Safety Concern</span>
-  </a>
-  <a href="https://app.smartsheet.com/b/form/2ba4ff03861d4d068ee5a0bff46308c3" target="_blank">
-    <i class="fas fa-bug"></i><span class="link-text">Quality Catch</span>
+  <a class="item" href="power-hours.html" data-route="power">
+    <i class="fas fa-clock"></i><span>Power Hours</span>
   </a>
 
-  <div class="sidebar-section">Other</div>
-  <a href="view-power-hours.html"><i class="fas fa-clock"></i><span class="link-text">Power Hours</span></a>
-  <a href="https://app.smartsheet.com/b/form/165de2f61d2a4c5bb7855df59f70a1db" target="_blank">
-    <i class="fas fa-coins"></i><span class="link-text">Redeem Tokens</span>
+  <a class="item" href="notes.html" data-route="notes">
+    <i class="fas fa-sticky-note"></i><span>Notes</span>
   </a>
-  <a href="level-tracker.html"><i class="fas fa-chart-line"></i><span class="link-text">Level Tracker</span></a>
-  <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span class="link-text">Logout</span></a>
+
+  <a class="item" href="squads.html" data-route="squads">
+    <i class="fas fa-users"></i><span>Squads</span>
+  </a>
 </div>
+
+<script>
+  // Collapse/expand to match your refreshed behavior (CSS should handle the class)
+  function toggleSidebar() {
+    document.body.classList.toggle('sidebar-collapsed');
+  }
+
+  // Mark current page active using your refreshed .item.active class
+  (function markActive() {
+    const p = location.pathname.toLowerCase();
+    const routes = [
+      { sel: '[data-route="dashboard"]', patterns: [/powerup_dashboard\.html$/, /powerup-dashboard\.html$/] },
+      { sel: '[data-route="level"]',     patterns: [/level-tracker\.html$/] },
+      { sel: '[data-route="power"]',     patterns: [/power-hours\.html$/] },
+      { sel: '[data-route="notes"]',     patterns: [/notes\.html$/] },
+      { sel: '[data-route="squads"]',    patterns: [/squads\.html$/, /squad-details\.html$/, /add-squad\.html$/] },
+    ];
+    routes.forEach(r => {
+      const el = document.querySelector(r.sel);
+      if (!el) return;
+      if (r.patterns.some(rx => rx.test(p))) el.classList.add('active');
+    });
+  })();
+</script>
