@@ -1,51 +1,41 @@
-<!-- Sidebar (refreshed structure) -->
+<!-- Sidebar (refreshed structure and behavior) -->
 <div class="sidebar" id="sidebar">
   <div class="item" onclick="toggleSidebar()">
     <i class="fas fa-bars"></i><span>Menu</span>
   </div>
 
-  <!-- Use <a> for navigation so right-click/open-in-new-tab works -->
-  <a class="item" href="PowerUp_Dashboard.html" data-route="dashboard">
+  <!-- Use <a> so right-click/open-in-new-tab works. Your CSS targets .sidebar .item; it applies to anchors too. -->
+  <a class="item" href="PowerUp_Dashboard.html">
     <i class="fas fa-home"></i><span>Dashboard</span>
   </a>
-
-  <a class="item" href="level-tracker.html" data-route="level">
+  <a class="item" href="level-tracker.html">
     <i class="fas fa-layer-group"></i><span>Level Tracker</span>
   </a>
-
-  <a class="item" href="power-hours.html" data-route="power">
+  <a class="item" href="power-hours.html">
     <i class="fas fa-clock"></i><span>Power Hours</span>
   </a>
-
-  <a class="item" href="notes.html" data-route="notes">
+  <a class="item" href="notes.html">
     <i class="fas fa-sticky-note"></i><span>Notes</span>
   </a>
-
-  <a class="item" href="squads.html" data-route="squads">
+  <a class="item" href="squads.html">
     <i class="fas fa-users"></i><span>Squads</span>
   </a>
 </div>
 
 <script>
-  // Collapse/expand to match your refreshed behavior (CSS should handle the class)
-  function toggleSidebar() {
-    document.body.classList.toggle('sidebar-collapsed');
-  }
+  // Match refreshed CSS: toggle the 'expanded' class (and 'open' for legacy safety)
+  window.toggleSidebar = function () {
+    const el = document.getElementById('sidebar');
+    if (!el) return;
+    el.classList.toggle('expanded');
+    el.classList.toggle('open'); // harmless if unused; keeps backward compatibility
+  };
 
-  // Mark current page active using your refreshed .item.active class
-  (function markActive() {
-    const p = location.pathname.toLowerCase();
-    const routes = [
-      { sel: '[data-route="dashboard"]', patterns: [/powerup_dashboard\.html$/, /powerup-dashboard\.html$/] },
-      { sel: '[data-route="level"]',     patterns: [/level-tracker\.html$/] },
-      { sel: '[data-route="power"]',     patterns: [/power-hours\.html$/] },
-      { sel: '[data-route="notes"]',     patterns: [/notes\.html$/] },
-      { sel: '[data-route="squads"]',    patterns: [/squads\.html$/, /squad-details\.html$/, /add-squad\.html$/] },
-    ];
-    routes.forEach(r => {
-      const el = document.querySelector(r.sel);
-      if (!el) return;
-      if (r.patterns.some(rx => rx.test(p))) el.classList.add('active');
+  // Highlight current page (uses your refreshed .item.active styles)
+  (function highlightActive() {
+    const current = location.pathname.split('/').pop().toLowerCase();
+    document.querySelectorAll('.sidebar a.item[href]').forEach(a => {
+      if (a.getAttribute('href').toLowerCase() === current) a.classList.add('active');
     });
   })();
 </script>
