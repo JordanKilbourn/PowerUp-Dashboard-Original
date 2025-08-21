@@ -1,38 +1,19 @@
-// /scripts/dashboard-ui.js
+// scripts/dashboard-ui.js
+// Tabs for refreshed CSS (.tab-buttons / .tab-button / .tab-panel)
+(function wireTabs(){
+  const buttons = Array.from(document.querySelectorAll('.tab-button'));
+  const panels  = Array.from(document.querySelectorAll('.tab-panel'));
+  if (!buttons.length || !panels.length) return;
 
-/**
- * Initialize accordion click toggling behavior
- */
-function initializeAccordions() {
-  const headers = document.querySelectorAll(".accordion-header");
+  const names = ['ci','safety','quality'];
+  buttons.forEach((b, i) => { if (!b.dataset.tab) b.dataset.tab = names[i] || `tab${i}`; });
+  panels.forEach((p, i) => { if (!p.id) p.id = `tab-${names[i] || `tab${i}`}`; });
 
-  if (headers.length === 0) return;
-
-  headers.forEach(header => {
-    header.addEventListener("click", () => {
-      const item = header.closest(".accordion-item");
-      const content = item?.querySelector(".accordion-content");
-      const icon = header.querySelector(".rotate-icon");
-
-      const isOpen = item.classList.contains("open");
-
-      // Collapse all items
-      document.querySelectorAll(".accordion-item").forEach(i => {
-        i.classList.remove("open");
-        const c = i.querySelector(".accordion-content");
-        const ic = i.querySelector(".rotate-icon");
-        if (c) c.style.maxHeight = null;
-        if (ic) ic.classList.remove("open");
-      });
-
-      // Expand clicked item
-      if (!isOpen && content) {
-        item.classList.add("open");
-        content.style.maxHeight = content.scrollHeight + "px";
-        if (icon) icon.classList.add("open");
-      }
-    });
-  });
-}
-
-export { initializeAccordions };
+  function activate(name){
+    buttons.forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+    panels.forEach(p => p.classList.toggle('active', p.id === `tab-${name}`));
+  }
+  buttons.forEach(b => b.addEventListener('click', () => activate(b.dataset.tab)));
+  const defaultTab = buttons.find(b => b.classList.contains('active'))?.dataset.tab || names[0];
+  activate(defaultTab);
+})();
