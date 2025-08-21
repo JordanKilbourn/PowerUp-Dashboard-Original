@@ -5,33 +5,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PowerUp Dashboard</title>
 
-  <!-- Only the refreshed CSS -->
+  <!-- Only your refreshed stylesheet -->
   <link rel="stylesheet" href="/styles/style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 
 <body class="dashboard">
+  <!-- overlay for sidebar (kept for your app) -->
   <div id="topOverlayBg"></div>
 
   <div class="container" id="container">
-    <!-- Injected by /scripts/layout.js -->
+    <!-- injected via /scripts/layout.js -->
     <div class="sidebar" id="sidebar"></div>
 
     <div class="main">
+      <!-- injected via /scripts/layout.js -->
       <div class="header" id="header"></div>
 
-      <!-- Cards -->
+      <!-- Top cards -->
       <div class="top-cards">
+        <!-- Power Hours card -->
         <div class="card power-card">
           <h3>Power Hours Logged</h3>
+
+          <!-- TEXT (JS sets this to "HOURS / TARGET") -->
           <div><strong id="phProgress">0 / 8</strong></div>
+
+          <!-- PROGRESS BAR: inner bar class matches refreshed CSS; id matches your JS -->
           <div class="progress-bar">
-            <div class="progress-bar-fill" id="progressBar"></div>
+            <div class="progress-bar-inner" id="progressBar"></div>
           </div>
+
+          <!-- Smart guidance line -->
           <p id="powerTips"></p>
         </div>
 
+        <!-- Tokens card -->
         <div class="card token-card">
           <h3>Tokens</h3>
           <div class="token-tracker">
@@ -41,11 +51,11 @@
         </div>
       </div>
 
-      <!-- Tabs -->
-      <div class="tabs">
-        <button class="tab-btn active" data-tab="ci">Continuous Improvement</button>
-        <button class="tab-btn" data-tab="safety">Safety Concerns</button>
-        <button class="tab-btn" data-tab="quality">Quality Catches</button>
+      <!-- Tabs (class names match refreshed CSS) -->
+      <div class="tab-buttons">
+        <button class="tab-button active" data-tab="ci">Continuous Improvement</button>
+        <button class="tab-button" data-tab="safety">Safety Concerns</button>
+        <button class="tab-button" data-tab="quality">Quality Catches</button>
       </div>
 
       <div class="tab-panels">
@@ -110,10 +120,9 @@
     </div>
   </div>
 
-  <!-- App init (your existing modules drive the data) -->
+  <!-- JS: adapter first (adds IDs if missing) → your data init → tabs behavior -->
   <script src="/scripts/ui-adapter.js"></script>
   <script type="module" src="/scripts/init-dashboard.js"></script>
   <script src="/scripts/dashboard-ui.js"></script>
 </body>
 </html>
-
